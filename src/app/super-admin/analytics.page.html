@@ -1,0 +1,101 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/super-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Analytics & Reports</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="analytics-container">
+    <ion-card *ngIf="(analyticsData$ | async) as stats">
+      <ion-card-header>
+        <ion-card-title>System Overview</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list lines="inset">
+          <ion-item>
+            <ion-label>Total Registered Users</ion-label>
+            <ion-note slot="end" color="primary">
+              <strong>{{ stats.totalUsers }}</strong>
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Pending Approval</ion-label>
+            <ion-note slot="end" color="warning">
+              <strong>{{ stats.pendingUsers }}</strong>
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Approved Users</ion-label>
+            <ion-note slot="end" color="success">
+              <strong>{{ stats.approvedUsers }}</strong>
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Approval Rate</ion-label>
+            <ion-note slot="end">
+              <strong>{{ stats.approvalRate }}%</strong>
+            </ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="(analyticsData$ | async) as stats">
+      <ion-card-header>
+        <ion-card-title>User Distribution</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list lines="inset">
+          <ion-item>
+            <ion-label>Alumni</ion-label>
+            <ion-note slot="end">
+              <strong>{{ stats.alumniCount }}</strong>
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Department Heads</ion-label>
+            <ion-note slot="end">
+              <strong>{{ stats.deptHeadCount }}</strong>
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Rejected</ion-label>
+            <ion-note slot="end" color="danger">
+              <strong>{{ stats.rejectedUsers }}</strong>
+            </ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="(deptSummary$ | async) as departments">
+      <ion-card-header>
+        <ion-card-title>Users by Department</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list lines="inset">
+          <ion-item *ngFor="let dept of departments">
+            <ion-label>
+              {{ dept.department }}
+              <p>{{ dept.userCount }} users</p>
+            </ion-label>
+            <ion-note slot="end" color="primary">
+              {{ dept.userCount }}
+            </ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

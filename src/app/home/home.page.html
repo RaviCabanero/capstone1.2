@@ -1,0 +1,108 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToProfile()">
+        <ion-avatar class="header-avatar" *ngIf="userProfile?.photoDataUrl; else defaultAvatar">
+          <img [src]="userProfile.photoDataUrl" alt="Profile avatar" />
+        </ion-avatar>
+        <ng-template #defaultAvatar>
+          <ion-icon name="person-circle"></ion-icon>
+        </ng-template>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-searchbar
+      placeholder="Search..."
+      mode="ios"
+      class="searchbar"
+    ></ion-searchbar>
+
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="chatbubbles"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="home-container">
+    <!-- Feed Section -->
+    <div class="feed-section">
+      <!-- Posts Feed -->
+      <div class="posts-feed" *ngIf="(allPosts$ | async) as posts; else loadingPosts">
+        <ion-card class="post-card" *ngFor="let post of posts">
+          <!-- Post Header -->
+          <ion-card-header>
+            <div class="post-header">
+              <ion-avatar class="user-avatar">
+                <img [src]="post.userAvatar || 'https://via.placeholder.com/56'" alt="User avatar" />
+              </ion-avatar>
+              <div class="post-user-info">
+                <h3 class="user-name">{{ post.userName }}</h3>
+                <p class="post-timestamp">{{ post.timestamp | date:'short' }}</p>
+              </div>
+              <ion-button fill="clear" size="small" class="menu-button" (click)="openPostMenu(post)">
+                <ion-icon name="ellipsis-vertical"></ion-icon>
+              </ion-button>
+            </div>
+          </ion-card-header>
+
+          <!-- Post Content -->
+          <ion-card-content>
+            <p class="post-text" *ngIf="post.text">{{ post.text }}</p>
+            <img *ngIf="post.image" [src]="post.image" class="post-image" alt="Post image" />
+          </ion-card-content>
+
+          <!-- Post Actions -->
+          <div class="post-actions">
+            <ion-button fill="clear" size="small" (click)="sharePost(post)">
+              <ion-icon name="arrow-redo-outline" slot="start"></ion-icon>
+              Forward
+            </ion-button>
+            <ion-button fill="clear" size="small">
+              <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+              Comment
+            </ion-button>
+          </div>
+        </ion-card>
+
+        <!-- No Posts State -->
+        <div class="empty-state" *ngIf="posts.length === 0">
+          <ion-icon name="newspaper-outline"></ion-icon>
+          <p>No posts yet. Be the first to share something!</p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <ng-template #loadingPosts>
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Loading posts...</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="footer-toolbar">
+    <ion-buttons class="footer-buttons">
+      <ion-button>
+        <ion-icon name="home"></ion-icon>
+      </ion-button>
+      <ion-button (click)="goToAlumniNetwork()">
+        <ion-icon name="people"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openPostModal()">
+        <ion-icon name="add-circle"></ion-icon>Post
+      </ion-button>
+      <ion-button>
+        <ion-icon name="notifications"></ion-icon>
+      </ion-button>
+      <ion-button>
+        <ion-icon name="menu"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

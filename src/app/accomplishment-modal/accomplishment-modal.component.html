@@ -1,0 +1,133 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Add Accomplishment</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="save()" [disabled]="accomplishmentForm.invalid">
+        Save
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="accomplishmentForm" class="accomplishment-form-container">
+    <!-- Certificate Image Upload -->
+    <div class="image-upload-section">
+      <div class="image-preview" *ngIf="imagePreview; else uploadPrompt">
+        <img [src]="imagePreview" alt="Certificate preview" />
+        <div class="image-actions">
+          <ion-button fill="clear" size="small" color="danger" (click)="removeImage()">
+            <ion-icon name="close-circle"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+      <ng-template #uploadPrompt>
+        <div class="upload-placeholder" (click)="fileInput.click()">
+          <ion-icon name="image"></ion-icon>
+          <p>Click to upload certificate image</p>
+          <small>PNG, JPG, GIF (Max 5MB)</small>
+        </div>
+      </ng-template>
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onImageSelected($event)"
+      />
+    </div>
+    <ion-text color="danger" *ngIf="submitted && image?.invalid">
+      <p class="error-text">
+        <ion-icon name="alert-circle"></ion-icon>
+        Certificate image is required
+      </p>
+    </ion-text>
+
+    <!-- Title -->
+    <ion-item lines="full">
+      <ion-label position="floating">
+        Achievement Title
+        <span class="required">*</span>
+      </ion-label>
+      <ion-input
+        formControlName="title"
+        type="text"
+        placeholder="e.g., AWS Certified Solutions Architect"
+      ></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="submitted && title?.invalid">
+      <p class="error-text" *ngIf="title?.hasError('required')">
+        <ion-icon name="alert-circle"></ion-icon>
+        Title is required
+      </p>
+      <p class="error-text" *ngIf="title?.hasError('minlength')">
+        <ion-icon name="alert-circle"></ion-icon>
+        Title must be at least 3 characters
+      </p>
+    </ion-text>
+
+    <!-- Issuer -->
+    <ion-item lines="full">
+      <ion-label position="floating">
+        Issuer/Organization
+        <span class="required">*</span>
+      </ion-label>
+      <ion-input
+        formControlName="issuer"
+        type="text"
+        placeholder="e.g., Amazon Web Services"
+      ></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="submitted && issuer?.invalid">
+      <p class="error-text">
+        <ion-icon name="alert-circle"></ion-icon>
+        Issuer is required
+      </p>
+    </ion-text>
+
+    <!-- Date Earned -->
+    <ion-item lines="full">
+      <ion-label position="floating">
+        Date Earned
+        <span class="required">*</span>
+      </ion-label>
+      <ion-datetime
+        formControlName="dateEarned"
+        presentation="date"
+        placeholder="Select date"
+      ></ion-datetime>
+    </ion-item>
+    <ion-text color="danger" *ngIf="submitted && dateEarned?.invalid">
+      <p class="error-text">
+        <ion-icon name="alert-circle"></ion-icon>
+        Date is required
+      </p>
+    </ion-text>
+
+    <!-- Description (Optional) -->
+    <ion-item lines="full">
+      <ion-label position="floating">Description (Optional)</ion-label>
+      <ion-textarea
+        formControlName="description"
+        autoGrow="true"
+        placeholder="Add details about this achievement..."
+        rows="3"
+      ></ion-textarea>
+    </ion-item>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <ion-button expand="block" fill="outline" (click)="cancel()">
+        Cancel
+      </ion-button>
+      <ion-button expand="block" (click)="save()" [disabled]="accomplishmentForm.invalid">
+        Save Achievement
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

@@ -1,0 +1,154 @@
+<!-- Top Header -->
+<ion-header class="custom-header">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-content">
+      <!-- Left: Profile Avatar -->
+      <ion-avatar class="profile-avatar" (click)="goToProfile()">
+        <img [src]="userProfile?.photoDataUrl || 'assets/icon/favicon.png'" alt="Profile" />
+      </ion-avatar>
+
+      <!-- Center: Search Bar -->
+      <ion-searchbar
+        class="search-bar"
+        placeholder="Search alumni..."
+        (ionInput)="searchAlumni($event)"
+        debounce="500">
+      </ion-searchbar>
+
+      <!-- Right: Message Icon -->
+      <ion-button fill="clear" (click)="goToMessages()">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Invite Section Card -->
+  <div class="invite-card">
+    <div class="invite-text">
+      <h3>Invite 3 of your alumni to connect today</h3>
+    </div>
+    <div class="invite-avatars">
+      <ion-avatar class="invite-avatar" *ngFor="let avatar of inviteAvatars">
+        <img [src]="avatar" alt="Alumni avatar" />
+      </ion-avatar>
+    </div>
+    <ion-button expand="block" color="success" class="search-btn" (click)="searchAlumniToInvite()">
+      Search alumni you know
+    </ion-button>
+  </div>
+
+  <!-- Network Overview Section -->
+  <div class="network-overview">
+    <h3 class="section-title">Network Overview</h3>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value">{{ inviteSent }}</div>
+        <div class="stat-label">Invite Sent</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ connections }}</div>
+        <div class="stat-label">Connection</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ following }}</div>
+        <div class="stat-label">Following</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggested Alumni Section -->
+  <div class="suggested-section">
+    <!-- Department Filter -->
+    <div class="department-filter">
+      <ion-select
+        [(ngModel)]="selectedDepartmentFilter"
+        (ionChange)="onDepartmentChange()"
+        interface="popover"
+        placeholder="Filter by Department">
+        <ion-select-option value="all">All Departments</ion-select-option>
+        <ion-select-option value="my">My Department ({{ userDepartment }})</ion-select-option>
+        <ion-select-option value="School of Computer Studies">School of Computer Studies</ion-select-option>
+        <ion-select-option value="School of Education">School of Education</ion-select-option>
+        <ion-select-option value="School of Engineering">School of Engineering</ion-select-option>
+        <ion-select-option value="School of Business">School of Business</ion-select-option>
+      </ion-select>
+    </div>
+
+    <h3 class="section-title" *ngIf="!isSearching">{{ selectedDepartment }}</h3>
+    <h3 class="section-title" *ngIf="isSearching">
+      Search Results ({{ suggestedAlumni.length }})
+      <ion-button fill="clear" size="small" (click)="clearSearch()" class="clear-btn">
+        Clear
+      </ion-button>
+    </h3>
+
+    <div class="alumni-grid" *ngIf="suggestedAlumni.length > 0; else noAlumni">
+      <div class="alumni-card-item" *ngFor="let alumnus of suggestedAlumni; let i = index">
+        <div class="card-dismiss">
+          <ion-button fill="clear" size="small" (click)="dismissAlumnus(i)">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </div>
+
+        <div class="card-avatar">
+          <img [src]="alumnus.photoDataUrl || 'assets/icon/favicon.png'" [alt]="alumnus.firstName" />
+        </div>
+
+        <div class="card-info">
+          <h4 class="alumni-name">{{ alumnus.firstName }} {{ alumnus.lastName }}</h4>
+          <p class="alumni-major">{{ alumnus.major || 'No major specified' }}</p>
+          <p class="alumni-department">{{ alumnus.schoolDepartment || alumnus.department || 'No department' }}</p>
+        </div>
+
+        <ion-button expand="block" color="success" size="small" (click)="connectWithAlumnus(alumnus.id)">
+          Connect
+        </ion-button>
+      </div>
+    </div>
+
+    <ng-template #noAlumni>
+      <div class="empty-state">
+        <ion-icon name="people-outline"></ion-icon>
+        <p *ngIf="!isSearching">No other users found in {{ userDepartment }}</p>
+        <p *ngIf="isSearching">No users found matching "{{ searchQuery }}"</p>
+        <small *ngIf="!isSearching">Check the browser console for debugging info</small>
+      </div>
+    </ng-template>
+  </div>
+</ion-content>
+
+<!-- Bottom Tab Bar -->
+<ion-footer>
+  <ion-toolbar class="tab-toolbar">
+    <ion-tab-bar slot="bottom">
+      <ion-tab-button tab="home" routerLink="/home" routerLinkActive="active">
+        <ion-icon name="home-outline"></ion-icon>
+        <ion-label>Home</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="alumni" routerLink="/alumni-network" routerLinkActive="active">
+        <ion-icon name="people-outline"></ion-icon>
+        <ion-label>Alumni</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="post" class="center-button" (click)="openPostModal()">
+        <ion-icon name="add-circle"></ion-icon>
+        <ion-label>Post</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="notification" routerLink="/notifications" routerLinkActive="active">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <ion-label>Notification</ion-label>
+        <ion-badge *ngIf="notificationCount > 0">{{ notificationCount }}</ion-badge>
+      </ion-tab-button>
+
+      <ion-tab-button tab="menu" (click)="openMenu()">
+        <ion-icon name="menu-outline"></ion-icon>
+        <ion-label>Menu</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-toolbar>
+</ion-footer>
+

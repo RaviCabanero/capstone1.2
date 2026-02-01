@@ -1,0 +1,466 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToProfile()">
+        <ion-avatar class="header-avatar" *ngIf="(userProfile$ | async)?.photoDataUrl; else defaultAvatar">
+          <img [src]="(userProfile$ | async)?.photoDataUrl" alt="Profile avatar" />
+        </ion-avatar>
+        <ng-template #defaultAvatar>
+          <ion-icon name="person-circle"></ion-icon>
+        </ng-template>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-searchbar
+      placeholder="Search..."
+      mode="ios"
+      class="searchbar"
+    ></ion-searchbar>
+
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="chatbubbles"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="profile-container" *ngIf="userProfile$ | async as profile">
+    <!-- Cover Photo Background -->
+    <div class="cover-photo">
+      <img src="https://via.placeholder.com/400x200" alt="Cover photo" />
+    </div>
+
+    <!-- Profile Picture Section -->
+    <div class="profile-picture-section">
+      <ion-avatar class="profile-avatar">
+        <img [src]="avatarPreview || profile.photoDataUrl || profile.photoUrl || 'https://via.placeholder.com/150'" alt="Profile picture" />
+      </ion-avatar>
+      <input
+        #avatarInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onAvatarSelected($event)"
+      />
+      <ion-button fill="clear" class="camera-edit-btn" (click)="avatarInput.click()">
+        <ion-icon name="camera" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- User Information Card -->
+    <ion-card class="user-info-card">
+      <ion-card-content>
+        <div class="user-header" style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+          <div>
+            <h1 class="user-name">{{ profile.firstName }} {{ profile.lastName }}</h1>
+            <p class="user-university">{{ profile.university || 'University of San Jose-Recoletos' }}</p>
+            <p class="user-course">{{ profile.course || 'Course not provided' }}</p>
+          </div>
+          <ion-button fill="outline" size="small" routerLink="/profile-edit">
+            <ion-icon name="pencil" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+        </div>
+
+        <ion-list lines="none" class="user-details">
+          <ion-item *ngIf="profile.location">
+            <ion-icon name="location" slot="start" color="medium"></ion-icon>
+            <ion-label>{{ profile.location }}</ion-label>
+          </ion-item>
+          <ion-item *ngIf="profile.degree">
+            <ion-icon name="school" slot="start" color="medium"></ion-icon>
+            <ion-label>{{ profile.degree }}</ion-label>
+          </ion-item>
+          <ion-item *ngIf="profile.schoolDepartment">
+            <ion-icon name="business" slot="start" color="medium"></ion-icon>
+            <ion-label>{{ profile.schoolDepartment }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- About Section -->
+    <ion-card class="about-section">
+      <ion-card-header>
+        <ion-card-title>About</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ng-container *ngIf="!editingSummary; else editSummaryForm">
+          <p *ngIf="profile.summary; else noSummary">{{ profile.summary }}</p>
+          <ng-template #noSummary>
+            <ion-button fill="clear" color="primary" expand="block" (click)="startEditSummary(profile)">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add Summary
+            </ion-button>
+          </ng-template>
+          <ion-button *ngIf="profile.summary" fill="clear" size="small" (click)="startEditSummary(profile)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Edit Summary
+          </ion-button>
+        </ng-container>
+
+        <ng-template #editSummaryForm>
+          <ion-textarea
+            [(ngModel)]="summaryDraft"
+            autoGrow="true"
+            placeholder="Write a short summary..."
+          ></ion-textarea>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+            <ion-button fill="clear" size="small" (click)="cancelEditSummary()">Cancel</ion-button>
+            <ion-button size="small" (click)="saveSummary()">Save</ion-button>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Activity Section -->
+    <ion-card class="activity-section">
+      <ion-card-header>
+        <ion-card-title>Activity</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none" *ngIf="(userPosts$ | async) as posts; else noPosts">
+          <ion-item *ngFor="let post of posts">
+            <ion-label>
+              <div class="post-header">
+                <p class="post-date">{{ post.timestamp | date:'short' }}</p>
+              </div>
+              <h3>{{ post.text }}</h3>
+              <img *ngIf="post.image" [src]="post.image" class="post-image" alt="Post image" />
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <ng-template #noPosts>
+          <p class="empty-state">No posts yet. Share your first post!</p>
+        </ng-template>
+        <ion-button expand="block" fill="outline" (click)="goToActivity()">
+          See All
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Experience Section -->
+    <ion-card class="experience-section">
+      <ion-card-header>
+        <div class="section-header">
+          <ion-card-title>Experience</ion-card-title>
+          <div class="header-buttons">
+            <ion-button fill="clear" color="primary" size="small" (click)="openExperienceModal()">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add
+            </ion-button>
+            <ion-button fill="clear" color="primary" size="small" class="see-all-btn">
+              See all
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="experience-list" *ngIf="profile.experiences && profile.experiences.length > 0; else noExperience">
+          <div class="company-group" *ngFor="let company of groupedExperiences">
+            <!-- Company Header -->
+            <div class="company-header">
+              <ion-avatar class="company-logo">
+                <ion-icon name="briefcase"></ion-icon>
+              </ion-avatar>
+              <div class="company-info">
+                <h3 class="company-name">{{ company.name }}</h3>
+                <p class="company-duration">{{ company.totalDuration }}</p>
+              </div>
+            </div>
+
+            <!-- Timeline of Roles -->
+            <div class="timeline">
+              <div class="role" *ngFor="let role of company.roles; let last = last" [class.last]="last">
+                <!-- Timeline Dot -->
+                <div class="timeline-dot"></div>
+
+                <!-- Role Details -->
+                <div class="role-details">
+                  <h4 class="role-title">{{ role.title }}</h4>
+                  <p class="role-dates">
+                    {{ formatDate(role.startYear, role.startMonth) }} –
+                    <span *ngIf="role.currentlyWorking">Present</span>
+                    <span *ngIf="!role.currentlyWorking">{{ formatDate(role.endYear, role.endMonth) }}</span>
+                    <span class="role-duration">· {{ calculateDuration(role) }}</span>
+                  </p>
+                  <p class="role-location" *ngIf="role.location">
+                    <ion-icon name="location"></ion-icon>
+                    {{ role.location }}
+                  </p>
+                  <p class="role-description" *ngIf="role.description">
+                    {{ truncateDescription(role.description) }}
+                    <span *ngIf="role.description.length > 150" class="read-more">…more</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noExperience>
+          <div class="empty-state">
+            <p>No experience added yet</p>
+            <ion-button fill="clear" color="primary" size="small" (click)="openExperienceModal()">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add your first experience
+            </ion-button>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Skills Section -->
+    <ion-card class="skills-section">
+      <ion-card-header>
+        <div class="section-header">
+          <ion-card-title>Skills</ion-card-title>
+          <div class="header-buttons">
+            <ion-button fill="clear" color="primary" size="small" (click)="openSkillModal()">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="skills-container" *ngIf="profile.skills && profile.skills.length > 0; else noSkills">
+          <div class="skill-card" *ngFor="let skill of profile.skills">
+            <div class="skill-header">
+              <div class="skill-name-endorsements">
+                <h4 class="skill-name">{{ skill.name }}</h4>
+                <p class="endorsement-count" *ngIf="skill.endorsements > 0">
+                  <ion-icon name="thumbs-up"></ion-icon>
+                  {{ skill.endorsements }}
+                </p>
+              </div>
+              <ion-button fill="clear" size="small" (click)="deleteSkill(skill)">
+                <ion-icon name="close" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+            <p class="skill-category" *ngIf="skill.category">
+              <span class="category-badge">{{ skill.category }}</span>
+            </p>
+            <p class="skill-proficiency" *ngIf="skill.proficiency">
+              Proficiency: <span class="proficiency-level">{{ skill.proficiency }}</span>
+            </p>
+          </div>
+        </div>
+        <ng-template #noSkills>
+          <div class="empty-state">
+            <p>No skills added yet</p>
+            <ion-button fill="clear" color="primary" size="small" (click)="openSkillModal()">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add your first skill
+            </ion-button>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Accomplishments Section -->
+    <ion-card class="accomplishments-section">
+      <ion-card-header>
+        <div class="section-header">
+          <ion-card-title>Accomplishments</ion-card-title>
+          <div class="header-buttons">
+            <ion-button fill="clear" color="primary" size="small" (click)="openAccomplishmentModal()">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="accomplishments-container" *ngIf="profile.accomplishments && profile.accomplishments.length > 0; else noAccomplishments">
+          <div class="accomplishment-card" *ngFor="let acc of profile.accomplishments">
+            <!-- Certificate Image -->
+            <div class="certificate-image-container">
+              <img [src]="acc.image" alt="{{ acc.title }}" class="certificate-image" />
+              <div class="image-overlay">
+                <ion-button fill="clear" size="small" (click)="deleteAccomplishment(acc)">
+                  <ion-icon name="trash" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+
+            <!-- Accomplishment Details -->
+            <div class="accomplishment-details">
+              <h4 class="accomplishment-title">{{ acc.title }}</h4>
+              <p class="accomplishment-issuer" *ngIf="acc.issuer">
+                {{ acc.issuer }}
+              </p>
+              <p class="accomplishment-date" *ngIf="acc.dateEarned">
+                <ion-icon name="calendar"></ion-icon>
+                {{ acc.dateEarned | date:'MMM yyyy' }}
+              </p>
+              <p class="accomplishment-description" *ngIf="acc.description">
+                {{ acc.description }}
+              </p>
+            </div>
+          </div>
+        </div>
+        <ng-template #noAccomplishments>
+          <div class="empty-state">
+            <p>No accomplishments added yet</p>
+            <ion-button fill="clear" color="primary" size="small" (click)="openAccomplishmentModal()">
+              <ion-icon name="add-circle" slot="start"></ion-icon>
+              Add your first accomplishment
+            </ion-button>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Contact Section -->
+    <ion-card class="contact-section">
+      <ion-card-header>
+        <div class="section-header">
+          <ion-card-title>Contact Information</ion-card-title>
+          <ion-button fill="clear" color="primary" size="small" (click)="openContactModal()">
+            <ion-icon name="pencil"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Email -->
+        <div class="contact-item">
+          <div class="contact-label-icon">
+            <ion-icon name="mail"></ion-icon>
+            <span class="contact-label">Email</span>
+          </div>
+          <p class="contact-value">{{ profile.email || 'Not provided' }}</p>
+        </div>
+
+        <!-- Website -->
+        <div class="contact-item" *ngIf="profile.website">
+          <div class="contact-label-icon">
+            <ion-icon name="globe"></ion-icon>
+            <span class="contact-label">Website</span>
+          </div>
+          <a [href]="profile.website" target="_blank" class="contact-link">
+            {{ profile.website }}
+            <ion-icon name="open"></ion-icon>
+          </a>
+        </div>
+
+        <!-- Profile URL -->
+        <div class="contact-item">
+          <div class="contact-label-icon">
+            <ion-icon name="link"></ion-icon>
+            <span class="contact-label">Profile URL</span>
+          </div>
+          <div class="contact-url">
+            <p class="contact-value">{{ profileUrl }}</p>
+            <ion-button fill="clear" size="small" (click)="copyProfileUrl()">
+              <ion-icon name="copy"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="contact-item" *ngIf="profile.phone">
+          <div class="contact-label-icon">
+            <ion-icon name="call"></ion-icon>
+            <span class="contact-label">Phone</span>
+          </div>
+          <p class="contact-value">{{ profile.phone }}</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Digital Alumni ID Section -->
+    <ion-card class="alumni-id-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="shield-checkmark"></ion-icon>
+          Digital Alumni ID
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Request Already Submitted -->
+        <ng-container *ngIf="profile.alumniIdRequest; else noRequest">
+          <div class="request-status" [ngClass]="'status-' + profile.alumniIdRequest.status">
+            <div class="status-badge">
+              <ion-icon 
+                [name]="profile.alumniIdRequest.status === 'approved' ? 'checkmark-circle' : 
+                        profile.alumniIdRequest.status === 'rejected' ? 'close-circle' : 'time'"
+              ></ion-icon>
+              <span class="status-text">
+                {{ profile.alumniIdRequest.status === 'approved' ? 'Approved' : 
+                   profile.alumniIdRequest.status === 'rejected' ? 'Rejected' : 
+                   'Pending Review' }}
+              </span>
+            </div>
+            <p class="request-date">
+              Requested on {{ profile.alumniIdRequest.requestedAt | date:'MMM d, yyyy' }}
+            </p>
+            <div class="request-details" *ngIf="profile.alumniIdRequest.status === 'pending'">
+              <p class="info-text">
+                <ion-icon name="information-circle"></ion-icon>
+                Your request is being reviewed. You'll be notified once it's processed.
+              </p>
+            </div>
+            <div class="request-details" *ngIf="profile.alumniIdRequest.status === 'approved'">
+              <p class="success-text">
+                <ion-icon name="checkmark"></ion-icon>
+                Your Digital Alumni ID has been approved!
+              </p>
+            </div>
+            <div class="request-details" *ngIf="profile.alumniIdRequest.status === 'rejected'">
+              <p class="error-text">
+                <ion-icon name="close"></ion-icon>
+                Your request was rejected. Please contact alumni services for more information.
+              </p>
+            </div>
+            <ion-button expand="block" fill="outline" (click)="openAlumniIdRequest()">
+              <ion-icon name="pencil" slot="start"></ion-icon>
+              Edit Request
+            </ion-button>
+          </div>
+        </ng-container>
+
+        <!-- No Request Yet -->
+        <ng-template #noRequest>
+          <p class="alumni-description">
+            Request your official Digital Alumni ID for verification and alumni benefits.
+          </p>
+          <ion-button expand="block" (click)="openAlumniIdRequest()">
+            <ion-icon name="document-text" slot="start"></ion-icon>
+            Request ID
+          </ion-button>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Logout Button -->
+    <ion-button expand="block" color="danger" (click)="logout()" class="logout-btn">
+      <ion-icon name="log-out" slot="start"></ion-icon>
+      Logout
+    </ion-button>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="footer-toolbar">
+    <ion-buttons class="footer-buttons">
+      <ion-button (click)="goToHome()">
+        <ion-icon name="home"></ion-icon>
+      </ion-button>
+      <ion-button>
+        <ion-icon name="people"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openPostModal()">
+        <ion-icon name="add-circle"></ion-icon>Post
+      </ion-button>
+      <ion-button>
+        <ion-icon name="notifications"></ion-icon>
+      </ion-button>
+      <ion-button>
+        <ion-icon name="menu"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>
+

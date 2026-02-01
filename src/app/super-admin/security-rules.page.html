@@ -1,0 +1,82 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="tertiary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/super-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Security Rules</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addNewRule()" color="light">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Add
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <!-- Search and Filter -->
+    <ion-card class="controls-card">
+      <ion-card-content>
+        <ion-searchbar
+          placeholder="Search rules..."
+          [(ngModel)]="searchTerm"
+          (ionChange)="onSearchChange()"
+        ></ion-searchbar>
+
+        <ion-segment [(ngModel)]="severityFilter" (ionChange)="onSeverityFilterChange()">
+          <ion-segment-button value="all">
+            <ion-label>All</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="critical">
+            <ion-label>Critical</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="high">
+            <ion-label>High</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="medium">
+            <ion-label>Medium</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="low">
+            <ion-label>Low</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Rules List -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Security Rules ({{ filteredRules.length }})</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="filteredRules.length > 0; else noRules">
+        <ion-list lines="inset">
+          <ion-item *ngFor="let rule of filteredRules" class="rule-item">
+            <ion-label>
+              <h2>{{ rule.name }}</h2>
+              <p>{{ rule.description }}</p>
+              <ion-badge [color]="getSeverityColor(rule.severity)">
+                {{ rule.severity }}
+              </ion-badge>
+            </ion-label>
+            <ion-toggle
+              slot="end"
+              [(ngModel)]="rule.isEnabled"
+              (ionChange)="toggleRule(rule)"
+              [color]="rule.isEnabled ? 'success' : 'danger'"
+            ></ion-toggle>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+
+      <ng-template #noRules>
+        <ion-card-content>
+          <ion-text color="medium">
+            <p>No security rules found.</p>
+          </ion-text>
+        </ion-card-content>
+      </ng-template>
+    </ion-card>
+  </div>
+</ion-content>

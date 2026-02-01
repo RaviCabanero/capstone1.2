@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Alumni Directory</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar 
+      [(ngModel)]="searchTerm" 
+      (ionInput)="searchAlumni()"
+      placeholder="Search by name, role, status, department, or email"
+      animated="true">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-header">
+    <h2>Complete Alumni List</h2>
+    <p>{{ filteredAlumni.length }} registered users</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent" color="danger"></ion-spinner>
+    <p>Loading alumni directory...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredAlumni.length === 0" class="empty-state">
+    <ion-icon name="search-outline" color="medium"></ion-icon>
+    <h3>No Alumni Found</h3>
+    <p *ngIf="searchTerm">Try adjusting your search criteria</p>
+    <p *ngIf="!searchTerm">No registered users in the system yet</p>
+  </div>
+
+  <!-- Alumni List (Table) -->
+  <div *ngIf="!loading && filteredAlumni.length > 0" class="table-wrapper">
+    <div class="table-header">
+      <div class="col name">Name</div>
+      <div class="col role">Role</div>
+      <div class="col dept">Dept</div>
+      <div class="col status">Status</div>
+      <div class="col batch">Batch/Year</div>
+      <div class="col email">Email</div>
+    </div>
+
+    <div class="table-row" *ngFor="let alumni of filteredAlumni">
+      <div class="col name">
+        <div class="name-cell">
+          <ion-icon name="person-circle-outline"></ion-icon>
+          <span>{{ getDisplayName(alumni) }}</span>
+        </div>
+      </div>
+      <div class="col role">
+        <ion-chip color="primary" class="role-chip">
+          <ion-label>{{ formatRole(alumni.role) }}</ion-label>
+        </ion-chip>
+      </div>
+      <div class="col dept">{{ getDepartment(alumni) }}</div>
+      <div class="col status">
+        <ion-chip [color]="alumni.status === 'approved' ? 'success' : (alumni.status === 'pending' ? 'warning' : 'medium')">
+          <ion-label>{{ alumni.status || 'unknown' }}</ion-label>
+        </ion-chip>
+      </div>
+      <div class="col batch">{{ getBatchYear(alumni) }}</div>
+      <div class="col email">{{ maskEmail(alumni.email) }}</div>
+    </div>
+  </div>
+</ion-content>

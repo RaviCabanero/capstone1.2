@@ -1,0 +1,115 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/super-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>User Approvals</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="approvals-container">
+    <!-- Pending Users Section -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title color="warning">
+          <ion-icon name="time-outline" slot="start"></ion-icon>
+          Pending Approvals ({{ pendingUsers.length || 0 }})
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="(pendingUsers$ | async) as users; else noUsers">
+        <div *ngFor="let user of users" class="user-card">
+          <div class="user-header">
+            <div class="user-info">
+              <h3>{{ user.firstName }} {{ user.lastName }}</h3>
+              <p class="user-email">{{ user.email }}</p>
+              <p class="user-meta">
+                <strong>Role:</strong> {{ user.role | titlecase }}
+              </p>
+              <p class="user-meta">
+                <strong>Department:</strong> {{ user.schoolDepartment }}
+              </p>
+              <p class="user-meta">
+                <strong>Registered:</strong> {{ user.createdAt | date: 'MMM dd, yyyy' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="user-actions">
+            <ion-button
+              color="success"
+              fill="solid"
+              (click)="approveUser(user.uid)"
+              [disabled]="approvingUid === user.uid"
+            >
+              <ion-spinner *ngIf="approvingUid === user.uid" name="crescent"></ion-spinner>
+              <ion-icon *ngIf="approvingUid !== user.uid" name="checkmark-outline" slot="start"></ion-icon>
+              Approve
+            </ion-button>
+
+            <ion-button
+              color="danger"
+              fill="outline"
+              (click)="rejectUser(user.uid)"
+              [disabled]="rejectingUid === user.uid"
+            >
+              <ion-spinner *ngIf="rejectingUid === user.uid" name="crescent"></ion-spinner>
+              <ion-icon *ngIf="rejectingUid !== user.uid" name="close-outline" slot="start"></ion-icon>
+              Reject
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+
+      <ng-template #noUsers>
+        <ion-card-content>
+          <ion-text color="medium">
+            <p>✅ No pending approvals. All users have been reviewed!</p>
+          </ion-text>
+        </ion-card-content>
+      </ng-template>
+    </ion-card>
+
+    <!-- Approved Users Section -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title color="success">
+          <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+          Approved Users ({{ approvedUsers.length || 0 }})
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="(approvedUsers$ | async) as users; else noApproved">
+        <ion-list lines="inset">
+          <ion-item *ngFor="let user of users">
+            <ion-label>
+              <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+              <p>{{ user.email }}</p>
+              <p class="role-badge" [ngClass]="'role-' + user.role">
+                {{ user.role | titlecase }}
+              </p>
+            </ion-label>
+            <ion-button
+              slot="end"
+              color="danger"
+              fill="clear"
+              size="small"
+              (click)="rejectApprovedUser(user.uid)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+
+      <ng-template #noApproved>
+        <ion-card-content>
+          <ion-text color="medium">
+            <p>No approved users yet.</p>
+          </ion-text>
+        </ion-card-content>
+      </ng-template>
+    </ion-card>
+  </div>
+</ion-content>

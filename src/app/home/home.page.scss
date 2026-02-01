@@ -1,0 +1,251 @@
+.searchbar {
+  --background: var(--ion-color-light);
+  padding: 0 8px;
+  flex: 1;
+}
+
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.footer-toolbar {
+  --background: var(--ion-color-light);
+  border-top: 1px solid var(--ion-color-step-150);
+}
+
+.footer-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.footer-buttons ion-button {
+  flex: 1;
+  margin: 0;
+}
+
+.home-container {
+  padding: 0;
+  background: var(--ion-color-step-50);
+  min-height: 100%;
+}
+
+.feed-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+// Create Post Card
+.create-post-card {
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ion-card-content {
+    padding: 12px;
+
+    .create-post-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 24px;
+      background: var(--ion-color-light);
+      transition: background 0.3s ease;
+
+      &:hover {
+        background: var(--ion-color-step-100);
+      }
+
+      .user-avatar-small {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+      }
+
+      .post-placeholder {
+        flex: 1;
+
+        p {
+          margin: 0;
+          color: var(--ion-color-medium);
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+// Posts Feed
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.post-card {
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    padding: 12px 16px;
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .user-avatar {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+      }
+
+      .post-user-info {
+        flex: 1;
+
+        .user-name {
+          font-size: 15px;
+          font-weight: 600;
+          margin: 0 0 2px 0;
+          color: var(--ion-color-dark);
+        }
+
+        .post-timestamp {
+          font-size: 12px;
+          color: var(--ion-color-medium);
+          margin: 0;
+        }
+      }
+
+      .menu-button {
+        --padding-start: 0;
+        --padding-end: 0;
+        margin-left: auto;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 0 16px 16px 16px;
+
+    .post-text {
+      font-size: 14px;
+      color: var(--ion-color-dark);
+      margin: 0 0 12px 0;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .post-image {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+  }
+
+  .post-actions {
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    border-top: 1px solid var(--ion-color-step-150);
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      flex: 1;
+      margin: 0;
+      font-size: 13px;
+
+      ion-icon {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+// Empty and Loading States
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 48px 16px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .home-container {
+    background: var(--ion-color-dark);
+  }
+
+  .create-post-card,
+  .post-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .create-post-input {
+    background: var(--ion-color-step-150);
+
+    &:hover {
+      background: var(--ion-color-step-200);
+    }
+  }
+
+  .post-user-info .user-name,
+  .post-text {
+    color: var(--ion-color-light);
+  }
+
+  .post-actions {
+    border-top-color: var(--ion-color-step-200);
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .feed-section {
+    padding: 8px;
+  }
+
+  .create-post-card,
+  .post-card {
+    margin: 0 0 12px 0;
+  }
+}

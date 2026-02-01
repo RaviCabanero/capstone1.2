@@ -1,0 +1,69 @@
+.welcome-section {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #c92a2a 0%, #e03131 100%);
+  color: white;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  
+  h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0;
+    opacity: 0.9;
+  }
+}
+
+.stat-card {
+  text-align: center;
+  
+  ion-card-content {
+    padding: 1.5rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--ion-color-danger);
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.function-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  ion-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .function-icon {
+    font-size: 2rem;
+    color: var(--ion-color-danger);
+  }
+  
+  ion-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  ion-card-content {
+    color: var(--ion-color-medium);
+  }
+}

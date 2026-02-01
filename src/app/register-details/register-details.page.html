@@ -1,0 +1,96 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Complete your profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Almost done</ion-card-title>
+        <ion-card-subtitle>Please provide your details</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="detailsForm" (ngSubmit)="onSubmit()" novalidate>
+          <ion-item lines="full">
+            <ion-label position="floating">First name</ion-label>
+            <ion-input type="text" formControlName="firstName" autocomplete="given-name" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="firstName?.touched && firstName?.invalid">First name is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Last name</ion-label>
+            <ion-input type="text" formControlName="lastName" autocomplete="family-name" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="lastName?.touched && lastName?.invalid">Last name is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Complete address</ion-label>
+            <ion-input type="text" formControlName="address" autocomplete="street-address" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="address?.touched && address?.invalid">Address is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Province</ion-label>
+            <ion-input type="text" formControlName="province" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="province?.touched && province?.invalid">Province is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">School department</ion-label>
+            <ion-select formControlName="schoolDepartment" required>
+              <ion-select-option *ngFor="let dept of departments$ | async" [value]="dept.DeptName">
+                {{ dept.DeptName }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note color="danger" *ngIf="schoolDepartment?.touched && schoolDepartment?.invalid">School department is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Course</ion-label>
+            <ion-select formControlName="course" required>
+              <ion-select-option *ngFor="let course of filteredCourses$ | async" [value]="course.CourseName">
+                {{ course.CourseName }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note color="danger" *ngIf="course?.touched && course?.invalid">Course is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Student ID Number</ion-label>
+            <ion-input type="text" formControlName="studentId" placeholder="e.g. 2020-1234" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="studentId?.touched && studentId?.invalid">Student ID is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Year Graduated</ion-label>
+            <ion-input type="number" formControlName="yearGraduated" placeholder="e.g. 2024" min="1950" max="2100" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="yearGraduated?.touched && yearGraduated?.invalid">Year graduated is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Phone (+63)</ion-label>
+            <ion-input type="tel" formControlName="phone" inputmode="tel" placeholder="+639XXXXXXXXX" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="phone?.touched && phone?.invalid">Use format +63 followed by 10 digits.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Account Type</ion-label>
+            <ion-select formControlName="role" required>
+              <ion-select-option value="alumni">Alumni</ion-select-option>
+              <ion-select-option value="dept_head">Department Head</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note color="danger" *ngIf="role?.touched && role?.invalid">Account type is required.</ion-note>
+
+          <ion-button expand="block" type="submit" [disabled]="detailsForm.invalid || isSubmitting" class="submit">
+            <ion-spinner slot="start" *ngIf="isSubmitting"></ion-spinner>
+            Continue to login
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

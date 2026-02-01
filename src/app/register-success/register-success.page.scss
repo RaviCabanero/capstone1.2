@@ -1,0 +1,17 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 16px;
+}
+
+ion-card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+ion-card-title {
+  margin-bottom: 8px;
+}

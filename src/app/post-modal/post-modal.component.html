@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Share</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [disabled]="!postText.trim()" (click)="submitPost()">
+        <strong>Post</strong>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="post-modal-container">
+    <!-- User Info Section -->
+    <div class="user-info">
+      <ion-avatar class="user-avatar">
+        <img [src]="userAvatar || 'https://via.placeholder.com/40'" alt="User avatar" />
+      </ion-avatar>
+      <div class="user-details">
+        <h3 class="user-name">{{ userName }}</h3>
+        <ion-select value="public" interface="popover" class="visibility-select">
+          <ion-select-option value="public">
+            <ion-icon name="globe-outline"></ion-icon>
+            Public
+          </ion-select-option>
+          <ion-select-option value="friends">
+            <ion-icon name="people-outline"></ion-icon>
+            Friends
+          </ion-select-option>
+          <ion-select-option value="onlyme">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            Only Me
+          </ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+
+    <!-- Post Text Area -->
+    <ion-textarea
+      [(ngModel)]="postText"
+      placeholder="Share your thoughts. Add photos or hashtags."
+      autoGrow="true"
+      rows="6"
+      class="post-textarea"
+    ></ion-textarea>
+
+    <!-- Preview of selected image -->
+    <div class="image-preview" *ngIf="selectedImage">
+      <img [src]="selectedImage" alt="Selected image" />
+      <ion-button fill="clear" size="small" class="remove-image" (click)="removeImage()">
+        <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- Action Icons -->
+    <div class="action-icons">
+      <input
+        #imageInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onImageSelected($event)"
+      />
+      <ion-button fill="clear" (click)="imageInput.click()">
+        <ion-icon name="camera" slot="start"></ion-icon>
+        Photo
+      </ion-button>
+      <ion-button fill="clear" (click)="insertMention()">
+        <ion-icon name="at" slot="start"></ion-icon>
+        Mention
+      </ion-button>
+      <ion-button fill="clear" (click)="insertHashtag()">
+        <ion-icon name="pricetag" slot="start"></ion-icon>
+        Hashtag
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

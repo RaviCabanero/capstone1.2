@@ -1,0 +1,172 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="header-title">Add experience</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="save()" [disabled]="experienceForm.invalid && submitted" color="primary" strong>
+        Save
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="experience-form-container">
+    <form [formGroup]="experienceForm">
+      <!-- Share with Network Toggle -->
+      <ion-card class="share-section">
+        <ion-item lines="none">
+          <ion-label>Share with network</ion-label>
+          <ion-toggle formControlName="shareWithNetwork"></ion-toggle>
+        </ion-item>
+        <p class="helper-text">
+          If enabled, your network may be notified of job changes, education changes, and work anniversaries.
+        </p>
+      </ion-card>
+
+      <!-- Company Field -->
+      <div class="form-section">
+        <ion-item [class.error]="submitted && company?.invalid">
+          <ion-label position="floating">
+            Company <span class="required">*</span>
+          </ion-label>
+          <ion-input
+            type="text"
+            formControlName="company"
+            placeholder="Enter company name"
+          ></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="submitted && company?.invalid">
+          <p class="error-text">Please enter your company</p>
+        </ion-text>
+      </div>
+
+      <!-- Title Field -->
+      <div class="form-section">
+        <ion-item [class.error]="submitted && title?.invalid">
+          <ion-label position="floating">
+            Title <span class="required">*</span>
+          </ion-label>
+          <ion-input
+            type="text"
+            formControlName="title"
+            placeholder="Enter job title"
+          ></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="submitted && title?.invalid">
+          <p class="error-text">Please enter your title</p>
+        </ion-text>
+      </div>
+
+      <!-- Time Period Section -->
+      <div class="time-period-section">
+        <div class="time-period-header">
+          <h3>Time period</h3>
+        </div>
+
+        <!-- Currently Working Toggle -->
+        <ion-item lines="full">
+          <ion-label>I currently work here</ion-label>
+          <ion-checkbox formControlName="currentlyWorking"></ion-checkbox>
+        </ion-item>
+
+        <!-- From Section -->
+        <div class="date-section">
+          <p class="section-label">From</p>
+          <div class="date-row">
+            <div class="date-input">
+              <ion-item lines="none">
+                <ion-label position="floating">Month</ion-label>
+                <ion-select formControlName="fromMonth" placeholder="Select month">
+                  <ion-select-option *ngFor="let month of months" [value]="month.value">
+                    {{ month.name }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+            <div class="date-input">
+              <ion-item lines="none">
+                <ion-label position="floating">Year</ion-label>
+                <ion-select formControlName="fromYear" placeholder="Select year">
+                  <ion-select-option *ngFor="let year of years" [value]="year">
+                    {{ year }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+          </div>
+        </div>
+
+        <!-- To Section -->
+        <div class="date-section" *ngIf="!currentlyWorking">
+          <p class="section-label">To</p>
+          <div class="date-row">
+            <div class="date-input">
+              <ion-item lines="none">
+                <ion-label position="floating">Month</ion-label>
+                <ion-select formControlName="toMonth" placeholder="Select month">
+                  <ion-select-option *ngFor="let month of months" [value]="month.value">
+                    {{ month.name }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+            <div class="date-input">
+              <ion-item lines="none">
+                <ion-label position="floating">Year</ion-label>
+                <ion-select formControlName="toYear" placeholder="Select year">
+                  <ion-select-option *ngFor="let year of years" [value]="year">
+                    {{ year }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+          </div>
+        </div>
+
+        <!-- Present Badge -->
+        <div class="present-badge" *ngIf="currentlyWorking">
+          <ion-badge>Present</ion-badge>
+        </div>
+      </div>
+
+      <!-- Location Field -->
+      <div class="form-section">
+        <ion-item lines="full">
+          <ion-label position="floating">Location</ion-label>
+          <ion-input
+            type="text"
+            formControlName="location"
+            placeholder="e.g., San Francisco, CA"
+          ></ion-input>
+        </ion-item>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-section">
+        <ion-item lines="full">
+          <ion-label position="floating">Description</ion-label>
+          <ion-textarea
+            formControlName="description"
+            autoGrow="true"
+            placeholder="Describe your job responsibilities and achievements..."
+            rows="4"
+          ></ion-textarea>
+        </ion-item>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <ion-button expand="block" fill="outline" (click)="cancel()">Cancel</ion-button>
+        <ion-button expand="block" [disabled]="experienceForm.invalid && submitted" (click)="save()">
+          Save Experience
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</ion-content>
+

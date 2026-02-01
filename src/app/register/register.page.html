@@ -1,0 +1,107 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Sign Up</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Create account</ion-card-title>
+        <ion-card-subtitle>Join to continue</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+          <ion-item lines="full">
+            <ion-label position="floating">First name</ion-label>
+            <ion-input
+              type="text"
+              formControlName="firstName"
+              autocomplete="given-name"
+              required
+            ></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="firstName?.touched && firstName?.invalid">
+            First name is required (min 2 characters).
+          </ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Last name</ion-label>
+            <ion-input
+              type="text"
+              formControlName="lastName"
+              autocomplete="family-name"
+              required
+            ></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="lastName?.touched && lastName?.invalid">
+            Last name is required (min 2 characters).
+          </ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Email</ion-label>
+            <ion-input
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              inputmode="email"
+              placeholder="your-email@example.com"
+              required
+            ></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="email?.touched && email?.invalid">
+            Enter a valid email address.
+          </ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Password</ion-label>
+            <ion-input
+              type="password"
+              formControlName="password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            ></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="password?.touched && password?.invalid">
+            Password must be at least 6 characters.
+          </ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Confirm Password</ion-label>
+            <ion-input
+              type="password"
+              formControlName="confirm"
+              autocomplete="new-password"
+              required
+            ></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="confirm?.touched && registerForm.errors?.['mismatch']">
+            Passwords must match.
+          </ion-note>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="registerForm.invalid || isSubmitting"
+            class="submit"
+          >
+            <ion-spinner slot="start" *ngIf="isSubmitting"></ion-spinner>
+            Create account
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            fill="clear"
+            [routerLink]="['/login']"
+            class="secondary"
+          >
+            Already have an account? Sign in
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

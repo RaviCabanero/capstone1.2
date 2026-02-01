@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Approve Alumni</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-header">
+    <h2>Pending Alumni Registrations</h2>
+    <p>Review and approve alumni who have registered</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent" color="danger"></ion-spinner>
+    <p>Loading pending registrations...</p>
+  </div>
+
+  <div *ngIf="!loading && pendingUsers.length === 0" class="empty-state">
+    <ion-icon name="checkmark-done-circle-outline" color="success"></ion-icon>
+    <h3>All Caught Up!</h3>
+    <p>There are no pending alumni registrations at the moment.</p>
+  </div>
+
+  <ion-card *ngFor="let user of pendingUsers" class="user-card">
+    <ion-card-header>
+      <ion-card-title>{{ user.displayName || user.email }}</ion-card-title>
+      <ion-card-subtitle>{{ user.email }}</ion-card-subtitle>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <div class="user-details">
+        <div class="detail-item" *ngIf="user.department">
+          <ion-icon name="briefcase-outline"></ion-icon>
+          <span>{{ user.department }}</span>
+        </div>
+        <div class="detail-item" *ngIf="user.graduationYear">
+          <ion-icon name="school-outline"></ion-icon>
+          <span>Graduated: {{ user.graduationYear }}</span>
+        </div>
+        <div class="detail-item" *ngIf="user.studentId">
+          <ion-icon name="card-outline"></ion-icon>
+          <span>ID: {{ user.studentId }}</span>
+        </div>
+        <div class="detail-item" *ngIf="user.createdAt">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Applied: {{ user.createdAt.toDate() | date:'short' }}</span>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <ion-button expand="block" color="success" (click)="approveUser(user.uid)">
+          <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+          Approve
+        </ion-button>
+        <ion-button expand="block" color="danger" fill="outline" (click)="rejectUser(user.uid)">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Reject
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

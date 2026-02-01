@@ -1,0 +1,24 @@
+.page {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100%;
+	padding: 16px;
+}
+
+ion-card {
+	width: 100%;
+	max-width: 420px;
+}
+
+.submit {
+	margin-top: 16px;
+}
+
+.secondary {
+	margin-top: 8px;
+}
+
+ion-note {
+	margin: 6px 8px 0;
+}

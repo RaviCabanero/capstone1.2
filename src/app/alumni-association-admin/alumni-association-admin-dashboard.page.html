@@ -1,0 +1,101 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-title>Alumni Association Admin</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        Logout
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="welcome-section">
+    <h1>Welcome, Alumni Association Admin</h1>
+    <p>Manage alumni registrations, announcements, events, and more</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6" size-md="4">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">{{stats.totalAlumni}}</div>
+            <div class="stat-label">Total Alumni</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">{{stats.activeEvents}}</div>
+            <div class="stat-label">Active Events</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="4">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">{{stats.recentAnnouncements}}</div>
+            <div class="stat-label">Announcements</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Function Cards -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <ion-card class="function-card" (click)="navigateToAnnouncements()">
+          <ion-card-header>
+            <ion-icon name="megaphone-outline" class="function-icon"></ion-icon>
+            <ion-card-title>Post Announcements</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Create announcements for all alumni members
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6">
+        <ion-card class="function-card" (click)="navigateToEvents()">
+          <ion-card-header>
+            <ion-icon name="calendar-outline" class="function-icon"></ion-icon>
+            <ion-card-title>Create Global Events</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Organize events for the entire alumni network
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6">
+        <ion-card class="function-card" (click)="navigateToAlumniList()">
+          <ion-card-header>
+            <ion-icon name="people-outline" class="function-icon"></ion-icon>
+            <ion-card-title>View Alumni List</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Browse and search the complete alumni directory
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6">
+        <ion-card class="function-card" (click)="navigateToReports()">
+          <ion-card-header>
+            <ion-icon name="stats-chart-outline" class="function-icon"></ion-icon>
+            <ion-card-title>Generate Reports</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            View analytics and generate alumni reports
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,264 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Alumni ID Request</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="alumni-request-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <h1>USJ-R Alumni Association Membership</h1>
+      <p class="intro-text">
+        Please fill out this form honestly and accurately. The information you provide will be used for alumni records, verification, and to connect you with fellow alumni.
+      </p>
+    </div>
+
+    <!-- Form Section -->
+    <form [formGroup]="alumniForm" (ngSubmit)="submit()" class="alumni-form">
+      <!-- Email -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Email Address
+          <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="email"
+          type="email"
+          placeholder="your.email@example.com"
+        ></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && email?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          <span *ngIf="email?.hasError('required')">Email is required</span>
+          <span *ngIf="email?.hasError('email')">Please enter a valid email</span>
+        </p>
+      </ion-text>
+
+      <!-- Student ID (Optional) -->
+      <ion-item lines="full">
+        <ion-label position="floating">Student ID (Optional)</ion-label>
+        <ion-input
+          formControlName="studentId"
+          type="text"
+          placeholder="e.g., 20-12345"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Name Section -->
+      <div class="form-section-title">Personal Information</div>
+
+      <!-- First Name -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          First Name
+          <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="firstName"
+          type="text"
+          placeholder="Enter first name"
+        ></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && firstName?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          First name is required
+        </p>
+      </ion-text>
+
+      <!-- Last Name -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Last Name
+          <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="lastName"
+          type="text"
+          placeholder="Enter last name"
+        ></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && lastName?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          Last name is required
+        </p>
+      </ion-text>
+
+      <!-- Middle Name (Optional) -->
+      <ion-item lines="full">
+        <ion-label position="floating">Middle Name (Optional)</ion-label>
+        <ion-input
+          formControlName="middleName"
+          type="text"
+          placeholder="Enter middle name"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Suffix (Optional) -->
+      <ion-item lines="full">
+        <ion-label position="floating">Suffix (Optional)</ion-label>
+        <ion-input
+          formControlName="suffix"
+          type="text"
+          placeholder="e.g., Jr., Sr., III"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Maiden Name (Optional) -->
+      <ion-item lines="full">
+        <ion-label position="floating">Maiden Name (Optional)</ion-label>
+        <ion-input
+          formControlName="maidenName"
+          type="text"
+          placeholder="For married women"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Education Section -->
+      <div class="form-section-title">Educational Background</div>
+
+      <!-- Education Level -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Educational Attainment
+          <span class="required">*</span>
+        </ion-label>
+        <ion-select
+          formControlName="educationLevel"
+          placeholder="Select your education level"
+        >
+          <ion-select-option *ngFor="let level of educationLevels" [value]="level">
+            {{ level }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && educationLevel?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          Education level is required
+        </p>
+      </ion-text>
+
+      <!-- Degree Program -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Degree Program / Strand
+          <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="degreeProgram"
+          type="text"
+          placeholder="e.g., Bachelor of Science in Computer Science"
+        ></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && degreeProgram?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          Degree program is required
+        </p>
+      </ion-text>
+
+      <!-- Year Graduated -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Year Graduated
+          <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="yearGraduated"
+          type="number"
+          placeholder="e.g., 2023, 1999, 2001"
+        ></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && yearGraduated?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          Year graduated is required
+        </p>
+      </ion-text>
+
+      <!-- Permanent Address -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Permanent Address
+          <span class="required">*</span>
+        </ion-label>
+        <ion-textarea
+          formControlName="permanentAddress"
+          autoGrow="true"
+          placeholder="Enter your complete permanent address"
+          rows="3"
+        ></ion-textarea>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && permanentAddress?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          Permanent address is required
+        </p>
+      </ion-text>
+
+      <!-- Photo Upload Section -->
+      <div class="form-section-title">2x2 ID Photo</div>
+      <div class="photo-upload-section">
+        <p class="section-label">Upload High Resolution Colored 2x2 ID Picture</p>
+
+        <!-- Image Preview -->
+        <div class="image-preview" *ngIf="imagePreview; else uploadPrompt">
+          <img [src]="imagePreview" alt="Alumni ID photo preview" />
+          <div class="image-actions">
+            <ion-button fill="clear" size="small" color="danger" (click)="removeImage()">
+              <ion-icon name="close-circle"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Upload Prompt -->
+        <ng-template #uploadPrompt>
+          <div class="upload-placeholder" (click)="fileInput.click()">
+            <ion-icon name="image"></ion-icon>
+            <p>Click to upload photo</p>
+            <small>JPG or PNG • White background • No borders</small>
+          </div>
+        </ng-template>
+
+        <input
+          #fileInput
+          type="file"
+          accept="image/jpeg,image/png"
+          hidden
+          (change)="onImageSelected($event)"
+        />
+
+        <ion-text color="danger" *ngIf="submitted && idPhoto?.invalid">
+          <p class="error-text">
+            <ion-icon name="alert-circle"></ion-icon>
+            Photo is required
+          </p>
+        </ion-text>
+
+        <p class="helper-text">
+          This image will be your final Alumni ID photo
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <ion-button expand="block" fill="outline" (click)="cancel()">
+          Cancel
+        </ion-button>
+        <ion-button expand="block" (click)="submit()" [disabled]="alumniForm.invalid">
+          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+          Submit Digital Alumni ID Request
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</ion-content>

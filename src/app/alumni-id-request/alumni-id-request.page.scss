@@ -1,0 +1,286 @@
+.alumni-request-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(102, 205, 170, 0.05), rgba(102, 205, 170, 0.02));
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 20px 0;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: var(--ion-color-dark);
+  }
+
+  .intro-text {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+.alumni-form {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 0;
+
+    ion-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ion-color-dark);
+
+      .required {
+        color: var(--ion-color-danger);
+        margin-left: 2px;
+      }
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+      --padding-start: 0;
+      --padding-end: 0;
+      font-size: 14px;
+    }
+  }
+
+  .error-text {
+    font-size: 12px;
+    color: var(--ion-color-danger);
+    margin: 4px 16px 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    ion-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+  }
+
+  .form-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 16px 8px 16px;
+    margin-top: 12px;
+    border-top: 1px solid var(--ion-color-step-150);
+  }
+}
+
+.photo-upload-section {
+  padding: 16px;
+  border-top: 1px solid var(--ion-color-step-150);
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+  }
+
+  .image-preview {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    max-width: 200px;
+
+    img {
+      width: 100%;
+      height: auto;
+      max-height: 250px;
+      object-fit: cover;
+      display: block;
+      border: 1px solid var(--ion-color-step-150);
+    }
+
+    .image-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+
+      ion-button {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        margin: 0;
+
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+
+  .upload-placeholder {
+    border: 2px dashed var(--ion-color-primary);
+    border-radius: 8px;
+    padding: 32px 16px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--ion-color-light);
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+
+    &:hover {
+      background: rgba(102, 205, 170, 0.1);
+      border-color: var(--ion-color-primary-shade);
+    }
+
+    ion-icon {
+      font-size: 48px;
+      color: var(--ion-color-primary);
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 4px 0;
+      color: var(--ion-color-dark);
+    }
+
+    small {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .helper-text {
+    font-size: 12px;
+    color: var(--ion-color-medium);
+    margin: 8px 0 0 0;
+    font-style: italic;
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  padding: 20px 16px;
+  border-top: 1px solid var(--ion-color-step-150);
+
+  ion-button {
+    flex: 1;
+
+    ion-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .alumni-request-container {
+    background: linear-gradient(180deg, rgba(102, 205, 170, 0.1), rgba(102, 205, 170, 0.05));
+  }
+
+  .header-section {
+    h1 {
+      color: var(--ion-color-light);
+    }
+
+    .intro-text {
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .alumni-form {
+    background: var(--ion-color-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    ion-label {
+      color: var(--ion-color-light);
+    }
+
+    .form-section-title {
+      color: var(--ion-color-primary);
+      border-top-color: var(--ion-color-step-200);
+    }
+  }
+
+  .photo-upload-section {
+    border-top-color: var(--ion-color-step-200);
+
+    .upload-placeholder {
+      background: var(--ion-color-step-150);
+      border-color: var(--ion-color-primary);
+
+      &:hover {
+        background: rgba(102, 205, 170, 0.2);
+      }
+
+      p {
+        color: var(--ion-color-light);
+      }
+
+      ion-icon {
+        color: var(--ion-color-primary);
+      }
+    }
+
+    .section-label {
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .button-group {
+    border-top-color: var(--ion-color-step-200);
+  }
+}
+
+// Mobile responsive
+@media (max-width: 480px) {
+  .alumni-request-container {
+    padding: 12px;
+  }
+
+  .header-section {
+    margin-bottom: 24px;
+    padding: 16px 0;
+
+    h1 {
+      font-size: 20px;
+    }
+
+    .intro-text {
+      font-size: 13px;
+    }
+  }
+
+  .alumni-form {
+    border-radius: 8px;
+
+    .form-section-title {
+      padding: 12px 12px 6px 12px;
+    }
+  }
+
+  .photo-upload-section {
+    padding: 12px;
+  }
+
+  .button-group {
+    padding: 16px 12px;
+    gap: 8px;
+  }
+}

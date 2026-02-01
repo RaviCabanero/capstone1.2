@@ -1,0 +1,124 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/super-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>View All Data</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refreshData()" color="light">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <!-- Loading Spinner -->
+    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+    <!-- Search and Filters -->
+    <ion-card *ngIf="!isLoading" class="controls-card">
+      <ion-card-content>
+        <ion-searchbar
+          placeholder="Search by name or email..."
+          [(ngModel)]="searchTerm"
+          (ionChange)="onSearchChange()"
+        ></ion-searchbar>
+
+        <div class="filter-section">
+          <ion-label>Role:</ion-label>
+          <ion-segment [(ngModel)]="filterRole" (ionChange)="onFilterChange()">
+            <ion-segment-button value="all">
+              <ion-label>All</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="admin">
+              <ion-label>Admin</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="dept_head">
+              <ion-label>Dept Head</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="alumni">
+              <ion-label>Alumni</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+
+        <div class="filter-section">
+          <ion-label>Status:</ion-label>
+          <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange()">
+            <ion-segment-button value="all">
+              <ion-label>All</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="pending">
+              <ion-label>Pending</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="approved">
+              <ion-label>Approved</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="rejected">
+              <ion-label>Rejected</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Export Options -->
+    <ion-card *ngIf="!isLoading" class="export-card">
+      <ion-card-header>
+        <ion-card-title>Export Data</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label>Format:</ion-label>
+          <ion-select [(ngModel)]="exportFormat" slot="end">
+            <ion-select-option value="json">JSON</ion-select-option>
+            <ion-select-option value="csv">CSV</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-button expand="block" color="primary" (click)="exportData()">
+          <ion-icon name="download-outline" slot="start"></ion-icon>
+          Export {{ filteredUsers.length }} Records
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Data Table -->
+    <ion-card *ngIf="!isLoading">
+      <ion-card-header>
+        <ion-card-title>Users ({{ filteredUsers.length }})</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="filteredUsers.length > 0; else noData">
+        <ion-list lines="inset">
+          <ion-item *ngFor="let user of filteredUsers" class="data-item">
+            <ion-label>
+              <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+              <p>{{ user.email }}</p>
+              <div class="user-badges">
+                <ion-badge [color]="getRoleBadgeColor(user.role)">
+                  {{ user.role }}
+                </ion-badge>
+                <ion-badge [color]="getStatusColor(user.status)">
+                  {{ user.status }}
+                </ion-badge>
+                <ion-badge *ngIf="user.schoolDepartment">
+                  {{ user.schoolDepartment }}
+                </ion-badge>
+              </div>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+
+      <ng-template #noData>
+        <ion-card-content>
+          <ion-text color="medium">
+            <p>No user data found.</p>
+          </ion-text>
+        </ion-card-content>
+      </ng-template>
+    </ion-card>
+  </div>
+</ion-content>

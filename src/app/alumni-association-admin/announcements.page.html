@@ -1,0 +1,86 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Announcements</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleForm()">
+        <ion-icon [name]="showForm ? 'close' : 'add'"></ion-icon>
+        {{ showForm ? 'Cancel' : 'New' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-header">
+    <h2>Post Announcements</h2>
+    <p>Create announcements for all alumni members</p>
+  </div>
+
+  <!-- Create Announcement Form -->
+  <ion-card *ngIf="showForm" class="create-form">
+    <ion-card-header>
+      <ion-card-title>New Announcement</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Title *</ion-label>
+        <ion-input 
+          [(ngModel)]="newAnnouncement.title" 
+          placeholder="Enter announcement title"
+          type="text">
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Content *</ion-label>
+        <ion-textarea 
+          [(ngModel)]="newAnnouncement.content" 
+          placeholder="Enter announcement details"
+          rows="6"
+          auto-grow="true">
+        </ion-textarea>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        color="danger" 
+        (click)="createAnnouncement()"
+        [disabled]="!newAnnouncement.title.trim() || !newAnnouncement.content.trim()">
+        <ion-icon slot="start" name="megaphone-outline"></ion-icon>
+        Post Announcement
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent" color="danger"></ion-spinner>
+    <p>Loading announcements...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && announcements.length === 0" class="empty-state">
+    <ion-icon name="megaphone-outline" color="medium"></ion-icon>
+    <h3>No Announcements Yet</h3>
+    <p>Create your first announcement for the alumni community</p>
+  </div>
+
+  <!-- Announcements List -->
+  <div *ngIf="!loading && announcements.length > 0">
+    <ion-card *ngFor="let announcement of announcements" class="announcement-card">
+      <ion-card-header>
+        <ion-card-title>{{ announcement.title }}</ion-card-title>
+        <ion-card-subtitle>
+          <ion-icon name="time-outline"></ion-icon>
+          {{ announcement.createdAt?.toDate() | date:'medium' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="announcement-content">{{ announcement.content }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

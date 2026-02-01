@@ -1,0 +1,53 @@
+.container {
+  padding: 16px;
+}
+
+.controls-card {
+  margin-bottom: 20px;
+}
+
+.export-card {
+  margin-bottom: 20px;
+}
+
+ion-searchbar {
+  --padding-start: 0;
+  --padding-end: 0;
+  margin-bottom: 16px;
+}
+
+.filter-section {
+  margin-bottom: 16px;
+
+  ion-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  ion-segment {
+    width: 100%;
+  }
+}
+
+.user-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+
+  ion-badge {
+    font-size: 11px;
+  }
+}
+
+.data-item {
+  margin-bottom: 8px;
+}
+
+ion-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

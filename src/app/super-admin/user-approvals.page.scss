@@ -1,0 +1,74 @@
+.approvals-container {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.user-card {
+  background: var(--ion-color-step-50);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid #ffc107;
+
+  .user-header {
+    margin-bottom: 12px;
+
+    .user-info {
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .user-email {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+        color: var(--ion-color-step-600);
+      }
+
+      .user-meta {
+        margin: 4px 0;
+        font-size: 13px;
+        color: var(--ion-color-step-700);
+
+        strong {
+          color: var(--ion-color-primary);
+        }
+      }
+    }
+  }
+
+  .user-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    ion-button {
+      flex: 1;
+      min-width: 100px;
+      --padding-top: 8px;
+      --padding-bottom: 8px;
+      font-size: 13px;
+    }
+  }
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+
+  &.role-alumni {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.role-dept_head {
+    background: #f3e5f5;
+    color: #7b1fa2;
+  }
+}

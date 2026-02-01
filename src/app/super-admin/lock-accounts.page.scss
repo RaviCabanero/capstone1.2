@@ -1,0 +1,37 @@
+.container {
+  padding: 16px;
+}
+
+.controls-card {
+  margin-bottom: 20px;
+}
+
+ion-searchbar {
+  --padding-start: 0;
+  --padding-end: 0;
+  margin-bottom: 16px;
+}
+
+ion-segment {
+  width: 100%;
+}
+
+.user-item {
+  margin-bottom: 8px;
+}
+
+.status-text {
+  font-size: 12px;
+  margin-top: 4px;
+
+  &.locked {
+    color: #d32f2f;
+  }
+}
+
+ion-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

@@ -1,0 +1,136 @@
+.dashboard-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-bottom: 24px;
+
+  ion-card-title {
+    color: white;
+    font-size: 24px;
+  }
+
+  ion-card-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .stat-card {
+    text-align: center;
+    padding: 16px;
+    border-left: 4px solid #667eea;
+
+    h2 {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 8px 0;
+      color: #667eea;
+    }
+
+    p {
+      font-size: 12px;
+      color: var(--ion-color-step-600);
+      margin: 0;
+    }
+
+    &.pending {
+      border-left-color: #ffc107;
+
+      h2 {
+        color: #ffc107;
+      }
+    }
+
+    &.approved {
+      border-left-color: #4caf50;
+
+      h2 {
+        color: #4caf50;
+      }
+    }
+  }
+}
+
+/* Navigation Section */
+.navigation-section {
+  margin-bottom: 24px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ion-color-step-700);
+    margin: 16px 0 12px 0;
+  }
+
+  .nav-button {
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-align: left;
+
+    ion-badge {
+      margin-left: auto;
+      background: #ff5252;
+      color: white;
+    }
+  }
+}
+
+/* System Info */
+.system-info {
+  margin-top: 24px;
+  background: var(--ion-color-step-50);
+
+  ion-card-title {
+    font-size: 16px;
+  }
+
+  ion-list {
+    padding: 0;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --padding-end: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 14px;
+    color: var(--ion-color-primary);
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: var(--ion-color-step-600);
+    margin: 0;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .stats-grid .stat-card h2 {
+    color: #667eea;
+  }
+
+  .navigation-section h3 {
+    color: var(--ion-color-step-300);
+  }
+}

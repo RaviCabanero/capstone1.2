@@ -1,0 +1,41 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/super-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Department Heads</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <ion-card *ngIf="(deptHeads$ | async) as heads">
+      <ion-card-header>
+        <ion-card-title>All Department Heads</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="heads.length > 0; else noDeptHeads">
+        <ion-list lines="inset">
+          <ion-item *ngFor="let head of heads">
+            <ion-avatar slot="start">
+              <img [src]="head.photoDataUrl || 'https://via.placeholder.com/40'" />
+            </ion-avatar>
+            <ion-label>
+              <h2>{{ head.firstName }} {{ head.lastName }}</h2>
+              <p>{{ head.email }}</p>
+              <p class="dept-badge">{{ head.schoolDepartment }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+
+      <ng-template #noDeptHeads>
+        <ion-card-content>
+          <ion-text color="medium">
+            <p>No department heads assigned yet.</p>
+          </ion-text>
+        </ion-card-content>
+      </ng-template>
+    </ion-card>
+  </div>
+</ion-content>

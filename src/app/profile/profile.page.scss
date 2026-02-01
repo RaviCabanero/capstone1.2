@@ -1,0 +1,858 @@
+.profile-container {
+  padding: 16px;
+}
+
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-icon {
+  font-size: 80px;
+  color: var(--ion-color-primary);
+}
+
+.profile-info {
+  flex: 1;
+}
+
+ion-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+ion-card-subtitle {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin: 4px 0 0 0;
+}
+
+.edit-btn {
+  margin-top: 16px;
+}
+
+.logout-btn {
+  margin-top: 12px;
+}
+
+ion-list {
+  margin: 0;
+}
+
+ion-item {
+  --padding-start: 0;
+  --padding-end: 0;
+  border-bottom: 1px solid var(--ion-color-step-150);
+}
+
+ion-item p {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+ion-item h3 {
+  font-size: 16px;
+  margin: 4px 0 0 0;
+}
+
+.footer-toolbar {
+  --background: var(--ion-color-light);
+  border-top: 1px solid var(--ion-color-step-150);
+}
+
+.footer-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.footer-buttons ion-button {
+  flex: 1;
+  margin: 0;
+}
+// Experience Section Styles
+.experience-section {
+  margin-top: 16px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      ion-button {
+        font-size: 12px;
+        color: var(--ion-color-primary);
+        text-decoration: none;
+        --padding-start: 0;
+        --padding-end: 0;
+      }
+
+      .see-all-btn {
+        --padding-start: 0;
+        --padding-end: 0;
+      }
+    }
+  }
+}
+
+.skills-section {
+  margin-top: 16px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      ion-button {
+        font-size: 12px;
+        color: var(--ion-color-primary);
+        text-decoration: none;
+        --padding-start: 0;
+        --padding-end: 0;
+      }
+    }
+  }
+}
+
+.skills-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.skill-card {
+  background: var(--ion-color-light);
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+
+    .skill-name-endorsements {
+      flex: 1;
+
+      .skill-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: var(--ion-color-dark);
+      }
+
+      .endorsement-count {
+        font-size: 11px;
+        color: var(--ion-color-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+
+        ion-icon {
+          font-size: 10px;
+        }
+      }
+    }
+
+    ion-button {
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 24px;
+      height: 24px;
+      margin: 0;
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .skill-category {
+    margin: 4px 0;
+
+    .category-badge {
+      display: inline-block;
+      background: var(--ion-color-primary-shade);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+  }
+
+  .skill-proficiency {
+    font-size: 11px;
+    color: var(--ion-color-medium);
+    margin: 4px 0 0 0;
+
+    .proficiency-level {
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+// Responsive grid
+@media (max-width: 480px) {
+  .skills-container {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .skills-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.accomplishments-section {
+  margin-top: 16px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      ion-button {
+        font-size: 12px;
+        color: var(--ion-color-primary);
+        text-decoration: none;
+        --padding-start: 0;
+        --padding-end: 0;
+      }
+    }
+  }
+}
+
+.accomplishments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accomplishment-card {
+  background: var(--ion-color-light);
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .certificate-image-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: var(--ion-color-step-150);
+
+    .certificate-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0);
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 8px;
+      transition: background 0.3s ease;
+      opacity: 0;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 1;
+      }
+
+      ion-button {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        margin: 0;
+
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+
+  .accomplishment-details {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .accomplishment-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      color: var(--ion-color-dark);
+    }
+
+    .accomplishment-issuer {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      margin: 0 0 4px 0;
+      font-weight: 500;
+    }
+
+    .accomplishment-date {
+      font-size: 11px;
+      color: var(--ion-color-medium);
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 10px;
+      }
+    }
+
+    .accomplishment-description {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      margin: 4px 0 0 0;
+      line-height: 1.4;
+    }
+  }
+}
+
+// Responsive layout for accomplishments
+@media (min-width: 480px) {
+  .accomplishments-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .accomplishments-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.contact-section {
+  margin-top: 16px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    ion-button {
+      --padding-start: 0;
+      --padding-end: 0;
+      color: var(--ion-color-primary);
+      margin: 0;
+
+      ion-icon {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+.contact-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ion-color-step-150);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .contact-label-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    ion-icon {
+      font-size: 18px;
+      color: var(--ion-color-primary);
+    }
+
+    .contact-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ion-color-medium);
+      text-transform: uppercase;
+    }
+  }
+
+  .contact-value {
+    font-size: 14px;
+    color: var(--ion-color-dark);
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .contact-link {
+    font-size: 14px;
+    color: var(--ion-color-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    word-break: break-word;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    ion-icon {
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+  }
+
+  .contact-url {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .contact-value {
+      flex: 1;
+      font-size: 13px;
+      color: var(--ion-color-primary);
+      word-break: break-all;
+    }
+
+    ion-button {
+      --padding-start: 0;
+      --padding-end: 0;
+      flex-shrink: 0;
+      margin: 0;
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .contact-item .contact-value {
+    color: var(--ion-color-light);
+  }
+}
+
+.alumni-id-card {
+  margin-top: 16px;
+  background: linear-gradient(135deg, var(--ion-color-primary-light), var(--ion-color-light));
+
+  ion-card-header {
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: var(--ion-color-primary);
+
+      ion-icon {
+        font-size: 24px;
+      }
+    }
+  }
+
+  ion-card-content {
+    .alumni-description {
+      font-size: 14px;
+      color: var(--ion-color-dark);
+      margin: 0 0 16px 0;
+      line-height: 1.5;
+    }
+
+    ion-button {
+      font-weight: 500;
+    }
+
+    .request-status {
+      padding: 12px;
+      border-radius: 8px;
+
+      .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        ion-icon {
+          font-size: 24px;
+        }
+
+        .status-text {
+          font-size: 16px;
+          font-weight: 600;
+        }
+      }
+
+      .request-date {
+        font-size: 12px;
+        color: var(--ion-color-medium);
+        margin: 0 0 12px 0;
+      }
+
+      .request-details {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+
+        p {
+          font-size: 13px;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          ion-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+          }
+        }
+
+        .info-text {
+          color: var(--ion-color-primary);
+          background: rgba(102, 205, 170, 0.1);
+        }
+
+        .success-text {
+          color: var(--ion-color-success);
+          background: rgba(34, 197, 94, 0.1);
+        }
+
+        .error-text {
+          color: var(--ion-color-danger);
+          background: rgba(239, 68, 68, 0.1);
+        }
+      }
+
+      &.status-pending {
+        background: rgba(102, 205, 170, 0.08);
+        border: 1px solid rgba(102, 205, 170, 0.3);
+
+        .status-badge {
+          color: var(--ion-color-primary);
+        }
+      }
+
+      &.status-approved {
+        background: rgba(34, 197, 94, 0.08);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+
+        .status-badge {
+          color: var(--ion-color-success);
+        }
+
+        .status-text {
+          color: var(--ion-color-success);
+        }
+      }
+
+      &.status-rejected {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+
+        .status-badge {
+          color: var(--ion-color-danger);
+        }
+
+        .status-text {
+          color: var(--ion-color-danger);
+        }
+      }
+    }
+  }
+}
+
+// Dark mode for alumni card
+@media (prefers-color-scheme: dark) {
+  .alumni-id-card {
+    background: linear-gradient(135deg, var(--ion-color-primary-shade), var(--ion-color-dark));
+
+    ion-card-header ion-card-title {
+      color: var(--ion-color-primary);
+    }
+
+    ion-card-content .alumni-description {
+      color: var(--ion-color-light);
+    }
+
+    .request-status {
+      &.status-pending {
+        background: rgba(102, 205, 170, 0.15);
+        border-color: rgba(102, 205, 170, 0.4);
+      }
+
+      &.status-approved {
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.4);
+      }
+
+      &.status-rejected {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.4);
+      }
+
+      .request-date {
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.company-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.company-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+
+  .company-logo {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 24px;
+      color: white;
+    }
+  }
+
+  .company-info {
+    flex: 1;
+
+    .company-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      color: var(--ion-color-dark);
+    }
+
+    .company-duration {
+      font-size: 13px;
+      color: var(--ion-color-medium);
+      margin: 0;
+    }
+  }
+}
+
+.timeline {
+  position: relative;
+  padding-left: 20px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  }
+}
+
+.role {
+  position: relative;
+  margin-bottom: 16px;
+
+  &.last {
+    margin-bottom: 0;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -17px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--ion-color-primary);
+    box-shadow: 0 0 0 2px var(--ion-color-light);
+  }
+
+  .role-details {
+    padding-left: 4px;
+
+    .role-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      color: var(--ion-color-dark);
+    }
+
+    .role-dates {
+      font-size: 13px;
+      color: var(--ion-color-medium);
+      margin: 0 0 4px 0;
+
+      .role-duration {
+        font-weight: 500;
+      }
+    }
+
+    .role-location {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 12px;
+      }
+    }
+
+    .role-description {
+      font-size: 13px;
+      color: var(--ion-color-dark);
+      margin: 8px 0 0 0;
+      line-height: 1.4;
+
+      .read-more {
+        color: var(--ion-color-primary);
+        font-weight: 500;
+        cursor: pointer;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--ion-color-medium);
+
+  p {
+    font-size: 14px;
+    margin: 0 0 16px 0;
+  }
+
+  ion-button {
+    margin-top: 8px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .company-header .company-logo {
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+  }
+
+  .timeline::before {
+    background: linear-gradient(180deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+  }
+
+  .role .timeline-dot {
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 0 0 2px var(--ion-color-dark);
+  }
+
+  .company-name,
+  .role-title {
+    color: var(--ion-color-light);
+  }
+}

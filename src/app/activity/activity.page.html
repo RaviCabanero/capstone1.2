@@ -1,0 +1,54 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Activity</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="activity-container" *ngIf="userPosts$ | async as posts">
+    <div *ngIf="posts.length > 0; else noPosts">
+      <ion-card *ngFor="let post of posts" class="post-card">
+        <!-- Post Header: User Info -->
+        <div class="post-header">
+          <ion-avatar class="user-avatar">
+            <img *ngIf="post.userAvatar" [src]="post.userAvatar" alt="User avatar" />
+            <div *ngIf="!post.userAvatar" class="placeholder-avatar">
+              <ion-icon name="person-circle"></ion-icon>
+            </div>
+          </ion-avatar>
+          <div class="user-info">
+            <h3 class="user-name">{{ post.userName }}</h3>
+            <p class="post-timestamp">{{ (post.timestamp | date:'short') || 'Just now' }}</p>
+          </div>
+          <ion-button fill="clear" (click)="openPostMenu(post)" class="menu-button">
+            <ion-icon name="ellipsis-vertical"></ion-icon>
+          </ion-button>
+        </div>
+
+        <!-- Post Content -->
+        <ion-card-content>
+          <p class="post-text">{{ post.text }}</p>
+          <img *ngIf="post.image" [src]="post.image" class="post-image" alt="Post image" />
+        </ion-card-content>
+
+        <!-- Post Actions -->
+        <div class="post-footer-icons">
+          <ion-button fill="clear" size="small">
+            <ion-icon name="share-social"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="small">
+            <ion-icon name="chatbubble-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card>
+    </div>
+    <ng-template #noPosts>
+      <div class="empty-state">
+        <p>No posts yet</p>
+      </div>
+    </ng-template>
+  </div>
+</ion-content>

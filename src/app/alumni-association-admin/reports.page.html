@@ -1,0 +1,109 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reports & Analytics</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="downloadReport()" [disabled]="loading">
+        <ion-icon name="download-outline"></ion-icon>
+        Export
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-header">
+    <h2>Alumni Statistics</h2>
+    <p>View and analyze alumni network data</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent" color="danger"></ion-spinner>
+    <p>Generating reports...</p>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Summary Cards -->
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-icon">
+                <ion-icon name="people-outline" color="danger"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ analytics.totalAlumni }}</div>
+                <div class="stat-label">Total Alumni</div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-icon">
+                <ion-icon name="hourglass-outline" color="warning"></ion-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ analytics.pendingApprovals }}</div>
+                <div class="stat-label">Pending Approvals</div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Department Breakdown -->
+    <ion-card class="breakdown-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="stats-chart-outline"></ion-icon>
+          Department Breakdown
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div *ngIf="analytics.departmentBreakdown.length === 0" class="empty-message">
+          No department data available
+        </div>
+        <ion-list *ngIf="analytics.departmentBreakdown.length > 0">
+          <ion-item *ngFor="let dept of analytics.departmentBreakdown">
+            <ion-label>
+              <h3>{{ dept.department }}</h3>
+              <div class="progress-bar">
+                <div 
+                  class="progress-fill" 
+                  [style.width.%]="(dept.count / analytics.totalAlumni) * 100">
+                </div>
+              </div>
+            </ion-label>
+            <ion-chip slot="end" color="danger">
+              <ion-label>{{ dept.count }}</ion-label>
+            </ion-chip>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Export Section -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document-text-outline"></ion-icon>
+          Export Report
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Download a CSV report containing all analytics data, including department statistics and alumni counts.</p>
+        <ion-button expand="block" color="danger" (click)="downloadReport()">
+          <ion-icon slot="start" name="download-outline"></ion-icon>
+          Download CSV Report
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

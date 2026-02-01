@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Edit Contact Info</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="save()" [disabled]="contactForm.invalid">
+        Save
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="contactForm" class="contact-form-container">
+    <!-- Copy Profile URL Section -->
+    <div class="profile-url-section">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Share Your Profile</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="url-display">
+            <p class="url-text">{{ profileUrl }}</p>
+            <ion-button fill="clear" size="small" (click)="copyProfileUrl()">
+              <ion-icon name="copy"></ion-icon>
+              Copy Link
+            </ion-button>
+          </div>
+          <p class="helper-text">Share this URL with your network to let them view your profile</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Email -->
+    <ion-item lines="full">
+      <ion-label position="floating">
+        Email Address
+        <span class="required">*</span>
+      </ion-label>
+      <ion-input
+        formControlName="email"
+        type="email"
+        placeholder="your.email@example.com"
+      ></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="submitted && email?.invalid">
+      <p class="error-text" *ngIf="email?.hasError('required')">
+        <ion-icon name="alert-circle"></ion-icon>
+        Email is required
+      </p>
+      <p class="error-text" *ngIf="email?.hasError('email')">
+        <ion-icon name="alert-circle"></ion-icon>
+        Please enter a valid email address
+      </p>
+    </ion-text>
+
+    <!-- Phone -->
+    <ion-item lines="full">
+      <ion-label position="floating">Phone Number (Optional)</ion-label>
+      <ion-input
+        formControlName="phone"
+        type="tel"
+        placeholder="+1 (555) 123-4567"
+      ></ion-input>
+    </ion-item>
+
+    <!-- Website -->
+    <ion-item lines="full">
+      <ion-label position="floating">Website (Optional)</ion-label>
+      <ion-input
+        formControlName="website"
+        type="url"
+        placeholder="https://yourwebsite.com"
+      ></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="submitted && website?.invalid">
+      <p class="error-text" *ngIf="website?.hasError('invalidUrl')">
+        <ion-icon name="alert-circle"></ion-icon>
+        Please enter a valid website URL (e.g., https://example.com)
+      </p>
+    </ion-text>
+    <ion-text color="medium">
+      <p class="helper-text">Include https:// or http:// in your URL</p>
+    </ion-text>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <ion-button expand="block" fill="outline" (click)="cancel()">
+        Cancel
+      </ion-button>
+      <ion-button expand="block" (click)="save()" [disabled]="contactForm.invalid">
+        Save Contact Info
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

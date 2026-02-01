@@ -1,0 +1,132 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Create Global Events</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleForm()">
+        <ion-icon [name]="showForm ? 'close' : 'add'"></ion-icon>
+        {{ showForm ? 'Cancel' : 'New' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-header">
+    <h2>Global Alumni Events</h2>
+    <p>Create events for the entire alumni network</p>
+  </div>
+
+  <!-- Create Event Form -->
+  <ion-card *ngIf="showForm" class="create-form">
+    <ion-card-header>
+      <ion-card-title>New Global Event</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Event Title *</ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.title" 
+          placeholder="e.g., Alumni Homecoming 2026"
+          type="text">
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Description *</ion-label>
+        <ion-textarea 
+          [(ngModel)]="newEvent.description" 
+          placeholder="Describe the event details"
+          rows="4"
+          auto-grow="true">
+        </ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Date & Time *</ion-label>
+        <ion-datetime-button datetime="event-datetime"></ion-datetime-button>
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime 
+              id="event-datetime"
+              [(ngModel)]="newEvent.date"
+              presentation="date-time">
+            </ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Location *</ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.location" 
+          placeholder="e.g., University Auditorium"
+          type="text">
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Capacity (optional)</ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.capacity" 
+          placeholder="Max attendees"
+          type="number">
+        </ion-input>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        color="danger" 
+        (click)="createEvent()"
+        [disabled]="!newEvent.title.trim() || !newEvent.description.trim() || !newEvent.date || !newEvent.location.trim()">
+        <ion-icon slot="start" name="calendar-outline"></ion-icon>
+        Create Event
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent" color="danger"></ion-spinner>
+    <p>Loading events...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && events.length === 0" class="empty-state">
+    <ion-icon name="calendar-outline" color="medium"></ion-icon>
+    <h3>No Events Yet</h3>
+    <p>Create your first global event for the alumni network</p>
+  </div>
+
+  <!-- Events List -->
+  <div *ngIf="!loading && events.length > 0">
+    <ion-card *ngFor="let event of events" class="event-card">
+      <ion-card-header>
+        <ion-card-title>{{ event.title }}</ion-card-title>
+        <ion-card-subtitle>
+          <div class="event-meta">
+            <span>
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ event.date | date:'medium' }}
+            </span>
+            <span>
+              <ion-icon name="location-outline"></ion-icon>
+              {{ event.location }}
+            </span>
+          </div>
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="event-description">{{ event.description }}</p>
+        <div class="event-stats" *ngIf="event.capacity">
+          <ion-chip color="danger">
+            <ion-icon name="people-outline"></ion-icon>
+            <ion-label>{{ event.attendees?.length || 0 }} / {{ event.capacity }}</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
