@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ModalController } from '@ionic/angular';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, docData, updateDoc, collection, addDoc, query, where, orderBy, collectionData } from '@angular/fire/firestore';
-import { Observable, of, map } from 'rxjs';
+import { Observable, of, map, catchError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { PostModalComponent } from '../post-modal/post-modal.component';
 import { ExperienceModalComponent } from '../experience-modal/experience-modal.component';
@@ -24,11 +24,17 @@ export class ProfilePage implements OnInit {
   user$ = this.authService.user$;
   userProfile$: Observable<any> = of({});
   userPosts$: Observable<any[]> = of([]);
+  idRequest$: Observable<any> = of(null);
   avatarPreview: string | null = null;
   summaryDraft = '';
   editingSummary = false;
   groupedExperiences: any[] = [];
   profileUrl = '';
+  
+  // Track if viewing own profile or other user's profile
+  viewedUserId: string | null = null;
+  currentUserId: string | null = null;
+  isOwnProfile: boolean = true;
 
   private monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -40,25 +46,51 @@ export class ProfilePage implements OnInit {
     private firestore: Firestore,
     private authService: AuthService,
     private router: Router,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit() {
     const uid = this.auth.currentUser?.uid;
-    if (uid) {
-      this.profileUrl = `${window.location.origin}/profile/${uid}`;
-      this.userProfile$ = docData(doc(this.firestore, `users/${uid}`)).pipe(
-        map((profile: any) => {
-          if (profile?.experiences) {
-            this.groupedExperiences = this.groupAndSortExperiences(profile.experiences);
-          }
-          return profile;
-        })
-      ) as Observable<any>;
-      this.loadUserPosts(uid);
-    } else {
-      this.userProfile$ = of({});
-    }
+    this.currentUserId = uid || null;
+
+    // Check if viewing another user's profile from route params
+    this.activatedRoute.params.subscribe(params => {
+      if (params['id'] && params['id'] !== uid) {
+        // Viewing another user's profile
+        this.viewedUserId = params['id'];
+        this.isOwnProfile = false;
+        this.loadProfileData(params['id']);
+      } else {
+        // Viewing own profile
+        if (uid) {
+          this.viewedUserId = uid;
+          this.isOwnProfile = true;
+          this.loadProfileData(uid);
+        } else {
+          this.userProfile$ = of({});
+          this.idRequest$ = of(null);
+        }
+      }
+    });
+  }
+
+  loadProfileData(uid: string) {
+    this.profileUrl = `${window.location.origin}/profile/${uid}`;
+    this.userProfile$ = docData(doc(this.firestore, `users/${uid}`)).pipe(
+      map((profile: any) => {
+        if (profile?.experiences) {
+          this.groupedExperiences = this.groupAndSortExperiences(profile.experiences);
+        }
+        return profile;
+      })
+    ) as Observable<any>;
+    
+    this.idRequest$ = docData(doc(this.firestore, `idRequests/${uid}`)).pipe(
+      catchError(() => of(null))
+    ) as Observable<any>;
+    
+    this.loadUserPosts(uid);
   }
 
   loadUserPosts(uid: string) {
@@ -95,7 +127,12 @@ export class ProfilePage implements OnInit {
   }
 
   goToProfile() {
-    this.router.navigate(['/profile']);
+    // Navigate to own profile
+    if (this.currentUserId) {
+      this.router.navigate(['/profile', this.currentUserId]);
+    } else {
+      this.router.navigate(['/profile']);
+    }
   }
 
   onAvatarSelected(event: Event) {
@@ -122,8 +159,8 @@ export class ProfilePage implements OnInit {
   }
 
   async saveSummary() {
-    const uid = this.auth.currentUser?.uid;
-    if (!uid) return;
+    const uid = this.currentUserId;
+    if (!uid || !this.isOwnProfile) return;
     await updateDoc(doc(this.firestore, `users/${uid}`), {
       summary: this.summaryDraft,
       updatedAt: new Date().toISOString(),

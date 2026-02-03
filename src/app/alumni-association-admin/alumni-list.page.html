@@ -38,34 +38,49 @@
   <!-- Alumni List (Table) -->
   <div *ngIf="!loading && filteredAlumni.length > 0" class="table-wrapper">
     <div class="table-header">
-      <div class="col name">Name</div>
+      <div class="col name">First Name</div>
+      <div class="col name">Last Name</div>
       <div class="col role">Role</div>
-      <div class="col dept">Dept</div>
+      <div class="col dept">Department</div>
+      <div class="col course">Course</div>
       <div class="col status">Status</div>
-      <div class="col batch">Batch/Year</div>
+      <div class="col year">Year Graduated</div>
       <div class="col email">Email</div>
+      <div class="col birthdate">Birthdate</div>
+      <div class="col mobile">Mobile</div>
+      <div class="col province">Province</div>
+      <div class="col action">Assign Role</div>
     </div>
 
     <div class="table-row" *ngFor="let alumni of filteredAlumni">
-      <div class="col name">
-        <div class="name-cell">
-          <ion-icon name="person-circle-outline"></ion-icon>
-          <span>{{ getDisplayName(alumni) }}</span>
-        </div>
-      </div>
+      <div class="col name">{{ alumni.firstName || 'N/A' }}</div>
+      <div class="col name">{{ alumni.lastName || 'N/A' }}</div>
       <div class="col role">
         <ion-chip color="primary" class="role-chip">
           <ion-label>{{ formatRole(alumni.role) }}</ion-label>
         </ion-chip>
       </div>
       <div class="col dept">{{ getDepartment(alumni) }}</div>
+      <div class="col course">{{ alumni.course || 'N/A' }}</div>
       <div class="col status">
         <ion-chip [color]="alumni.status === 'approved' ? 'success' : (alumni.status === 'pending' ? 'warning' : 'medium')">
           <ion-label>{{ alumni.status || 'unknown' }}</ion-label>
         </ion-chip>
       </div>
-      <div class="col batch">{{ getBatchYear(alumni) }}</div>
+      <div class="col year">{{ alumni.yearGraduated || 'N/A' }}</div>
       <div class="col email">{{ maskEmail(alumni.email) }}</div>
+      <div class="col birthdate">{{ formatDate(alumni.birthdate) }}</div>
+      <div class="col mobile">{{ alumni.phone || 'N/A' }}</div>
+      <div class="col province">{{ alumni.province || 'N/A' }}</div>
+      <div class="col action">
+        <ion-select
+          interface="popover"
+          [value]="alumni.role || 'alumni'"
+          (ionChange)="assignRole(alumni, $event.detail.value)">
+          <ion-select-option value="alumni">Alumni</ion-select-option>
+          <ion-select-option value="dept_head">Dept Head</ion-select-option>
+        </ion-select>
+      </div>
     </div>
   </div>
 </ion-content>

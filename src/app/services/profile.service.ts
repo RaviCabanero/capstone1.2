@@ -4,6 +4,8 @@ import { Firestore, doc, setDoc, updateDoc } from '@angular/fire/firestore';
 export interface UserProfile {
   firstName?: string;
   lastName?: string;
+  birthdate?: string;
+  sex?: string;
   email?: string;
   address?: string;
   province?: string;

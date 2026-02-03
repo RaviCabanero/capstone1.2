@@ -18,6 +18,7 @@ import { AnnouncementsPage } from './alumni-association-admin/announcements.page
 import { CreateEventsPage } from './alumni-association-admin/create-events.page';
 import { AlumniListPage } from './alumni-association-admin/alumni-list.page';
 import { ReportsPage } from './alumni-association-admin/reports.page';
+import { AlumniIdApprovalPage } from './alumni-association-admin/alumni-id-approval.page';
 
 const routes: Routes = [
   {
@@ -42,6 +43,10 @@ const routes: Routes = [
   },
   {
     path: 'profile',
+    loadChildren: () => import('./profile/profile.module').then(m => m.ProfilePageModule)
+  },
+  {
+    path: 'profile/:id',
     loadChildren: () => import('./profile/profile.module').then(m => m.ProfilePageModule)
   },
   {
@@ -124,6 +129,11 @@ const routes: Routes = [
   {
     path: 'alumni-admin/reports',
     component: ReportsPage,
+    canActivate: [alumniAssociationAdminGuard]
+  },
+  {
+    path: 'alumni-admin/alumni-id-approval',
+    component: AlumniIdApprovalPage,
     canActivate: [alumniAssociationAdminGuard]
   },
   {

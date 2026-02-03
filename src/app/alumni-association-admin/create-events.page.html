@@ -22,7 +22,7 @@
   <!-- Create Event Form -->
   <ion-card *ngIf="showForm" class="create-form">
     <ion-card-header>
-      <ion-card-title>New Global Event</ion-card-title>
+      <ion-card-title>{{ editingEventId ? 'Edit Event' : 'New Global Event' }}</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ion-item>
@@ -47,12 +47,14 @@
       <ion-item>
         <ion-label position="stacked">Date & Time *</ion-label>
         <ion-datetime-button datetime="event-datetime"></ion-datetime-button>
-        <ion-modal [keepContentsMounted]="true">
+        <ion-modal trigger="event-datetime" [keepContentsMounted]="true">
           <ng-template>
-            <ion-datetime 
+            <ion-datetime
               id="event-datetime"
               [(ngModel)]="newEvent.date"
-              presentation="date-time">
+              presentation="date-time"
+              hour-cycle="h12"
+              show-default-buttons="true">
             </ion-datetime>
           </ng-template>
         </ion-modal>
@@ -82,7 +84,7 @@
         (click)="createEvent()"
         [disabled]="!newEvent.title.trim() || !newEvent.description.trim() || !newEvent.date || !newEvent.location.trim()">
         <ion-icon slot="start" name="calendar-outline"></ion-icon>
-        Create Event
+        {{ editingEventId ? 'Update Event' : 'Create Event' }}
       </ion-button>
     </ion-card-content>
   </ion-card>
@@ -104,7 +106,17 @@
   <div *ngIf="!loading && events.length > 0">
     <ion-card *ngFor="let event of events" class="event-card">
       <ion-card-header>
-        <ion-card-title>{{ event.title }}</ion-card-title>
+        <div class="event-header">
+          <ion-card-title>{{ event.title }}</ion-card-title>
+          <div class="event-actions">
+            <ion-button fill="clear" size="small" (click)="editEvent(event)">
+              <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(event)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
         <ion-card-subtitle>
           <div class="event-meta">
             <span>

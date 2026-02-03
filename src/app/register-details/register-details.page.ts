@@ -25,6 +25,8 @@ export class RegisterDetailsPage implements OnInit {
   detailsForm = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
+    birthdate: ['', [Validators.required]],
+    sex: ['', [Validators.required]],
     address: ['', [Validators.required, Validators.minLength(5)]],
     province: ['', [Validators.required]],
     schoolDepartment: ['', [Validators.required]],
@@ -84,6 +86,8 @@ export class RegisterDetailsPage implements OnInit {
       await this.profileService.updateProfile(uid, {
         firstName: this.firstName?.value ?? '',
         lastName: this.lastName?.value ?? '',
+        birthdate: this.birthdate?.value ?? '',
+        sex: this.sex?.value ?? '',
         address: this.address?.value ?? '',
         province: this.province?.value ?? '',
         schoolDepartment: this.schoolDepartment?.value ?? '',
@@ -106,6 +110,8 @@ export class RegisterDetailsPage implements OnInit {
 
   get firstName() { return this.detailsForm.get('firstName'); }
   get lastName() { return this.detailsForm.get('lastName'); }
+  get birthdate() { return this.detailsForm.get('birthdate'); }
+  get sex() { return this.detailsForm.get('sex'); }
   get address() { return this.detailsForm.get('address'); }
   get province() { return this.detailsForm.get('province'); }
   get schoolDepartment() { return this.detailsForm.get('schoolDepartment'); }

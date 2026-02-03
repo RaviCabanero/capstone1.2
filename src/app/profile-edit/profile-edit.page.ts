@@ -22,6 +22,8 @@ export class ProfileEditPage implements OnInit {
   editForm = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
+    birthdate: ['', [Validators.required]],
+    sex: ['', [Validators.required]],
     address: ['', [Validators.required, Validators.minLength(5)]],
     province: ['', [Validators.required]],
     schoolDepartment: ['', [Validators.required]],
@@ -50,6 +52,8 @@ export class ProfileEditPage implements OnInit {
           this.editForm.patchValue({
             firstName: profile.firstName,
             lastName: profile.lastName,
+            birthdate: profile.birthdate,
+            sex: profile.sex,
             address: profile.address,
             province: profile.province,
             schoolDepartment: profile.schoolDepartment,
@@ -75,6 +79,8 @@ export class ProfileEditPage implements OnInit {
       await this.profileService.updateProfile(uid, {
         firstName: this.firstName?.value ?? '',
         lastName: this.lastName?.value ?? '',
+        birthdate: this.birthdate?.value ?? '',
+        sex: this.sex?.value ?? '',
         address: this.address?.value ?? '',
         province: this.province?.value ?? '',
         schoolDepartment: this.schoolDepartment?.value ?? '',
@@ -92,6 +98,8 @@ export class ProfileEditPage implements OnInit {
 
   get firstName() { return this.editForm.get('firstName'); }
   get lastName() { return this.editForm.get('lastName'); }
+  get birthdate() { return this.editForm.get('birthdate'); }
+  get sex() { return this.editForm.get('sex'); }
   get address() { return this.editForm.get('address'); }
   get province() { return this.editForm.get('province'); }
   get schoolDepartment() { return this.editForm.get('schoolDepartment'); }

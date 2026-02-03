@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, doc, docData, updateDoc } from '@angular/fire/firestore';
+import { Firestore, doc, docData, updateDoc, getDoc, setDoc } from '@angular/fire/firestore';
+import { DepartmentService, Department } from 'src/app/services/department.service';
+import { CourseService, Course } from 'src/app/services/course.service';
+import { Observable, combineLatest } from 'rxjs';
+import { map, shareReplay, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-alumni-id-request',
@@ -17,6 +21,9 @@ export class AlumniIdRequestPage implements OnInit {
   alumniForm!: FormGroup;
   submitted = false;
   imagePreview: string | null = null;
+  departments$: Observable<Department[]>;
+  courses$: Observable<Course[]>;
+  filteredCourses$!: Observable<Course[]>;
 
   educationLevels = [
     'Senior High School',
@@ -26,15 +33,33 @@ export class AlumniIdRequestPage implements OnInit {
     'Certificate Program',
   ];
 
+  yearOptions: number[] = [];
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private auth: Auth,
-    private firestore: Firestore
-  ) {}
+    private firestore: Firestore,
+    private toastController: ToastController,
+    private deptService: DepartmentService,
+    private courseService: CourseService
+  ) {
+    this.departments$ = this.deptService.getDepartments();
+    this.courses$ = this.courseService.getCourses().pipe(shareReplay(1));
+  }
 
   ngOnInit() {
     this.initializeForm();
+    this.setupCourseFiltering();
+    this.generateYearOptions();
+  }
+
+  private generateYearOptions() {
+    const currentYear = new Date().getFullYear();
+    const startYear = 1950;
+    for (let year = currentYear; year >= startYear; year--) {
+      this.yearOptions.push(year);
+    }
   }
 
   /**
@@ -50,11 +75,27 @@ export class AlumniIdRequestPage implements OnInit {
       suffix: [''],
       maidenName: [''],
       educationLevel: ['', [Validators.required]],
+      schoolDepartment: ['', [Validators.required]],
       degreeProgram: ['', [Validators.required]],
       yearGraduated: ['', [Validators.required]],
       permanentAddress: ['', [Validators.required]],
-      idPhoto: ['', [Validators.required]],
     });
+  }
+
+  private setupCourseFiltering() {
+    const deptControl = this.alumniForm.get('schoolDepartment');
+    this.filteredCourses$ = combineLatest([
+      this.courses$,
+      deptControl!.valueChanges.pipe(startWith(deptControl!.value))
+    ]).pipe(
+      map(([courses, dept]) => {
+        // Reset course selection when department changes
+        if (dept) {
+          this.alumniForm.patchValue({ degreeProgram: '' }, { emitEvent: false });
+        }
+        return dept ? courses.filter(c => c.DeptName === dept) : [];
+      })
+    );
   }
 
   /**
@@ -74,6 +115,10 @@ export class AlumniIdRequestPage implements OnInit {
 
   get educationLevel() {
     return this.alumniForm.get('educationLevel');
+  }
+
+  get schoolDepartment() {
+    return this.alumniForm.get('schoolDepartment');
   }
 
   get degreeProgram() {
@@ -144,14 +189,23 @@ export class AlumniIdRequestPage implements OnInit {
     }
 
     try {
+      // Get user profile for additional info
+      const userDoc = await getDoc(doc(this.firestore, `users/${uid}`));
+      const userData = userDoc.data();
+
       const alumniData = {
         ...this.alumniForm.value,
         userId: uid,
         requestedAt: new Date().toISOString(),
         status: 'pending',
+        course: userData?.['course'] || '',
+        department: userData?.['department'] || '',
       };
 
-      // Save to user profile
+      // Save to idRequests collection for admin queries
+      await setDoc(doc(this.firestore, `idRequests/${uid}`), alumniData);
+
+      // Save to user profile for easy reference
       await updateDoc(doc(this.firestore, `users/${uid}`), {
         alumniIdRequest: alumniData,
         updatedAt: new Date().toISOString(),

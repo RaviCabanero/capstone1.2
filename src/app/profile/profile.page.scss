@@ -836,6 +836,154 @@ ion-item h3 {
   }
 }
 
+.digital-id-section {
+  margin: 16px 0 24px;
+}
+
+.digital-id-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(237, 248, 242, 0.9), rgba(214, 240, 226, 0.9)),
+    url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1600&q=60');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.digital-id-card.pending {
+  min-height: 190px;
+}
+
+.digital-id-glass {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+  padding: 16px;
+  height: 100%;
+}
+
+.digital-id-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.digital-id-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.digital-id-title {
+  text-align: center;
+}
+
+.digital-id-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #0f5132;
+  text-transform: uppercase;
+}
+
+.digital-id-subtitle {
+  font-size: 11px;
+  color: #2f6b4c;
+}
+
+.digital-id-body {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.digital-id-photo {
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(15, 81, 50, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.digital-id-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.digital-id-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.digital-id-fullname {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0a3d26;
+}
+
+.digital-id-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #1c5137;
+}
+
+.digital-id-row .label {
+  font-weight: 600;
+  color: #2b5d44;
+}
+
+.digital-id-row .value {
+  font-weight: 500;
+}
+
+.digital-id-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #2b5d44;
+}
+
+.digital-id-status {
+  font-weight: 700;
+  color: #0f5132;
+  letter-spacing: 1px;
+}
+
+.digital-id-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  min-height: 160px;
+  color: #2b5d44;
+}
+
+.digital-id-empty ion-icon {
+  font-size: 32px;
+  color: #2b5d44;
+}
+
+.digital-id-empty .title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.digital-id-empty .subtitle {
+  font-size: 13px;
+}
+
 // Dark mode support
 @media (prefers-color-scheme: dark) {
   .company-header .company-logo {

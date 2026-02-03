@@ -29,6 +29,21 @@
           <ion-note color="danger" *ngIf="lastName?.touched && lastName?.invalid">Last name is required.</ion-note>
 
           <ion-item lines="full">
+            <ion-label position="floating">Birthdate</ion-label>
+            <ion-input type="date" formControlName="birthdate" required></ion-input>
+          </ion-item>
+          <ion-note color="danger" *ngIf="birthdate?.touched && birthdate?.invalid">Birthdate is required.</ion-note>
+
+          <ion-item lines="full">
+            <ion-label position="floating">Sex</ion-label>
+            <ion-select formControlName="sex" placeholder="Select sex" required>
+              <ion-select-option value="Male">Male</ion-select-option>
+              <ion-select-option value="Female">Female</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note color="danger" *ngIf="sex?.touched && sex?.invalid">Sex is required.</ion-note>
+
+          <ion-item lines="full">
             <ion-label position="floating">Complete address</ion-label>
             <ion-input type="text" formControlName="address" autocomplete="street-address" required></ion-input>
           </ion-item>

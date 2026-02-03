@@ -53,6 +53,10 @@ export class AlumniAssociationAdminDashboardPage implements OnInit {
     this.router.navigate(['/alumni-admin/reports']);
   }
 
+  navigateToIdApprovals() {
+    this.router.navigate(['/alumni-admin/alumni-id-approval']);
+  }
+
   logout() {
     this.router.navigate(['/login']);
   }

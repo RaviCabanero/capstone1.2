@@ -44,14 +44,19 @@ export class AlumniListPage implements OnInit {
     }
 
     this.filteredAlumni = this.allAlumni.filter(alumni => 
+      alumni.firstName?.toLowerCase().includes(term) ||
+      alumni.lastName?.toLowerCase().includes(term) ||
       alumni.displayName?.toLowerCase().includes(term) ||
       alumni.email?.toLowerCase().includes(term) ||
+      alumni.phone?.toLowerCase().includes(term) ||
       alumni.department?.toLowerCase().includes(term) ||
       alumni.schoolDepartment?.toLowerCase().includes(term) ||
+      alumni.course?.toLowerCase().includes(term) ||
+      alumni.province?.toLowerCase().includes(term) ||
       alumni.studentId?.toLowerCase().includes(term) ||
       alumni.role?.toLowerCase().includes(term) ||
       alumni.status?.toLowerCase().includes(term) ||
-      String(alumni.graduationYear || alumni.batchYear || '').toLowerCase().includes(term)
+      String(alumni.yearGraduated || '').toLowerCase().includes(term)
     );
   }
 
@@ -86,5 +91,28 @@ export class AlumniListPage implements OnInit {
   formatRole(role?: string): string {
     if (!role) return 'user';
     return role.replace(/_/g, ' ');
+  }
+
+  /**
+   * Format date for display (MM/DD/YYYY)
+   */
+  formatDate(date?: string): string {
+    if (!date) return 'N/A';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    } catch (error) {
+      return date;
+    }
+  }
+
+  async assignRole(alumni: any, newRole: 'alumni' | 'dept_head') {
+    if (!alumni?.uid || alumni?.role === newRole) return;
+    try {
+      await this.adminService.changeUserRole(alumni.uid, newRole);
+      alumni.role = newRole;
+    } catch (error) {
+      console.error('Failed to assign role:', error);
+    }
   }
 }

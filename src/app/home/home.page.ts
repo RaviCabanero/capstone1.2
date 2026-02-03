@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, collection, query, orderBy, collectionData, doc, docData, deleteDoc, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, query, where, orderBy, collectionData, doc, docData, deleteDoc, addDoc, updateDoc, arrayUnion, arrayRemove } from '@angular/fire/firestore';
 import { Observable, of, map } from 'rxjs';
-import { ModalController, ActionSheetController } from '@ionic/angular';
+import { ModalController, ActionSheetController, AlertController } from '@ionic/angular';
 import { PostModalComponent } from '../post-modal/post-modal.component';
 
 @Component({
@@ -16,17 +16,30 @@ export class HomePage implements OnInit {
   allPosts$: Observable<any[]> = of([]);
   userProfile: any;
 
+  // Events
+  events: any[] = [];
+  loadingEvents = true;
+
+  // Search Alumni
+  searchQuery: string = '';
+  isSearching: boolean = false;
+  searchResults: any[] = [];
+  allAlumni: any[] = [];
+
   constructor(
     private router: Router,
     private auth: Auth,
     private firestore: Firestore,
     private modalCtrl: ModalController,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {
     this.loadAllPosts();
     this.loadCurrentUserProfile();
+    this.loadAllAlumniForSearch();
+    this.loadEvents();
   }
 
   /**
@@ -34,6 +47,78 @@ export class HomePage implements OnInit {
    */
   goToAlumniNetwork() {
     this.router.navigate(['/alumni-network']);
+  }
+
+  /**
+   * Load all alumni for search functionality
+   */
+  loadAllAlumniForSearch() {
+    const currentUserId = this.auth.currentUser?.uid;
+    const alumniQuery = query(collection(this.firestore, 'users'));
+
+    collectionData(alumniQuery, { idField: 'id' }).subscribe(
+      (users: any[]) => {
+        this.allAlumni = users.filter(user => user.id !== currentUserId && user.role === 'alumni');
+        console.log('✅ Alumni loaded for search:', this.allAlumni.length);
+      },
+      (error) => {
+        console.error('❌ Error loading alumni:', error.message);
+      }
+    );
+  }
+
+  /**
+   * Search alumni by name, course, year, department
+   */
+  searchAlumni(event: any) {
+    this.searchQuery = event.target.value.toLowerCase().trim();
+
+    if (this.searchQuery.length > 0) {
+      this.isSearching = true;
+
+      this.searchResults = this.allAlumni.filter(user => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`;
+        const email = user.email?.toLowerCase() || '';
+        const course = user.course?.toLowerCase() || '';
+        const degreeProgram = user.degreeProgram?.toLowerCase() || '';
+        const department = (user.schoolDepartment || user.department || '').toLowerCase();
+        const yearGraduated = user.yearGraduated?.toString().toLowerCase() || '';
+
+        return (
+          fullName.includes(this.searchQuery) ||
+          firstName.includes(this.searchQuery) ||
+          lastName.includes(this.searchQuery) ||
+          email.includes(this.searchQuery) ||
+          course.includes(this.searchQuery) ||
+          degreeProgram.includes(this.searchQuery) ||
+          department.includes(this.searchQuery) ||
+          yearGraduated.includes(this.searchQuery)
+        );
+      });
+
+      console.log(`Search results: ${this.searchResults.length} matches`);
+    } else {
+      this.isSearching = false;
+      this.searchResults = [];
+    }
+  }
+
+  /**
+   * Clear search
+   */
+  clearSearch() {
+    this.searchQuery = '';
+    this.isSearching = false;
+    this.searchResults = [];
+  }
+
+  /**
+   * Navigate to alumni profile
+   */
+  goToAlumniProfile(alumniId: string) {
+    this.router.navigate(['/profile', alumniId]);
   }
 
   /**
@@ -65,6 +150,70 @@ export class HomePage implements OnInit {
         }))
       )
     ) as Observable<any[]>;
+  }
+
+  /**
+   * Load global events for home page
+   */
+  loadEvents() {
+    this.loadingEvents = true;
+    const eventsQuery = query(
+      collection(this.firestore, 'events'),
+      where('isGlobal', '==', true),
+      orderBy('date', 'desc')
+    );
+
+    collectionData(eventsQuery, { idField: 'id' }).subscribe(
+      (events: any[]) => {
+        this.events = events;
+        this.loadingEvents = false;
+      },
+      (error) => {
+        console.error('Error loading events:', error);
+        this.loadingEvents = false;
+      }
+    );
+  }
+
+  hasUserRegistered(event: any): boolean {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return false;
+    return (event.attendees || []).includes(uid);
+  }
+
+  isEventFull(event: any): boolean {
+    if (!event.capacity) return false;
+    return (event.attendees?.length || 0) >= event.capacity;
+  }
+
+  async toggleEventRegistration(event: any) {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    const alreadyRegistered = this.hasUserRegistered(event);
+    if (!alreadyRegistered && this.isEventFull(event)) {
+      await this.showAlert('Event Full', 'This event has reached its maximum capacity.');
+      return;
+    }
+
+    try {
+      await updateDoc(doc(this.firestore, `events/${event.id}`), {
+        attendees: alreadyRegistered ? arrayRemove(uid) : arrayUnion(uid),
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Failed to update registration', error);
+      await this.showAlert('Error', 'Unable to update event registration. Please try again.');
+    }
+  }
+
+  private async showAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 
   /**
@@ -221,6 +370,134 @@ export class HomePage implements OnInit {
       } catch (error) {
         console.error('Failed to copy', error);
       }
+    }
+  }
+
+  /**
+   * Like/React to a post
+   */
+  async likePost(post: any) {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      // Toggle like
+      const likes = post.likes || 0;
+      const likedBy = post.likedBy || [];
+      const userIndex = likedBy.indexOf(uid);
+      
+      let updatedLikes = likes;
+      let updatedLikedBy = likedBy;
+
+      if (userIndex > -1) {
+        // Unlike
+        updatedLikedBy.splice(userIndex, 1);
+        updatedLikes = Math.max(0, likes - 1);
+      } else {
+        // Like
+        updatedLikedBy.push(uid);
+        updatedLikes = likes + 1;
+      }
+
+      await updateDoc(doc(this.firestore, `posts/${post.id}`), {
+        likes: updatedLikes,
+        likedBy: updatedLikedBy,
+      });
+
+      console.log('Post like updated:', updatedLikes);
+    } catch (error) {
+      console.error('Failed to like post', error);
+    }
+  }
+
+  /**
+   * Check if user has liked a post
+   */
+  hasUserLiked(post: any): boolean {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return false;
+    return (post.likedBy || []).includes(uid);
+  }
+
+  /**
+   * Open comment dialog
+   */
+  async openCommentDialog(post: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Add Comment',
+      message: 'Share your thoughts on this post',
+      inputs: [
+        {
+          name: 'comment',
+          type: 'textarea',
+          placeholder: 'Write a comment...',
+          attributes: {
+            rows: 4,
+            maxlength: 500,
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Post',
+          handler: (data) => {
+            if (data.comment && data.comment.trim().length > 0) {
+              this.addComment(post, data.comment);
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Add comment to post
+   */
+  async addComment(post: any, commentText: string) {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      // Get current user profile for comment display
+      const userDoc = await new Promise<any>((resolve, reject) => {
+        const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
+          data => {
+            unsubscribe.unsubscribe();
+            resolve(data);
+          },
+          err => {
+            unsubscribe.unsubscribe();
+            reject(err);
+          }
+        );
+      });
+
+      const newComment = {
+        id: new Date().getTime().toString(),
+        userId: uid,
+        userName: this.auth.currentUser?.displayName || userDoc?.firstName + ' ' + userDoc?.lastName || 'Anonymous',
+        userAvatar: userDoc?.photoDataUrl || '',
+        text: commentText,
+        timestamp: new Date().getTime(),
+      };
+
+      const comments = post.comments || [];
+      const updatedComments = [...comments, newComment];
+
+      await updateDoc(doc(this.firestore, `posts/${post.id}`), {
+        comments: updatedComments,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('Comment added successfully');
+    } catch (error) {
+      console.error('Failed to add comment', error);
     }
   }
 

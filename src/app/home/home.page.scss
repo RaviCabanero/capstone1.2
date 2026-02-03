@@ -40,6 +40,175 @@
   min-height: 100%;
 }
 
+// Events Section
+.events-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 12px;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+    }
+  }
+
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .event-card {
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .event-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    .event-description {
+      margin: 0 0 12px 0;
+      color: var(--ion-color-dark);
+      line-height: 1.5;
+    }
+
+    .event-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+  }
+}
+
+// Search Results Container
+.search-results-container {
+  padding: 16px;
+  background: var(--ion-color-step-50);
+
+  .search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+    }
+  }
+
+  .alumni-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+// Alumni Card
+.alumni-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+  background-color: var(--ion-color-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .card-avatar {
+    flex-shrink: 0;
+
+    img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  .card-info {
+    flex: 1;
+
+    h4 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+    }
+
+    p {
+      margin: 2px 0;
+      font-size: 12px;
+      color: var(--ion-color-medium);
+
+      &.course {
+        font-weight: 500;
+        color: var(--ion-color-success);
+      }
+
+      &.department {
+        color: var(--ion-color-medium);
+      }
+
+      &.year {
+        font-size: 11px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  ion-button {
+    margin: 0;
+  }
+}
+
+// Empty Search State
+.empty-search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: var(--ion-color-step-50);
+
+  ion-icon {
+    font-size: 64px;
+    color: var(--ion-color-step-300);
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
 .feed-section {
   max-width: 800px;
   margin: 0 auto;
@@ -110,6 +279,12 @@
         width: 48px;
         height: 48px;
         min-width: 48px;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+          opacity: 0.8;
+        }
       }
 
       .post-user-info {
@@ -120,6 +295,12 @@
           font-weight: 600;
           margin: 0 0 2px 0;
           color: var(--ion-color-dark);
+          cursor: pointer;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: var(--ion-color-primary);
+          }
         }
 
         .post-timestamp {
@@ -174,6 +355,68 @@
       }
     }
   }
+
+  // Comments Section
+  .comments-section {
+    padding: 12px 16px 0 16px;
+    border-top: 1px solid var(--ion-color-step-150);
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+
+      .comment-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .comment-content {
+        flex: 1;
+
+        .comment-header {
+          display: flex;
+          gap: 8px;
+          align-items: baseline;
+          margin-bottom: 4px;
+
+          .comment-user {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ion-color-dark);
+          }
+
+          .comment-time {
+            margin: 0;
+            font-size: 11px;
+            color: var(--ion-color-medium);
+          }
+        }
+
+        .comment-text {
+          margin: 0;
+          font-size: 13px;
+          color: var(--ion-color-dark);
+          line-height: 1.4;
+          word-wrap: break-word;
+        }
+      }
+    }
+  }
 }
 
 // Empty and Loading States
@@ -215,6 +458,37 @@
     background: var(--ion-color-dark);
   }
 
+  .search-results-container {
+    background: var(--ion-color-dark);
+  }
+
+  .alumni-card {
+    background-color: var(--ion-color-step-150);
+    border-color: var(--ion-color-step-200);
+
+    .card-info {
+      h4 {
+        color: var(--ion-color-light);
+      }
+
+      p {
+        color: var(--ion-color-step-400);
+
+        &.course {
+          color: var(--ion-color-success);
+        }
+      }
+    }
+  }
+
+  .empty-search-state {
+    background: var(--ion-color-dark);
+
+    p {
+      color: var(--ion-color-step-400);
+    }
+  }
+
   .create-post-card,
   .post-card {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -235,6 +509,42 @@
 
   .post-actions {
     border-top-color: var(--ion-color-step-200);
+  }
+
+  .events-section {
+    .section-header h3 {
+      color: var(--ion-color-light);
+    }
+
+    .event-card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      .event-description {
+        color: var(--ion-color-light);
+      }
+    }
+  }
+
+  .comments-section {
+    border-top-color: var(--ion-color-step-200);
+
+    .comment-item {
+      .comment-content {
+        .comment-header {
+          .comment-user {
+            color: var(--ion-color-light);
+          }
+
+          .comment-time {
+            color: var(--ion-color-step-400);
+          }
+        }
+
+        .comment-text {
+          color: var(--ion-color-light);
+        }
+      }
+    }
   }
 }
 

@@ -1,0 +1,91 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Digital Alumni ID Approvals</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-container">
+    <div class="header-section">
+      <h2>Review Alumni ID Requests</h2>
+      <p>Approve or reject digital alumni ID card requests</p>
+    </div>
+
+    <!-- Segment Control -->
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="onSegmentChange($event)">
+      <ion-segment-button value="pending">
+        <ion-label>Pending</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="approved">
+        <ion-label>Approved</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="rejected">
+        <ion-label>Rejected</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading requests...</p>
+    </div>
+
+    <!-- Requests List -->
+    <div *ngIf="!loading" class="requests-container">
+      <!-- Empty State -->
+      <div *ngIf="requests.length === 0" class="empty-state">
+        <ion-icon name="document-outline"></ion-icon>
+        <p>No {{ selectedSegment }} requests</p>
+      </div>
+
+      <!-- Request Cards -->
+      <ion-card *ngFor="let request of requests" class="request-card" (click)="openDetails(request)">
+        <ion-card-header>
+          <div class="card-header-content">
+            <div class="user-info">
+              <ion-card-title>{{ request.firstName }} {{ request.lastName }}</ion-card-title>
+              <ion-card-subtitle>{{ request.email }}</ion-card-subtitle>
+            </div>
+            <ion-badge [color]="selectedSegment === 'approved' ? 'success' : selectedSegment === 'rejected' ? 'danger' : 'warning'">
+              {{ selectedSegment }}
+            </ion-badge>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="request-details">
+            <div class="detail-item">
+              <ion-icon name="school-outline"></ion-icon>
+              <span>{{ request.degreeProgram }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ request.yearGraduated }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ request.requestedAt | date:'medium' }}</span>
+            </div>
+          </div>
+
+          <!-- Quick Actions (only for pending) -->
+          <div *ngIf="selectedSegment === 'pending'" class="quick-actions" (click)="$event.stopPropagation()">
+            <ion-button size="small" color="success" (click)="approveRequest(request)">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Approve
+            </ion-button>
+            <ion-button size="small" color="danger" (click)="rejectRequest(request)">
+              <ion-icon name="close-circle" slot="start"></ion-icon>
+              Reject
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

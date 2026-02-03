@@ -64,6 +64,24 @@
 
 .event-card {
   margin-bottom: 1rem;
+
+  .event-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    .event-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      ion-button {
+        --padding-start: 4px;
+        --padding-end: 4px;
+      }
+    }
+  }
   
   ion-card-title {
     font-size: 1.2rem;

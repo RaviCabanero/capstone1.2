@@ -44,7 +44,7 @@
         hidden
         (change)="onAvatarSelected($event)"
       />
-      <ion-button fill="clear" class="camera-edit-btn" (click)="avatarInput.click()">
+      <ion-button fill="clear" class="camera-edit-btn" (click)="avatarInput.click()" *ngIf="isOwnProfile">
         <ion-icon name="camera" slot="icon-only"></ion-icon>
       </ion-button>
     </div>
@@ -58,7 +58,7 @@
             <p class="user-university">{{ profile.university || 'University of San Jose-Recoletos' }}</p>
             <p class="user-course">{{ profile.course || 'Course not provided' }}</p>
           </div>
-          <ion-button fill="outline" size="small" routerLink="/profile-edit">
+          <ion-button fill="outline" size="small" routerLink="/profile-edit" *ngIf="isOwnProfile">
             <ion-icon name="pencil" slot="start"></ion-icon>
             Edit
           </ion-button>
@@ -81,23 +81,80 @@
       </ion-card-content>
     </ion-card>
 
+    <!-- Digital Alumni ID Card -->
+    <div class="digital-id-section" *ngIf="idRequest$ | async as idRequest">
+      <ion-card class="digital-id-card" *ngIf="idRequest?.status === 'approved'; else idNotAvailable">
+        <div class="digital-id-glass">
+          <div class="digital-id-header">
+            <img class="digital-id-logo" src="assets/icon/favicon.png" alt="USJ-R Logo" />
+            <div class="digital-id-title">
+              <div class="digital-id-name">USJ-R ALUMNI ASSOCIATION, INC.</div>
+              <div class="digital-id-subtitle">University of San Jose–Recoletos, Cebu City, Philippines</div>
+            </div>
+            <img class="digital-id-logo" src="assets/icon/favicon.png" alt="USJ-R Logo" />
+          </div>
+
+          <div class="digital-id-body">
+            <div class="digital-id-photo">
+              <img [src]="profile.photoDataUrl || profile.photoUrl || 'https://via.placeholder.com/140'" alt="Alumni photo" />
+            </div>
+
+            <div class="digital-id-details">
+              <div class="digital-id-fullname">{{ profile.firstName }} {{ profile.lastName }}</div>
+              <div class="digital-id-row">
+                <span class="label">Degree Program</span>
+                <span class="value">{{ idRequest.degreeProgram || profile.course || 'N/A' }}</span>
+              </div>
+              <div class="digital-id-row">
+                <span class="label">Year Graduated</span>
+                <span class="value">{{ idRequest.yearGraduated || 'N/A' }}</span>
+              </div>
+              <div class="digital-id-row">
+                <span class="label">Alumni ID No.</span>
+                <span class="value">{{ idRequest.studentId || idRequest.userId }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="digital-id-footer">
+            <div class="digital-id-issue">Valid for Alumni Association Use</div>
+            <div class="digital-id-status">APPROVED</div>
+          </div>
+        </div>
+      </ion-card>
+
+      <ng-template #idNotAvailable>
+        <ion-card class="digital-id-card pending">
+          <div class="digital-id-glass">
+            <div class="digital-id-empty">
+              <ion-icon name="card-outline"></ion-icon>
+              <div class="title">Digital Alumni ID</div>
+              <div class="subtitle">Status: {{ idRequest?.status || 'not requested' }}</div>
+            </div>
+          </div>
+        </ion-card>
+      </ng-template>
+    </div>
+
     <!-- About Section -->
     <ion-card class="about-section">
       <ion-card-header>
         <ion-card-title>About</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ng-container *ngIf="!editingSummary; else editSummaryForm">
+        <ng-container *ngIf="!editingSummary || !isOwnProfile; else editSummaryForm">
           <p *ngIf="profile.summary; else noSummary">{{ profile.summary }}</p>
           <ng-template #noSummary>
-            <ion-button fill="clear" color="primary" expand="block" (click)="startEditSummary(profile)">
-              <ion-icon name="add-circle" slot="start"></ion-icon>
-              Add Summary
-            </ion-button>
+            <p *ngIf="isOwnProfile" class="empty-state">No summary yet. Add one to tell your story!</p>
+            <p *ngIf="!isOwnProfile" class="empty-state">No summary available.</p>
           </ng-template>
-          <ion-button *ngIf="profile.summary" fill="clear" size="small" (click)="startEditSummary(profile)">
+          <ion-button *ngIf="profile.summary && isOwnProfile" fill="clear" size="small" (click)="startEditSummary(profile)">
             <ion-icon name="create-outline" slot="start"></ion-icon>
             Edit Summary
+          </ion-button>
+          <ion-button *ngIf="!profile.summary && isOwnProfile" fill="clear" color="primary" expand="block" (click)="startEditSummary(profile)">
+            <ion-icon name="add-circle" slot="start"></ion-icon>
+            Add Summary
           </ion-button>
         </ng-container>
 
@@ -202,7 +259,7 @@
         <ng-template #noExperience>
           <div class="empty-state">
             <p>No experience added yet</p>
-            <ion-button fill="clear" color="primary" size="small" (click)="openExperienceModal()">
+            <ion-button fill="clear" color="primary" size="small" (click)="openExperienceModal()" *ngIf="isOwnProfile">
               <ion-icon name="add-circle" slot="start"></ion-icon>
               Add your first experience
             </ion-button>
@@ -216,7 +273,7 @@
       <ion-card-header>
         <div class="section-header">
           <ion-card-title>Skills</ion-card-title>
-          <div class="header-buttons">
+          <div class="header-buttons" *ngIf="isOwnProfile">
             <ion-button fill="clear" color="primary" size="small" (click)="openSkillModal()">
               <ion-icon name="add-circle" slot="start"></ion-icon>
               Add
@@ -235,7 +292,7 @@
                   {{ skill.endorsements }}
                 </p>
               </div>
-              <ion-button fill="clear" size="small" (click)="deleteSkill(skill)">
+              <ion-button fill="clear" size="small" (click)="deleteSkill(skill)" *ngIf="isOwnProfile">
                 <ion-icon name="close" slot="icon-only"></ion-icon>
               </ion-button>
             </div>
@@ -250,7 +307,7 @@
         <ng-template #noSkills>
           <div class="empty-state">
             <p>No skills added yet</p>
-            <ion-button fill="clear" color="primary" size="small" (click)="openSkillModal()">
+            <ion-button fill="clear" color="primary" size="small" (click)="openSkillModal()" *ngIf="isOwnProfile">
               <ion-icon name="add-circle" slot="start"></ion-icon>
               Add your first skill
             </ion-button>
@@ -264,7 +321,7 @@
       <ion-card-header>
         <div class="section-header">
           <ion-card-title>Accomplishments</ion-card-title>
-          <div class="header-buttons">
+          <div class="header-buttons" *ngIf="isOwnProfile">
             <ion-button fill="clear" color="primary" size="small" (click)="openAccomplishmentModal()">
               <ion-icon name="add-circle" slot="start"></ion-icon>
               Add
@@ -278,7 +335,7 @@
             <!-- Certificate Image -->
             <div class="certificate-image-container">
               <img [src]="acc.image" alt="{{ acc.title }}" class="certificate-image" />
-              <div class="image-overlay">
+              <div class="image-overlay" *ngIf="isOwnProfile">
                 <ion-button fill="clear" size="small" (click)="deleteAccomplishment(acc)">
                   <ion-icon name="trash" slot="icon-only"></ion-icon>
                 </ion-button>
@@ -435,7 +492,7 @@
     </ion-card>
 
     <!-- Logout Button -->
-    <ion-button expand="block" color="danger" (click)="logout()" class="logout-btn">
+    <ion-button expand="block" color="danger" (click)="logout()" class="logout-btn" *ngIf="isOwnProfile">
       <ion-icon name="log-out" slot="start"></ion-icon>
       Logout
     </ion-button>
@@ -451,7 +508,7 @@
       <ion-button>
         <ion-icon name="people"></ion-icon>
       </ion-button>
-      <ion-button (click)="openPostModal()">
+      <ion-button (click)="openPostModal()" *ngIf="isOwnProfile">
         <ion-icon name="add-circle"></ion-icon>Post
       </ion-button>
       <ion-button>

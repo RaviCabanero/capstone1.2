@@ -147,22 +147,41 @@
         </p>
       </ion-text>
 
-      <!-- Degree Program -->
+      <!-- School Department -->
       <ion-item lines="full">
         <ion-label position="floating">
-          Degree Program / Strand
+          School Department
           <span class="required">*</span>
         </ion-label>
-        <ion-input
-          formControlName="degreeProgram"
-          type="text"
-          placeholder="e.g., Bachelor of Science in Computer Science"
-        ></ion-input>
+        <ion-select formControlName="schoolDepartment" placeholder="Select your department">
+          <ion-select-option *ngFor="let dept of departments$ | async" [value]="dept.DeptName">
+            {{ dept.DeptName }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-text color="danger" *ngIf="submitted && schoolDepartment?.invalid">
+        <p class="error-text">
+          <ion-icon name="alert-circle"></ion-icon>
+          School department is required
+        </p>
+      </ion-text>
+
+      <!-- Degree Program / Course -->
+      <ion-item lines="full">
+        <ion-label position="floating">
+          Course / Degree Program
+          <span class="required">*</span>
+        </ion-label>
+        <ion-select formControlName="degreeProgram" placeholder="Select your course">
+          <ion-select-option *ngFor="let course of filteredCourses$ | async" [value]="course.CourseName">
+            {{ course.CourseName }}
+          </ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-text color="danger" *ngIf="submitted && degreeProgram?.invalid">
         <p class="error-text">
           <ion-icon name="alert-circle"></ion-icon>
-          Degree program is required
+          Course is required
         </p>
       </ion-text>
 
@@ -172,11 +191,14 @@
           Year Graduated
           <span class="required">*</span>
         </ion-label>
-        <ion-input
+        <ion-select
           formControlName="yearGraduated"
-          type="number"
-          placeholder="e.g., 2023, 1999, 2001"
-        ></ion-input>
+          placeholder="Select year"
+        >
+          <ion-select-option *ngFor="let year of yearOptions" [value]="year">
+            {{ year }}
+          </ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-text color="danger" *ngIf="submitted && yearGraduated?.invalid">
         <p class="error-text">
@@ -204,50 +226,6 @@
           Permanent address is required
         </p>
       </ion-text>
-
-      <!-- Photo Upload Section -->
-      <div class="form-section-title">2x2 ID Photo</div>
-      <div class="photo-upload-section">
-        <p class="section-label">Upload High Resolution Colored 2x2 ID Picture</p>
-
-        <!-- Image Preview -->
-        <div class="image-preview" *ngIf="imagePreview; else uploadPrompt">
-          <img [src]="imagePreview" alt="Alumni ID photo preview" />
-          <div class="image-actions">
-            <ion-button fill="clear" size="small" color="danger" (click)="removeImage()">
-              <ion-icon name="close-circle"></ion-icon>
-            </ion-button>
-          </div>
-        </div>
-
-        <!-- Upload Prompt -->
-        <ng-template #uploadPrompt>
-          <div class="upload-placeholder" (click)="fileInput.click()">
-            <ion-icon name="image"></ion-icon>
-            <p>Click to upload photo</p>
-            <small>JPG or PNG • White background • No borders</small>
-          </div>
-        </ng-template>
-
-        <input
-          #fileInput
-          type="file"
-          accept="image/jpeg,image/png"
-          hidden
-          (change)="onImageSelected($event)"
-        />
-
-        <ion-text color="danger" *ngIf="submitted && idPhoto?.invalid">
-          <p class="error-text">
-            <ion-icon name="alert-circle"></ion-icon>
-            Photo is required
-          </p>
-        </ion-text>
-
-        <p class="helper-text">
-          This image will be your final Alumni ID photo
-        </p>
-      </div>
 
       <!-- Action Buttons -->
       <div class="button-group">

@@ -12,10 +12,14 @@
     </ion-buttons>
 
     <ion-searchbar
-      placeholder="Search..."
+      placeholder="Search alumni by name, course, year..."
       mode="ios"
       class="searchbar"
-    ></ion-searchbar>
+      [(ngModel)]="searchQuery"
+      (ionInput)="searchAlumni($event)"
+      debounce="500"
+      animated="true">
+    </ion-searchbar>
 
     <ion-buttons slot="end">
       <ion-button>
@@ -27,19 +31,108 @@
 
 <ion-content [fullscreen]="true">
   <div class="home-container">
-    <!-- Feed Section -->
-    <div class="feed-section">
+    <!-- Search Results Section -->
+    <div *ngIf="isSearching && searchResults.length > 0" class="search-results-container">
+      <div class="search-header">
+        <h3>Alumni Results ({{ searchResults.length }})</h3>
+        <ion-button fill="clear" size="small" (click)="clearSearch()">
+          <ion-icon name="close"></ion-icon> Clear
+        </ion-button>
+      </div>
+
+      <div class="alumni-list">
+        <div class="alumni-card" *ngFor="let alumni of searchResults">
+          <div class="card-avatar">
+            <img [src]="alumni.photoDataUrl || 'assets/icon/favicon.png'" [alt]="alumni.firstName" />
+          </div>
+          <div class="card-info">
+            <h4>{{ alumni.firstName }} {{ alumni.lastName }}</h4>
+            <p class="course">{{ alumni.course || 'No course' }}</p>
+            <p class="department">{{ alumni.schoolDepartment || 'No department' }}</p>
+            <p class="year" *ngIf="alumni.yearGraduated">Class of {{ alumni.yearGraduated }}</p>
+          </div>
+          <ion-button 
+            fill="outline" 
+            size="small"
+            (click)="goToAlumniProfile(alumni.id)">
+            View
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="isSearching && searchResults.length === 0 && searchQuery.length > 0" class="empty-search-state">
+      <ion-icon name="search-outline"></ion-icon>
+      <p>No alumni found matching "{{ searchQuery }}"</p>
+    </div>
+
+    <!-- Events Section (show when not searching) -->
+    <div *ngIf="!isSearching" class="events-section">
+      <div class="section-header">
+        <h3>Upcoming Events</h3>
+      </div>
+
+      <div *ngIf="loadingEvents" class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading events...</p>
+      </div>
+
+      <div *ngIf="!loadingEvents && events.length === 0" class="empty-state">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <p>No upcoming events yet.</p>
+      </div>
+
+      <div *ngIf="!loadingEvents && events.length > 0" class="events-list">
+        <ion-card class="event-card" *ngFor="let event of events">
+          <ion-card-header>
+            <ion-card-title>{{ event.title }}</ion-card-title>
+            <ion-card-subtitle>
+              <div class="event-meta">
+                <span>
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{ event.date | date:'medium' }}
+                </span>
+                <span>
+                  <ion-icon name="location-outline"></ion-icon>
+                  {{ event.location }}
+                </span>
+              </div>
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="event-description">{{ event.description }}</p>
+            <div class="event-actions">
+              <ion-chip *ngIf="event.capacity">
+                <ion-icon name="people-outline"></ion-icon>
+                <ion-label>{{ event.attendees?.length || 0 }} / {{ event.capacity }}</ion-label>
+              </ion-chip>
+              <ion-button
+                size="small"
+                [color]="hasUserRegistered(event) ? 'success' : 'primary'"
+                [disabled]="!hasUserRegistered(event) && isEventFull(event)"
+                (click)="toggleEventRegistration(event)">
+                {{ hasUserRegistered(event) ? 'Registered' : (isEventFull(event) ? 'Full' : 'Attend') }}
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- Feed Section (show when not searching) -->
+    <div *ngIf="!isSearching" class="feed-section">
       <!-- Posts Feed -->
       <div class="posts-feed" *ngIf="(allPosts$ | async) as posts; else loadingPosts">
         <ion-card class="post-card" *ngFor="let post of posts">
           <!-- Post Header -->
           <ion-card-header>
             <div class="post-header">
-              <ion-avatar class="user-avatar">
+              <ion-avatar class="user-avatar" (click)="goToAlumniProfile(post.userId)">
                 <img [src]="post.userAvatar || 'https://via.placeholder.com/56'" alt="User avatar" />
               </ion-avatar>
               <div class="post-user-info">
-                <h3 class="user-name">{{ post.userName }}</h3>
+                <h3 class="user-name" (click)="goToAlumniProfile(post.userId)">{{ post.userName }}</h3>
                 <p class="post-timestamp">{{ post.timestamp | date:'short' }}</p>
               </div>
               <ion-button fill="clear" size="small" class="menu-button" (click)="openPostMenu(post)">
@@ -56,14 +149,39 @@
 
           <!-- Post Actions -->
           <div class="post-actions">
-            <ion-button fill="clear" size="small" (click)="sharePost(post)">
+            <ion-button 
+              fill="clear" 
+              size="small" 
+              (click)="likePost(post)"
+              [color]="hasUserLiked(post) ? 'success' : ''">
               <ion-icon name="arrow-redo-outline" slot="start"></ion-icon>
-              Forward
+              {{ post.likes || 0 }} Forward
             </ion-button>
-            <ion-button fill="clear" size="small">
+            <ion-button 
+              fill="clear" 
+              size="small"
+              (click)="openCommentDialog(post)">
               <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-              Comment
+              {{ post.comments?.length || 0 }} Comment
             </ion-button>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="comments-section" *ngIf="post.comments && post.comments.length > 0">
+            <div class="comments-list">
+              <div class="comment-item" *ngFor="let comment of post.comments">
+                <ion-avatar class="comment-avatar">
+                  <img [src]="comment.userAvatar || 'https://via.placeholder.com/40'" [alt]="comment.userName" />
+                </ion-avatar>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <h5 class="comment-user">{{ comment.userName }}</h5>
+                    <p class="comment-time">{{ comment.timestamp | date:'short' }}</p>
+                  </div>
+                  <p class="comment-text">{{ comment.text }}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </ion-card>
 
