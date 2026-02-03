@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" [class.header-hidden]="!showHeader">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button (click)="goToProfile()">
@@ -29,7 +29,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" (ionScroll)="onScroll($event)" [scrollEvents]="true">
   <div class="home-container">
     <!-- Search Results Section -->
     <div *ngIf="isSearching && searchResults.length > 0" class="search-results-container">
@@ -203,24 +203,27 @@
   </div>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar class="footer-toolbar">
-    <ion-buttons class="footer-buttons">
-      <ion-button>
-        <ion-icon name="home"></ion-icon>
-      </ion-button>
-      <ion-button (click)="goToAlumniNetwork()">
-        <ion-icon name="people"></ion-icon>
-      </ion-button>
-      <ion-button (click)="openPostModal()">
-        <ion-icon name="add-circle"></ion-icon>Post
-      </ion-button>
-      <ion-button>
-        <ion-icon name="notifications"></ion-icon>
-      </ion-button>
-      <ion-button>
-        <ion-icon name="menu"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+<ion-footer [class.footer-hidden]="!showFooter">
+  <ion-tab-bar slot="bottom" class="custom-tab-bar">
+    <ion-tab-button>
+      <ion-icon name="home"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+    <ion-tab-button (click)="goToAlumniNetwork()">
+      <ion-icon name="people"></ion-icon>
+      <ion-label>Alumni</ion-label>
+    </ion-tab-button>
+    <ion-tab-button (click)="openPostModal()">
+      <ion-icon name="add-circle"></ion-icon>
+      <ion-label>Post</ion-label>
+    </ion-tab-button>
+    <ion-tab-button (click)="goToNotifications()">
+      <ion-icon name="notifications"></ion-icon>
+      <ion-label>Notification</ion-label>
+    </ion-tab-button>
+    <ion-tab-button>
+      <ion-icon name="menu"></ion-icon>
+      <ion-label>Menu</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
 </ion-footer>

@@ -1,67 +1,78 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Login</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="login-content">
   <div class="page">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Welcome back</ion-card-title>
-        <ion-card-subtitle>Please sign in to continue</ion-card-subtitle>
-      </ion-card-header>
+    <div class="login-wrapper">
+      <div class="card-logo">
+        <img src="assets/icon/JosenianLinkLogo.png" alt="App Logo" />
+      </div>
+      <ion-card class="login-card">
+        <ion-card-header>
+          <ion-card-title>Adelante </ion-card-title>
+          <ion-card-subtitle>Sign in to your alumni account</ion-card-subtitle>
+        </ion-card-header>
 
-      <ion-card-content>
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-          <ion-item lines="full">
-            <ion-label position="floating">Email</ion-label>
-            <ion-input
-              type="email"
-              formControlName="email"
-              autocomplete="email"
-              inputmode="email"
-              required
-            ></ion-input>
-          </ion-item>
-          <ion-note color="danger" *ngIf="email?.touched && email?.invalid">
-            Enter a valid email.
-          </ion-note>
+        <ion-card-content>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="mail-outline" slot="start"></ion-icon>
+              <ion-label position="floating">Email</ion-label>
+              <ion-input
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                inputmode="email"
+                required
+              ></ion-input>
+            </ion-item>
+            <ion-note color="danger" *ngIf="email?.touched && email?.invalid">
+              Enter a valid email.
+            </ion-note>
 
-          <ion-item lines="full">
-            <ion-label position="floating">Password</ion-label>
-            <ion-input
-              type="password"
-              formControlName="password"
-              autocomplete="current-password"
-              required
-              minlength="6"
-            ></ion-input>
-          </ion-item>
-          <ion-note color="danger" *ngIf="password?.touched && password?.invalid">
-            Password must be at least 6 characters.
-          </ion-note>
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              <ion-label position="floating">Password</ion-label>
+              <ion-input
+                type="password"
+                formControlName="password"
+                autocomplete="current-password"
+                required
+                minlength="6"
+              ></ion-input>
+            </ion-item>
+            <ion-note color="danger" *ngIf="password?.touched && password?.invalid">
+              Password must be at least 6 characters.
+            </ion-note>
 
-          <ion-button
-            expand="block"
-            type="submit"
-            [disabled]="loginForm.invalid || isSubmitting"
-            class="submit"
-          >
-            <ion-spinner slot="start" *ngIf="isSubmitting"></ion-spinner>
-            Sign In
-          </ion-button>
+            <div class="form-links">
+              <ion-button fill="clear" size="small" class="link" type="button">
+                Forgot password?
+              </ion-button>
+            </div>
 
-          <ion-button
-            expand="block"
-            fill="clear"
-            (click)="goToRegister()"
-            class="secondary"
-          >
-            Create an account
-          </ion-button>
-        </form>
-      </ion-card-content>
-    </ion-card>
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="loginForm.invalid || isSubmitting"
+              class="submit"
+            >
+              <ion-spinner slot="start" *ngIf="isSubmitting"></ion-spinner>
+              Sign In
+            </ion-button>
+
+            <div class="divider">
+              <span>New here?</span>
+            </div>
+
+            <ion-button
+              expand="block"
+              fill="clear"
+              (click)="goToRegister()"
+              class="secondary"
+            >
+              Create an account
+            </ion-button>
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
 </ion-content>

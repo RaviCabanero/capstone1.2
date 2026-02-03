@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, collection, query, where, orderBy, collectionData, doc, docData, deleteDoc, addDoc, updateDoc, arrayUnion, arrayRemove } from '@angular/fire/firestore';
 import { Observable, of, map } from 'rxjs';
-import { ModalController, ActionSheetController, AlertController } from '@ionic/angular';
+import { ModalController, ActionSheetController, AlertController, IonContent } from '@ionic/angular';
 import { PostModalComponent } from '../post-modal/post-modal.component';
 
 @Component({
@@ -13,6 +13,8 @@ import { PostModalComponent } from '../post-modal/post-modal.component';
   standalone: false,
 })
 export class HomePage implements OnInit {
+  @ViewChild(IonContent, { static: false }) content!: IonContent;
+  
   allPosts$: Observable<any[]> = of([]);
   userProfile: any;
 
@@ -25,6 +27,11 @@ export class HomePage implements OnInit {
   isSearching: boolean = false;
   searchResults: any[] = [];
   allAlumni: any[] = [];
+
+  // Scroll tracking
+  private lastScrollTop = 0;
+  showHeader = true;
+  showFooter = true;
 
   constructor(
     private router: Router,
@@ -503,5 +510,37 @@ export class HomePage implements OnInit {
 
   goToProfile() {
     this.router.navigateByUrl('/profile');
+  }
+
+  /**
+   * Navigate to Notifications page
+   */
+  goToNotifications() {
+    this.router.navigate(['/notifications']);
+  }
+
+  /**
+   * Handle scroll events to show/hide header and footer
+   */
+  async onScroll(event: any) {
+    const scrollElement = await this.content.getScrollElement();
+    const scrollTop = scrollElement.scrollTop;
+    const scrollThreshold = 50; // Minimum scroll distance to trigger hide/show
+
+    if (Math.abs(scrollTop - this.lastScrollTop) < scrollThreshold) {
+      return; // Don't trigger for small scrolls
+    }
+
+    if (scrollTop > this.lastScrollTop && scrollTop > 100) {
+      // Scrolling down - hide header and footer
+      this.showHeader = false;
+      this.showFooter = false;
+    } else if (scrollTop < this.lastScrollTop) {
+      // Scrolling up - show header and footer
+      this.showHeader = true;
+      this.showFooter = true;
+    }
+
+    this.lastScrollTop = scrollTop;
   }
 }

@@ -1,0 +1,120 @@
+.notifications-container {
+  padding: 0;
+  min-height: 100%;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+.notifications-list {
+  ion-item {
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    margin-bottom: 2px;
+
+    &.unread {
+      --background: rgba(var(--ion-color-primary-rgb), 0.05);
+      border-left: 3px solid var(--ion-color-primary);
+    }
+
+    ion-avatar {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ion-color-light);
+      border-radius: 50%;
+
+      ion-icon {
+        font-size: 24px;
+      }
+    }
+
+    ion-label {
+      h2 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--ion-color-dark);
+      }
+
+      p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+        margin-bottom: 4px;
+        white-space: normal;
+        overflow: visible;
+      }
+
+      .notification-time {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--ion-color-medium-shade);
+        margin-top: 4px;
+
+        ion-icon {
+          font-size: 14px;
+        }
+      }
+    }
+
+    ion-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+  }
+
+  ion-item-options {
+    ion-item-option {
+      ion-icon {
+        font-size: 22px;
+      }
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 80px;
+    color: var(--ion-color-medium);
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+    max-width: 300px;
+  }
+}

@@ -62,6 +62,10 @@ const routes: Routes = [
     component: ActivityPage
   },
   {
+    path: 'notifications',
+    loadChildren: () => import('./notifications/notifications.module').then(m => m.NotificationsPageModule)
+  },
+  {
     path: 'alumni-id-request',
     component: AlumniIdRequestPage
   },
