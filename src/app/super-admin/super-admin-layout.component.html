@@ -1,0 +1,47 @@
+<ion-app>
+  <ion-header [translucent]="true" class="admin-header">
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-menu-button (click)="toggleMenu()"></ion-menu-button>
+      </ion-buttons>
+      <ion-title>Super Admin Panel</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="logout()" color="light">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Logout
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="layout-container">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" [class.open]="menuOpen">
+      <div class="sidebar-header">
+        <h2>Menu</h2>
+        <ion-icon name="close-outline" (click)="toggleMenu()" class="close-icon"></ion-icon>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a 
+          *ngFor="let item of menuItems"
+          [href]="item.path"
+          [class.active]="currentPage === item.path"
+          (click)="navigate(item.path)"
+          class="nav-item"
+        >
+          <ion-icon [name]="item.icon"></ion-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" *ngIf="menuOpen" (click)="toggleMenu()"></div>
+</ion-app>

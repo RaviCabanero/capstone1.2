@@ -1,0 +1,138 @@
+ion-header.admin-header {
+  --background: linear-gradient(135deg, #148245 0%, #0f6138 100%);
+}
+
+.layout-container {
+  display: flex;
+  height: calc(100vh - var(--ion-toolbar-min-height));
+  background: #ffffff;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: #f8faf8;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(17, 24, 39, 0.08);
+  transition: transform 0.3s ease;
+
+  @media (max-width: 768px) {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 280px;
+    z-index: 999;
+    transform: translateX(-100%);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #148245 0%, #0f6138 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .close-icon {
+    font-size: 24px;
+    cursor: pointer;
+    display: none;
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
+}
+
+.sidebar-nav {
+  padding: 8px 0;
+  list-style: none;
+  margin: 0;
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin: 4px 8px;
+    color: #111827;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 20px;
+      color: #148245;
+    }
+
+    &:hover {
+      background: rgba(20, 130, 69, 0.08);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, rgba(20, 130, 69, 0.15), rgba(15, 97, 56, 0.15));
+      border-left: 4px solid #148245;
+      padding-left: 12px;
+      font-weight: 600;
+
+      ion-icon {
+        color: #0f6138;
+      }
+    }
+  }
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+/* Mobile Overlay */
+.sidebar-overlay {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-height: 300px;
+  }
+
+  .main-content {
+    flex: 1;
+  }
+}

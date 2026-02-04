@@ -14,6 +14,7 @@ import { switchMap } from 'rxjs/operators';
 })
 export class DepartmentHeadsPage implements OnInit {
   deptHeads$: Observable<any[]>;
+  selectedHead: any = null;
 
   constructor(private adminService: AdminService) {
     this.deptHeads$ = of(null).pipe(
@@ -31,5 +32,9 @@ export class DepartmentHeadsPage implements OnInit {
       switchMap(() => from(this.adminService.getDepartmentHeads())),
       startWith([])
     );
+  }
+
+  selectHead(head: any) {
+    this.selectedHead = head;
   }
 }

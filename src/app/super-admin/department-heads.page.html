@@ -7,35 +7,70 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <div class="container">
-    <ion-card *ngIf="(deptHeads$ | async) as heads">
-      <ion-card-header>
-        <ion-card-title>All Department Heads</ion-card-title>
-      </ion-card-header>
+<ion-content [fullscreen]="true" class="sidebar-layout">
+  <div class="sidebar-container" *ngIf="(deptHeads$ | async) as heads">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>Department Heads</h2>
+        <p class="count">{{ heads.length }} assigned</p>
+      </div>
+      <ion-list lines="none" class="sidebar-list">
+        <ion-item 
+          *ngFor="let head of heads" 
+          class="sidebar-item"
+          [class.active]="selectedHead?.id === head.id"
+          (click)="selectHead(head)"
+        >
+          <ion-avatar slot="start">
+            <img [src]="head.photoDataUrl || 'https://via.placeholder.com/40'" />
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ head.firstName }} {{ head.lastName }}</h3>
+            <p>{{ head.schoolDepartment }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <div *ngIf="heads.length === 0" class="empty-state">
+        <p>No department heads assigned yet.</p>
+      </div>
+    </div>
 
-      <ion-card-content *ngIf="heads.length > 0; else noDeptHeads">
-        <ion-list lines="inset">
-          <ion-item *ngFor="let head of heads">
-            <ion-avatar slot="start">
-              <img [src]="head.photoDataUrl || 'https://via.placeholder.com/40'" />
-            </ion-avatar>
-            <ion-label>
-              <h2>{{ head.firstName }} {{ head.lastName }}</h2>
-              <p>{{ head.email }}</p>
-              <p class="dept-badge">{{ head.schoolDepartment }}</p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-
-      <ng-template #noDeptHeads>
+    <!-- Content Panel -->
+    <div class="content-panel" *ngIf="selectedHead; else noSelection">
+      <div class="panel-header">
+        <h1>{{ selectedHead.firstName }} {{ selectedHead.lastName }}</h1>
+        <p class="subtitle">{{ selectedHead.schoolDepartment }}</p>
+      </div>
+      <ion-card class="detail-card">
         <ion-card-content>
-          <ion-text color="medium">
-            <p>No department heads assigned yet.</p>
-          </ion-text>
+          <div class="detail-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ selectedHead.email }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Department:</span>
+            <span class="value dept-badge">{{ selectedHead.schoolDepartment }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedHead.phone">
+            <span class="label">Phone:</span>
+            <span class="value">{{ selectedHead.phone }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedHead.address">
+            <span class="label">Address:</span>
+            <span class="value">{{ selectedHead.address }}</span>
+          </div>
         </ion-card-content>
-      </ng-template>
-    </ion-card>
+      </ion-card>
+    </div>
+
+    <ng-template #noSelection>
+      <div class="content-panel empty">
+        <div class="empty-message">
+          <ion-icon name="person-outline"></ion-icon>
+          <p>Select a department head to view details</p>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </ion-content>
