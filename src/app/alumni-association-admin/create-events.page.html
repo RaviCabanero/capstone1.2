@@ -1,144 +1,232 @@
 <ion-header>
-  <ion-toolbar color="danger">
+  <ion-toolbar color="success">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
     </ion-buttons>
-    <ion-title>Create Global Events</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="toggleForm()">
-        <ion-icon [name]="showForm ? 'close' : 'add'"></ion-icon>
-        {{ showForm ? 'Cancel' : 'New' }}
-      </ion-button>
-    </ion-buttons>
+    <ion-title>Create Event</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div class="page-header">
-    <h2>Global Alumni Events</h2>
-    <p>Create events for the entire alumni network</p>
-  </div>
+  <ion-card class="event-form-card">
+    <ion-grid>
+      <ion-row>
+        <!-- Left Column: Event Form -->
+        <ion-col size="12" sizeMd="6" class="left-column">
+          <div class="form-section">
+            <h3 class="section-title">Event Details</h3>
+            
+            <!-- Event Name -->
+            <ion-item class="form-item">
+              <ion-label position="stacked">Event Name <span class="required">*</span></ion-label>
+              <ion-input 
+                [(ngModel)]="newEvent.title" 
+                placeholder="Enter event name"
+                type="text">
+              </ion-input>
+            </ion-item>
 
-  <!-- Create Event Form -->
-  <ion-card *ngIf="showForm" class="create-form">
-    <ion-card-header>
-      <ion-card-title>{{ editingEventId ? 'Edit Event' : 'New Global Event' }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-label position="stacked">Event Title *</ion-label>
-        <ion-input 
-          [(ngModel)]="newEvent.title" 
-          placeholder="e.g., Alumni Homecoming 2026"
-          type="text">
-        </ion-input>
-      </ion-item>
+            <!-- Event Date -->
+            <ion-item class="form-item">
+              <ion-label position="stacked">Event Date <span class="required">*</span></ion-label>
+              <ion-datetime-button datetime="event-date"></ion-datetime-button>
+            </ion-item>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime 
+                  id="event-date"
+                  [(ngModel)]="newEvent.date"
+                  presentation="date"
+                  [min]="minDate"
+                  [showDefaultButtons]="true">
+                </ion-datetime>
+              </ng-template>
+            </ion-modal>
 
-      <ion-item>
-        <ion-label position="stacked">Description *</ion-label>
-        <ion-textarea 
-          [(ngModel)]="newEvent.description" 
-          placeholder="Describe the event details"
-          rows="4"
-          auto-grow="true">
-        </ion-textarea>
-      </ion-item>
+            <!-- Duration -->
+            <ion-item class="form-item">
+              <ion-label position="stacked">Ends After</ion-label>
+              <ion-select [(ngModel)]="newEvent.duration" placeholder="Select duration">
+                <ion-select-option value="1">1 hour</ion-select-option>
+                <ion-select-option value="2">2 hours</ion-select-option>
+                <ion-select-option value="3">3 hours</ion-select-option>
+                <ion-select-option value="4">4 hours</ion-select-option>
+                <ion-select-option value="custom">Custom</ion-select-option>
+              </ion-select>
+            </ion-item>
 
-      <ion-item>
-        <ion-label position="stacked">Date & Time *</ion-label>
-        <ion-datetime-button datetime="event-datetime"></ion-datetime-button>
-        <ion-modal trigger="event-datetime" [keepContentsMounted]="true">
-          <ng-template>
-            <ion-datetime
-              id="event-datetime"
-              [(ngModel)]="newEvent.date"
-              presentation="date-time"
-              hour-cycle="h12"
-              show-default-buttons="true">
-            </ion-datetime>
-          </ng-template>
-        </ion-modal>
-      </ion-item>
+            <!-- Start & End Time -->
+            <ion-row>
+              <ion-col size="6">
+                <ion-item class="form-item">
+                  <ion-label position="stacked">Start Time</ion-label>
+                  <ion-datetime-button datetime="start-time"></ion-datetime-button>
+                </ion-item>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime 
+                      id="start-time"
+                      [(ngModel)]="newEvent.startTime"
+                      presentation="time"
+                      [showDefaultButtons]="true">
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item class="form-item">
+                  <ion-label position="stacked">End Time</ion-label>
+                  <ion-datetime-button datetime="end-time"></ion-datetime-button>
+                </ion-item>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime 
+                      id="end-time"
+                      [(ngModel)]="newEvent.endTime"
+                      presentation="time"
+                      [showDefaultButtons]="true">
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-col>
+            </ion-row>
 
-      <ion-item>
-        <ion-label position="stacked">Location *</ion-label>
-        <ion-input 
-          [(ngModel)]="newEvent.location" 
-          placeholder="e.g., University Auditorium"
-          type="text">
-        </ion-input>
-      </ion-item>
+            <!-- Location -->
+            <ion-item class="form-item">
+              <ion-label position="stacked">Location</ion-label>
+              <ion-input 
+                [(ngModel)]="newEvent.location" 
+                placeholder="Enter location"
+                type="text">
+              </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-label position="stacked">Capacity (optional)</ion-label>
-        <ion-input 
-          [(ngModel)]="newEvent.capacity" 
-          placeholder="Max attendees"
-          type="number">
-        </ion-input>
-      </ion-item>
+            <!-- Attach Image -->
+            <div class="attach-file-section">
+              <input 
+                type="file" 
+                #fileInput 
+                accept="image/*" 
+                (change)="onFileSelected($event)" 
+                style="display: none;">
+              <ion-button fill="outline" size="small" (click)="fileInput.click()">
+                <ion-icon name="image-outline" slot="start"></ion-icon>
+                Attach Image
+              </ion-button>
+              <div *ngIf="attachedFile" class="image-preview">
+                <img [src]="attachedFile" alt="Event image preview">
+                <ion-button fill="clear" size="small" color="danger" (click)="removeImage()">
+                  <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
 
-      <ion-button 
-        expand="block" 
-        color="danger" 
-        (click)="createEvent()"
-        [disabled]="!newEvent.title.trim() || !newEvent.description.trim() || !newEvent.date || !newEvent.location.trim()">
-        <ion-icon slot="start" name="calendar-outline"></ion-icon>
-        {{ editingEventId ? 'Update Event' : 'Create Event' }}
+            <!-- Event Color -->
+            <div class="color-section">
+              <ion-label class="section-label">Choose Event Color</ion-label>
+              <div class="color-picker">
+                <div 
+                  *ngFor="let color of eventColors" 
+                  class="color-circle"
+                  [class.selected]="newEvent.color === color"
+                  [style.background-color]="color"
+                  (click)="selectColor(color)">
+                </div>
+              </div>
+            </div>
+
+            <!-- Show Me -->
+            <div class="radio-section">
+              <ion-label class="section-label">Show Me</ion-label>
+              <ion-radio-group [(ngModel)]="newEvent.availability">
+                <ion-item lines="none">
+                  <ion-radio slot="start" value="busy"></ion-radio>
+                  <ion-label>Busy</ion-label>
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-radio slot="start" value="available"></ion-radio>
+                  <ion-label>Available</ion-label>
+                </ion-item>
+              </ion-radio-group>
+            </div>
+
+            <!-- Event Visibility -->
+            <div class="radio-section">
+              <ion-label class="section-label">Event Visibility</ion-label>
+              <ion-radio-group [(ngModel)]="newEvent.visibility">
+                <ion-item lines="none">
+                  <ion-radio slot="start" value="public"></ion-radio>
+                  <ion-label>Public</ion-label>
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-radio slot="start" value="private"></ion-radio>
+                  <ion-label>Private</ion-label>
+                </ion-item>
+              </ion-radio-group>
+            </div>
+          </div>
+        </ion-col>
+
+        <!-- Right Column: Description & Guests -->
+        <ion-col size="12" sizeMd="6" class="right-column">
+          <div class="form-section">
+            <!-- About Event -->
+            <div class="about-section">
+              <ion-label class="section-label">About Event</ion-label>
+              <ion-textarea
+                [(ngModel)]="newEvent.description"
+                placeholder="Describe your event, include important details..."
+                rows="8"
+                class="about-textarea">
+              </ion-textarea>
+            </div>
+
+            <!-- Guest List -->
+            <div class="guests-section">
+              <ion-label class="section-label">Guests</ion-label>
+              <ion-list class="guests-list">
+                <ion-item *ngFor="let guest of guests" lines="none" class="guest-item">
+                  <ion-avatar slot="start" class="guest-avatar">
+                    <div class="avatar-initials" [style.background-color]="guest.color">
+                      {{ guest.initials }}
+                    </div>
+                  </ion-avatar>
+                  <ion-label>
+                    <h3>{{ guest.name }}</h3>
+                    <p>{{ guest.email }}</p>
+                  </ion-label>
+                  <ion-button fill="clear" size="small" (click)="removeGuest(guest)">
+                    <ion-icon name="close" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </ion-item>
+              </ion-list>
+
+              <!-- Add Guest Input -->
+              <ion-item class="add-guest-item">
+                <ion-input 
+                  [(ngModel)]="guestEmail"
+                  placeholder="Enter guest email"
+                  type="email">
+                </ion-input>
+                <ion-button fill="clear" slot="end" (click)="addGuest()">
+                  <ion-icon name="add-circle" slot="icon-only"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Footer Actions -->
+    <div class="form-footer">
+      <ion-button fill="clear" (click)="cancel()">
+        Cancel
       </ion-button>
-    </ion-card-content>
+      <ion-button fill="solid" color="success" (click)="createEvent()">
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        Create Event
+      </ion-button>
+    </div>
   </ion-card>
-
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <ion-spinner name="crescent" color="danger"></ion-spinner>
-    <p>Loading events...</p>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!loading && events.length === 0" class="empty-state">
-    <ion-icon name="calendar-outline" color="medium"></ion-icon>
-    <h3>No Events Yet</h3>
-    <p>Create your first global event for the alumni network</p>
-  </div>
-
-  <!-- Events List -->
-  <div *ngIf="!loading && events.length > 0">
-    <ion-card *ngFor="let event of events" class="event-card">
-      <ion-card-header>
-        <div class="event-header">
-          <ion-card-title>{{ event.title }}</ion-card-title>
-          <div class="event-actions">
-            <ion-button fill="clear" size="small" (click)="editEvent(event)">
-              <ion-icon name="create-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-            <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(event)">
-              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-            </ion-button>
-          </div>
-        </div>
-        <ion-card-subtitle>
-          <div class="event-meta">
-            <span>
-              <ion-icon name="calendar-outline"></ion-icon>
-              {{ event.date | date:'medium' }}
-            </span>
-            <span>
-              <ion-icon name="location-outline"></ion-icon>
-              {{ event.location }}
-            </span>
-          </div>
-        </ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        <p class="event-description">{{ event.description }}</p>
-        <div class="event-stats" *ngIf="event.capacity">
-          <ion-chip color="danger">
-            <ion-icon name="people-outline"></ion-icon>
-            <ion-label>{{ event.attendees?.length || 0 }} / {{ event.capacity }}</ion-label>
-          </ion-chip>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
 </ion-content>

@@ -52,6 +52,7 @@ export class AlumniListPage implements OnInit {
       alumni.department?.toLowerCase().includes(term) ||
       alumni.schoolDepartment?.toLowerCase().includes(term) ||
       alumni.course?.toLowerCase().includes(term) ||
+      alumni.address?.toLowerCase().includes(term) ||
       alumni.province?.toLowerCase().includes(term) ||
       alumni.studentId?.toLowerCase().includes(term) ||
       alumni.role?.toLowerCase().includes(term) ||

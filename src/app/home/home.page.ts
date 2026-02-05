@@ -17,6 +17,7 @@ export class HomePage implements OnInit {
   
   allPosts$: Observable<any[]> = of([]);
   userProfile: any;
+  selectedEvent: any = null;
 
   // Events
   events: any[] = [];
@@ -27,6 +28,7 @@ export class HomePage implements OnInit {
   isSearching: boolean = false;
   searchResults: any[] = [];
   allAlumni: any[] = [];
+  suggestedAlumni: any[] = [];
 
   // Scroll tracking
   private lastScrollTop = 0;
@@ -47,6 +49,7 @@ export class HomePage implements OnInit {
     this.loadCurrentUserProfile();
     this.loadAllAlumniForSearch();
     this.loadEvents();
+    this.loadSuggestedAlumni();
   }
 
   /**
@@ -74,8 +77,24 @@ export class HomePage implements OnInit {
     );
   }
 
-  /**
-   * Search alumni by name, course, year, department
+  /**   * Load suggested alumni to connect (random selection from all alumni)
+   */
+  loadSuggestedAlumni() {
+    const currentUserId = this.auth.currentUser?.uid;
+    const alumniQuery = query(
+      collection(this.firestore, 'users'),
+      where('role', '==', 'alumni')
+    );
+
+    collectionData(alumniQuery, { idField: 'id' }).subscribe((alumni: any[]) => {
+      // Filter out current user and get random 5-8 alumni
+      const filtered = alumni.filter(a => a.id !== currentUserId);
+      const shuffled = filtered.sort(() => 0.5 - Math.random());
+      this.suggestedAlumni = shuffled.slice(0, 6);
+    });
+  }
+
+  /**   * Search alumni by name, course, year, department
    */
   searchAlumni(event: any) {
     this.searchQuery = event.target.value.toLowerCase().trim();
@@ -180,6 +199,10 @@ export class HomePage implements OnInit {
         this.loadingEvents = false;
       }
     );
+  }
+
+  async viewEventDetails(event: any) {
+    this.selectedEvent = event;
   }
 
   hasUserRegistered(event: any): boolean {

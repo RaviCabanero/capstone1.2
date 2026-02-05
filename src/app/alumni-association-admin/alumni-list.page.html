@@ -9,7 +9,7 @@
     <ion-searchbar 
       [(ngModel)]="searchTerm" 
       (ionInput)="searchAlumni()"
-      placeholder="Search by name, role, status, department, or email"
+      placeholder="Search by name, role, status, department, address, or email"
       animated="true">
     </ion-searchbar>
   </ion-toolbar>
@@ -48,6 +48,7 @@
       <div class="col email">Email</div>
       <div class="col birthdate">Birthdate</div>
       <div class="col mobile">Mobile</div>
+      <div class="col address">Address</div>
       <div class="col province">Province</div>
       <div class="col action">Assign Role</div>
     </div>
@@ -71,6 +72,7 @@
       <div class="col email">{{ maskEmail(alumni.email) }}</div>
       <div class="col birthdate">{{ formatDate(alumni.birthdate) }}</div>
       <div class="col mobile">{{ alumni.phone || 'N/A' }}</div>
+      <div class="col address">{{ alumni.address || 'N/A' }}</div>
       <div class="col province">{{ alumni.province || 'N/A' }}</div>
       <div class="col action">
         <ion-select

@@ -1,57 +1,49 @@
 // Header
-.custom-header {
+ion-header {
   --background: #ffffff;
-  --border-bottom: 1px solid #f0f0f0;
+  --border-color: #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: none;
+}
 
-  .header-toolbar {
-    --padding-start: 8px;
-    --padding-end: 8px;
-    --min-height: 70px;
-  }
+ion-toolbar {
+  --background: #ffffff;
+  box-shadow: none;
+}
 
-  .header-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.searchbar {
+  --background: #ffffff;
+  --color: #111111;
+  --placeholder-color: #666666;
+  --border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 0 8px;
+  flex: 1;
+}
+
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
     width: 100%;
-
-    .profile-avatar {
-      width: 45px;
-      height: 45px;
-      min-width: 45px;
-      border-radius: 50%;
-      cursor: pointer;
-
-      img {
-        border-radius: 50%;
-      }
-    }
-
-    .search-bar {
-      flex: 1;
-      --background: #f0f0f0;
-      --border-radius: 25px;
-      --padding-start: 15px;
-      --padding-end: 15px;
-      --icon-color: #999;
-      margin: 0;
-
-      ::part(native) {
-        border-radius: 25px;
-      }
-    }
-
-    ion-button {
-      --padding-start: 8px;
-      --padding-end: 8px;
-      --min-width: auto;
-
-      ion-icon {
-        font-size: 24px;
-        color: #333;
-      }
-    }
+    height: 100%;
+    object-fit: cover;
   }
+}
+
+.header-avatar + ng-template ion-icon,
+.header-avatar ion-icon,
+ion-buttons ion-icon[name="person-circle"] {
+  color: #000000;
+}
+
+.chat-icon {
+  color: #2ecc71;
+  font-size: 24px;
 }
 
 // Invite Card
@@ -366,6 +358,52 @@
 
 // Safe area adjustments
 ion-content {
+  --background: #ffffff;
   --padding-bottom: 60px;
+}
+
+// Footer Tab Bar
+.custom-tab-bar {
+  --background: #ffffff;
+  --border: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  height: 60px;
+
+  ion-tab-button {
+    --color: #666666;
+    --color-selected: #2ecc71;
+    --background: #ffffff;
+    --background-focused: #ffffff;
+    --ripple-color: rgba(46, 204, 113, 0.1);
+    
+    ion-icon {
+      font-size: 24px;
+      margin-bottom: 2px;
+    }
+    
+    ion-label {
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    
+    ion-badge {
+      position: absolute;
+      top: 4px;
+      right: 20px;
+      background: #dc2626;
+      color: white;
+      font-size: 10px;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      padding: 2px 4px;
+    }
+  }
+}
+
+ion-footer {
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
 }
 

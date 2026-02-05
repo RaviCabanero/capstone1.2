@@ -1,44 +1,36 @@
 <!-- Top Header -->
-<ion-header class="custom-header">
-  <ion-toolbar class="header-toolbar">
-    <div class="header-content">
-      <!-- Left: Profile Avatar -->
-      <ion-avatar class="profile-avatar" (click)="goToProfile()">
-        <img [src]="userProfile?.photoDataUrl || 'assets/icon/favicon.png'" alt="Profile" />
-      </ion-avatar>
-
-      <!-- Center: Search Bar -->
-      <ion-searchbar
-        class="search-bar"
-        placeholder="Search alumni..."
-        (ionInput)="searchAlumni($event)"
-        debounce="500">
-      </ion-searchbar>
-
-      <!-- Right: Message Icon -->
-      <ion-button fill="clear" (click)="goToMessages()">
-        <ion-icon name="chatbubbles-outline"></ion-icon>
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToProfile()">
+        <ion-avatar class="header-avatar" *ngIf="userProfile?.photoDataUrl; else defaultAvatar">
+          <img [src]="userProfile.photoDataUrl" alt="Profile avatar" />
+        </ion-avatar>
+        <ng-template #defaultAvatar>
+          <ion-icon name="person-circle"></ion-icon>
+        </ng-template>
       </ion-button>
-    </div>
+    </ion-buttons>
+
+    <ion-searchbar
+      placeholder="Search alumni..."
+      mode="ios"
+      class="searchbar"
+      [(ngModel)]="searchQuery"
+      (ionInput)="searchAlumni($event)"
+      debounce="500"
+      animated="true">
+    </ion-searchbar>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="goToMessages()">
+        <ion-icon name="chatbubbles" class="chat-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <!-- Invite Section Card -->
-  <div class="invite-card">
-    <div class="invite-text">
-      <h3>Invite 3 of your alumni to connect today</h3>
-    </div>
-    <div class="invite-avatars">
-      <ion-avatar class="invite-avatar" *ngFor="let avatar of inviteAvatars">
-        <img [src]="avatar" alt="Alumni avatar" />
-      </ion-avatar>
-    </div>
-    <ion-button expand="block" color="success" class="search-btn" (click)="searchAlumniToInvite()">
-      Search alumni you know
-    </ion-button>
-  </div>
-
   <!-- Network Overview Section -->
   <div class="network-overview">
     <h3 class="section-title">Network Overview</h3>
@@ -98,7 +90,7 @@
 
         <div class="card-info">
           <h4 class="alumni-name">{{ alumnus.firstName }} {{ alumnus.lastName }}</h4>
-          <p class="alumni-major">{{ alumnus.major || 'No major specified' }}</p>
+          <p class="alumni-major">{{ alumnus.course || 'Course not specified' }}</p>
           <p class="alumni-department">{{ alumnus.schoolDepartment || alumnus.department || 'No department' }}</p>
         </div>
 
@@ -121,34 +113,32 @@
 
 <!-- Bottom Tab Bar -->
 <ion-footer>
-  <ion-toolbar class="tab-toolbar">
-    <ion-tab-bar slot="bottom">
-      <ion-tab-button tab="home" routerLink="/home" routerLinkActive="active">
-        <ion-icon name="home-outline"></ion-icon>
-        <ion-label>Home</ion-label>
-      </ion-tab-button>
-
-      <ion-tab-button tab="alumni" routerLink="/alumni-network" routerLinkActive="active">
-        <ion-icon name="people-outline"></ion-icon>
-        <ion-label>Alumni</ion-label>
-      </ion-tab-button>
-
-      <ion-tab-button tab="post" class="center-button" (click)="openPostModal()">
-        <ion-icon name="add-circle"></ion-icon>
-        <ion-label>Post</ion-label>
-      </ion-tab-button>
-
-      <ion-tab-button tab="notification" routerLink="/notifications" routerLinkActive="active">
-        <ion-icon name="notifications-outline"></ion-icon>
-        <ion-label>Notification</ion-label>
-        <ion-badge *ngIf="notificationCount > 0">{{ notificationCount }}</ion-badge>
-      </ion-tab-button>
-
-      <ion-tab-button tab="menu" (click)="openMenu()">
-        <ion-icon name="menu-outline"></ion-icon>
-        <ion-label>Menu</ion-label>
-      </ion-tab-button>
-    </ion-tab-bar>
-  </ion-toolbar>
+  <ion-tab-bar slot="bottom" class="custom-tab-bar">
+    <ion-tab-button tab="home" routerLink="/home">
+      <ion-icon name="home"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="alumni" routerLink="/alumni-network">
+      <ion-icon name="people"></ion-icon>
+      <ion-label>Alumni</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="post" (click)="openPostModal()">
+      <ion-icon name="add-circle"></ion-icon>
+      <ion-label>Post</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="notification" routerLink="/notifications">
+      <ion-icon name="notifications"></ion-icon>
+      <ion-label>Notification</ion-label>
+      <ion-badge *ngIf="notificationCount > 0">{{ notificationCount }}</ion-badge>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="menu" (click)="openMenu()">
+      <ion-icon name="menu"></ion-icon>
+      <ion-label>Menu</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
 </ion-footer>
 

@@ -23,11 +23,116 @@
 
     <ion-buttons slot="end">
       <ion-button>
-        <ion-icon name="chatbubbles"></ion-icon>
+        <ion-icon name="chatbubbles" class="chat-icon"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
+<!-- Event Details Modal -->
+<ion-modal [isOpen]="selectedEvent !== null" (ionModalDidDismiss)="selectedEvent = null" class="event-details-modal">
+  <ng-template>
+    <ion-header [translucent]="true" class="event-modal-header">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="selectedEvent = null" class="back-button">
+            <ion-icon name="arrow-back"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="event-modal-content">
+      <div *ngIf="selectedEvent" class="event-details-container">
+        <!-- Event Image with Overlay -->
+        <div class="event-image-wrapper">
+          <img *ngIf="selectedEvent.attachedFile" [src]="selectedEvent.attachedFile" alt="{{ selectedEvent.title }}" class="event-detail-image">
+          <div *ngIf="!selectedEvent.attachedFile" class="event-detail-placeholder">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <div class="image-overlay"></div>
+        </div>
+        
+        <!-- Content Card -->
+        <div class="event-content-card">
+          <!-- Event Title -->
+          <h1 class="event-detail-title">{{ selectedEvent.title }}</h1>
+          
+          <!-- Event Meta Grid -->
+          <div class="event-meta-grid">
+            <div class="meta-card">
+              <div class="meta-icon">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="meta-info">
+                <p class="meta-label">Date & Time</p>
+                <p class="meta-value">{{ selectedEvent.date | date:'EEE, MMM d' }}</p>
+                <p class="meta-time">{{ selectedEvent.date | date:'h:mm a' }}</p>
+              </div>
+            </div>
+            
+            <div class="meta-card">
+              <div class="meta-icon">
+                <ion-icon name="location-outline"></ion-icon>
+              </div>
+              <div class="meta-info">
+                <p class="meta-label">Location</p>
+                <p class="meta-value">{{ selectedEvent.location }}</p>
+              </div>
+            </div>
+            
+            <div class="meta-card" *ngIf="selectedEvent.capacity">
+              <div class="meta-icon">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <div class="meta-info">
+                <p class="meta-label">Going</p>
+                <p class="meta-value">{{ selectedEvent.attendees?.length || 0 }}<span class="meta-capacity"> / {{ selectedEvent.capacity }}</span></p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Divider -->
+          <div class="section-divider"></div>
+          
+          <!-- Description Section -->
+          <div *ngIf="selectedEvent.description" class="description-section">
+            <h3 class="section-title">About this event</h3>
+            <p class="description-text">{{ selectedEvent.description }}</p>
+          </div>
+          
+          <!-- Guests Section -->
+          <div *ngIf="selectedEvent.guests && selectedEvent.guests.length > 0" class="guests-section">
+            <h3 class="section-title">Guests Invited</h3>
+            <div class="guests-list">
+              <div class="guest-item" *ngFor="let guest of selectedEvent.guests">
+                <div class="guest-avatar" [style.background-color]="guest.color">
+                  {{ guest.initials || guest.name.substring(0, 2).toUpperCase() }}
+                </div>
+                <div class="guest-info">
+                  <p class="guest-name">{{ guest.name }}</p>
+                  <p class="guest-email">{{ guest.email }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- CTA Button -->
+          <div class="button-wrapper">
+            <ion-button 
+              expand="block" 
+              fill="solid"
+              color="success"
+              (click)="toggleEventRegistration(selectedEvent)"
+              class="attend-button">
+              <ion-icon [name]="hasUserRegistered(selectedEvent) ? 'checkmark-circle' : 'add-circle'" slot="start"></ion-icon>
+              {{ hasUserRegistered(selectedEvent) ? 'You\'re Going!' : 'Attend Event' }}
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
 
 <ion-content [fullscreen]="true" (ionScroll)="onScroll($event)" [scrollEvents]="true">
   <div class="home-container">
@@ -67,10 +172,13 @@
       <p>No alumni found matching "{{ searchQuery }}"</p>
     </div>
 
-    <!-- Events Section (show when not searching) -->
-    <div *ngIf="!isSearching" class="events-section">
-      <div class="section-header">
-        <h3>Upcoming Events</h3>
+    <!-- Combined Content Card -->
+    <div *ngIf="!isSearching" class="content-wrapper-card">
+      <!-- Events Section (show when not searching) -->
+      <div class="events-section">
+        <div class="section-title">
+        <ion-icon name="calendar" class="section-icon"></ion-icon>
+        <h2>Upcoming Events</h2>
       </div>
 
       <div *ngIf="loadingEvents" class="loading-state">
@@ -83,122 +191,140 @@
         <p>No upcoming events yet.</p>
       </div>
 
-      <div *ngIf="!loadingEvents && events.length > 0" class="events-list">
-        <ion-card class="event-card" *ngFor="let event of events">
-          <ion-card-header>
-            <ion-card-title>{{ event.title }}</ion-card-title>
-            <ion-card-subtitle>
-              <div class="event-meta">
-                <span>
-                  <ion-icon name="calendar-outline"></ion-icon>
-                  {{ event.date | date:'medium' }}
-                </span>
-                <span>
-                  <ion-icon name="location-outline"></ion-icon>
-                  {{ event.location }}
-                </span>
+      <div class="events-scroll-container" *ngIf="!loadingEvents && events.length > 0">
+        <ion-card class="content-card event-card-horizontal" *ngFor="let event of events" (click)="viewEventDetails(event)">
+          <!-- Event Image -->
+          <div class="event-image" *ngIf="event.attachedFile">
+            <img [src]="event.attachedFile" alt="{{ event.title }}">
+          </div>
+          <div class="event-image event-placeholder" *ngIf="!event.attachedFile">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          
+          <!-- Event Info -->
+          <ion-card-content class="event-content">
+            <h3 class="event-title">{{ event.title }}</h3>
+            
+            <div class="event-details">
+              <div class="detail-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>{{ event.date | date:'MMM d, yyyy - h:mm a' }}</span>
               </div>
-            </ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            <p class="event-description">{{ event.description }}</p>
-            <div class="event-actions">
-              <ion-chip *ngIf="event.capacity">
-                <ion-icon name="people-outline"></ion-icon>
-                <ion-label>{{ event.attendees?.length || 0 }} / {{ event.capacity }}</ion-label>
-              </ion-chip>
-              <ion-button
-                size="small"
-                [color]="hasUserRegistered(event) ? 'success' : 'primary'"
-                [disabled]="!hasUserRegistered(event) && isEventFull(event)"
-                (click)="toggleEventRegistration(event)">
-                {{ hasUserRegistered(event) ? 'Registered' : (isEventFull(event) ? 'Full' : 'Attend') }}
-              </ion-button>
+              <div class="detail-item">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ event.location }}</span>
+              </div>
             </div>
           </ion-card-content>
         </ion-card>
       </div>
-    </div>
+      </div>
 
-    <!-- Feed Section (show when not searching) -->
-    <div *ngIf="!isSearching" class="feed-section">
-      <!-- Posts Feed -->
-      <div class="posts-feed" *ngIf="(allPosts$ | async) as posts; else loadingPosts">
-        <ion-card class="post-card" *ngFor="let post of posts">
-          <!-- Post Header -->
-          <ion-card-header>
-            <div class="post-header">
-              <ion-avatar class="user-avatar" (click)="goToAlumniProfile(post.userId)">
-                <img [src]="post.userAvatar || 'https://via.placeholder.com/56'" alt="User avatar" />
-              </ion-avatar>
-              <div class="post-user-info">
-                <h3 class="user-name" (click)="goToAlumniProfile(post.userId)">{{ post.userName }}</h3>
-                <p class="post-timestamp">{{ post.timestamp | date:'short' }}</p>
-              </div>
-              <ion-button fill="clear" size="small" class="menu-button" (click)="openPostMenu(post)">
-                <ion-icon name="ellipsis-vertical"></ion-icon>
-              </ion-button>
+      <div class="section-divider"></div>
+
+      <!-- Suggested Alumni Section -->
+      <div class="suggested-alumni-section">
+        <div class="section-title">
+          <ion-icon name="people" class="section-icon"></ion-icon>
+          <h2>Suggested Alumni to Connect</h2>
+        </div>
+
+        <div class="alumni-scroll-container" *ngIf="suggestedAlumni.length > 0">
+          <div class="alumni-suggestion-card" *ngFor="let alumni of suggestedAlumni">
+            <ion-avatar class="alumni-avatar" (click)="goToAlumniProfile(alumni.id)">
+              <img *ngIf="alumni.photoDataUrl" [src]="alumni.photoDataUrl" [alt]="alumni.firstName" />
+              <ion-icon *ngIf="!alumni.photoDataUrl" name="person-circle"></ion-icon>
+            </ion-avatar>
+            <div class="alumni-info">
+              <h4 class="alumni-name" (click)="goToAlumniProfile(alumni.id)">{{ alumni.firstName }} {{ alumni.lastName }}</h4>
+              <p class="alumni-course">{{ alumni.course || 'No course' }}</p>
+              <p class="alumni-department">{{ alumni.schoolDepartment || 'No department' }}</p>
             </div>
-          </ion-card-header>
+            <ion-button fill="solid" color="success" size="small" class="connect-btn">
+              <ion-icon name="person-add-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <div *ngIf="suggestedAlumni.length === 0" class="empty-state">
+          <ion-icon name="people-outline"></ion-icon>
+          <p>No suggestions available.</p>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Feed Section -->
+      <div class="feed-section">
+        <div class="section-title">
+        <ion-icon name="chatbubbles" class="section-icon"></ion-icon>
+        <h2>Activity Feed</h2>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="!(allPosts$ | async)">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading posts...</p>
+      </div>
+
+      <!-- Posts Feed -->
+      <ng-container *ngIf="(allPosts$ | async) as posts">
+        <div *ngIf="posts.length === 0" class="empty-state">
+          <ion-icon name="newspaper-outline"></ion-icon>
+          <p>No posts yet. Be the first to share something!</p>
+        </div>
+
+        <ion-card class="content-card post-card" *ngFor="let post of posts">
+          <!-- Post Header -->
+          <div class="post-header">
+            <ion-avatar class="post-avatar" (click)="goToAlumniProfile(post.userId)">
+              <img [src]="post.userAvatar || 'https://via.placeholder.com/56'" [alt]="post.userName" />
+            </ion-avatar>
+            <div class="post-user-info">
+              <h4 class="post-user-name" (click)="goToAlumniProfile(post.userId)">{{ post.userName }}</h4>
+              <p class="post-time">{{ post.timestamp | date:'short' }}</p>
+            </div>
+            <ion-button fill="clear" size="small" class="menu-btn" (click)="openPostMenu(post)">
+              <ion-icon name="ellipsis-vertical"></ion-icon>
+            </ion-button>
+          </div>
 
           <!-- Post Content -->
-          <ion-card-content>
+          <ion-card-content class="post-content">
             <p class="post-text" *ngIf="post.text">{{ post.text }}</p>
             <img *ngIf="post.image" [src]="post.image" class="post-image" alt="Post image" />
           </ion-card-content>
 
           <!-- Post Actions -->
           <div class="post-actions">
-            <ion-button 
-              fill="clear" 
-              size="small" 
-              (click)="likePost(post)"
-              [color]="hasUserLiked(post) ? 'success' : ''">
+            <ion-button fill="clear" size="small" (click)="likePost(post)" [color]="hasUserLiked(post) ? 'success' : ''">
               <ion-icon name="arrow-redo-outline" slot="start"></ion-icon>
-              {{ post.likes || 0 }} Forward
+              <span class="action-text">Forward</span>
             </ion-button>
-            <ion-button 
-              fill="clear" 
-              size="small"
-              (click)="openCommentDialog(post)">
+            <ion-button fill="clear" size="small" (click)="openCommentDialog(post)">
               <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-              {{ post.comments?.length || 0 }} Comment
+              <span class="action-text">Comment</span>
             </ion-button>
           </div>
 
           <!-- Comments Section -->
           <div class="comments-section" *ngIf="post.comments && post.comments.length > 0">
-            <div class="comments-list">
-              <div class="comment-item" *ngFor="let comment of post.comments">
-                <ion-avatar class="comment-avatar">
-                  <img [src]="comment.userAvatar || 'https://via.placeholder.com/40'" [alt]="comment.userName" />
-                </ion-avatar>
-                <div class="comment-content">
-                  <div class="comment-header">
-                    <h5 class="comment-user">{{ comment.userName }}</h5>
-                    <p class="comment-time">{{ comment.timestamp | date:'short' }}</p>
-                  </div>
-                  <p class="comment-text">{{ comment.text }}</p>
+            <div class="comment" *ngFor="let comment of post.comments">
+              <ion-avatar class="comment-avatar">
+                <img [src]="comment.userAvatar || 'https://via.placeholder.com/40'" [alt]="comment.userName" />
+              </ion-avatar>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <h5 class="comment-name">{{ comment.userName }}</h5>
+                  <span class="comment-time">{{ comment.timestamp | date:'short' }}</span>
                 </div>
+                <p class="comment-text">{{ comment.text }}</p>
               </div>
             </div>
           </div>
         </ion-card>
-
-        <!-- No Posts State -->
-        <div class="empty-state" *ngIf="posts.length === 0">
-          <ion-icon name="newspaper-outline"></ion-icon>
-          <p>No posts yet. Be the first to share something!</p>
-        </div>
+      </ng-container>
       </div>
-
-      <!-- Loading State -->
-      <ng-template #loadingPosts>
-        <div class="loading-state">
-          <ion-spinner name="crescent"></ion-spinner>
-          <p>Loading posts...</p>
-        </div>
-      </ng-template>
     </div>
   </div>
 </ion-content>

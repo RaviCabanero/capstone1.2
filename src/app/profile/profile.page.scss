@@ -1,5 +1,32 @@
 .profile-container {
-  padding: 16px;
+  padding: 0;
+  background: var(--ion-background-color, #1a1a1a);
+}
+
+// Global Ion Card Styling
+ion-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+// Header and Footer hide on scroll
+ion-header {
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
+
+  &.header-hidden {
+    transform: translateY(-100%);
+  }
+}
+
+ion-footer {
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
+
+  &.footer-hidden {
+    transform: translateY(100%);
+  }
 }
 
 .header-avatar {
@@ -15,11 +42,229 @@
   }
 }
 
-.profile-header {
+// Facebook-Style Profile Header
+.profile-header-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 70px; // Space for avatar overlap + user info
+}
+
+// Cover Image Container
+.cover-image-container {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  .cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+// Avatar Container - Overlapping
+.avatar-container {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  border: 5px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  background: #2a2a2a;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Camera Edit Button
+.camera-edit-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ion-color-primary, #3880ff);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --padding-start: 0;
+  --padding-end: 0;
+  
+  ion-icon {
+    font-size: 20px;
+  }
+  
+  &:hover {
+    background: var(--ion-color-primary-shade, #3171e0);
+  }
+}
+
+// User Info Card
+.user-info-card {
+  padding: 20px 24px;
+  background: rgba(42, 42, 42, 0.6);
+  backdrop-filter: blur(10px);
+  margin: 0 16px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.user-university {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.user-course {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 8px 0;
+}
+
+.user-department {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 6px;
+  
+  ion-icon {
+    font-size: 16px;
+    color: var(--ion-color-primary, #3880ff);
+  }
+}
+
+.edit-profile-btn {
+  --border-radius: 20px;
+  height: 36px;
+  flex-shrink: 0;
+  --color: #16a34a;
+  --border-color: #16a34a;
+}
+
+.edit-profile-btn::part(native) {
+  color: #16a34a;
+}
+
+.user-title {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 12px 0;
+  font-weight: 500;
+}
+
+.user-bio {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+// Responsive Design
+@media (max-width: 576px) {
+  .cover-image-container {
+    height: 200px;
+  }
+  
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-width: 4px;
+  }
+  
+  .avatar-container {
+    bottom: -50px;
+  }
+  
+  .profile-header-wrapper {
+    margin-bottom: 60px;
+  }
+  
+  .user-name {
+    font-size: 22px;
+  }
+  
+  .user-university {
+    font-size: 14px;
+  }
+  
+  .user-course {
+    font-size: 13px;
+  }
+  
+  .user-department {
+    font-size: 12px;
+  }
+  
+  .user-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .edit-profile-btn {
+    align-self: flex-end;
+  }
+  
+  .camera-edit-btn {
+    width: 36px;
+    height: 36px;
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .cover-image-container {
+    height: 180px;
+  }
+  
+  .user-info-card {
+    padding: 16px 20px;
+  }
 }
 
 .profile-icon {
@@ -29,6 +274,32 @@
 
 .profile-info {
   flex: 1;
+}
+
+// About Section
+.about-section {
+  ion-button {
+    --color: #16a34a;
+  }
+
+  ion-button::part(native) {
+    color: #16a34a;
+  }
+
+  ion-button[fill="clear"] {
+    --background: transparent;
+    --background-hover: transparent;
+    --background-activated: transparent;
+    --background-focused: transparent;
+  }
+
+  .about-save-btn {
+    --color: #16a34a;
+  }
+
+  .about-save-btn::part(native) {
+    color: #16a34a;
+  }
 }
 
 ion-card-title {
@@ -88,20 +359,74 @@ ion-item h3 {
   flex: 1;
   margin: 0;
 }
+
+.custom-tab-bar {
+  --background: #ffffff;
+  --border: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  height: 60px;
+
+  ion-tab-button {
+    --color: #666666;
+    --color-selected: #148245;
+    --background: #ffffff;
+    --background-focused: #ffffff;
+    --ripple-color: rgba(20, 130, 69, 0.1);
+    
+    ion-icon {
+      font-size: 24px;
+      margin-bottom: 2px;
+    }
+    
+    ion-label {
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+  }
+}
 // Experience Section Styles
 .experience-section {
   margin-top: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(22, 163, 74, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.06), rgba(34, 197, 94, 0.04));
+    border-bottom: 1px solid rgba(22, 163, 74, 0.15);
+  }
+
+  ion-button {
+    --color: #16a34a;
+  }
+
+  ion-button::part(native) {
+    color: #16a34a;
+  }
 
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 0;
+
+    .section-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .section-icon {
+        font-size: 20px;
+        color: #16a34a;
+      }
+    }
 
     ion-card-title {
       font-size: 18px;
-      font-weight: 600;
+      font-weight: 700;
       margin: 0;
+      color: #16a34a;
     }
 
     .header-buttons {
@@ -111,7 +436,7 @@ ion-item h3 {
 
       ion-button {
         font-size: 12px;
-        color: var(--ion-color-primary);
+        color: #16a34a;
         text-decoration: none;
         --padding-start: 0;
         --padding-end: 0;
@@ -128,6 +453,14 @@ ion-item h3 {
 .skills-section {
   margin-top: 16px;
 
+  ion-button {
+    --color: #16a34a;
+  }
+
+  ion-button::part(native) {
+    color: #16a34a;
+  }
+
   .section-header {
     display: flex;
     justify-content: space-between;
@@ -147,7 +480,7 @@ ion-item h3 {
 
       ion-button {
         font-size: 12px;
-        color: var(--ion-color-primary);
+        color: #16a34a;
         text-decoration: none;
         --padding-start: 0;
         --padding-end: 0;
@@ -189,7 +522,7 @@ ion-item h3 {
 
       .endorsement-count {
         font-size: 11px;
-        color: var(--ion-color-primary);
+        color: #16a34a;
         margin: 0;
         display: flex;
         align-items: center;
@@ -201,15 +534,23 @@ ion-item h3 {
       }
     }
 
-    ion-button {
-      --padding-start: 0;
-      --padding-end: 0;
-      width: 24px;
-      height: 24px;
-      margin: 0;
+    .skill-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
 
-      ion-icon {
-        font-size: 16px;
+      ion-button {
+        --padding-start: 0;
+        --padding-end: 0;
+        --color: #16a34a;
+        width: 24px;
+        height: 24px;
+        margin: 0;
+
+        ion-icon {
+          font-size: 16px;
+          color: #16a34a;
+        }
       }
     }
   }
@@ -256,6 +597,14 @@ ion-item h3 {
 .accomplishments-section {
   margin-top: 16px;
 
+  ion-button {
+    --color: #16a34a;
+  }
+
+  ion-button::part(native) {
+    color: #16a34a;
+  }
+
   .section-header {
     display: flex;
     justify-content: space-between;
@@ -275,7 +624,7 @@ ion-item h3 {
 
       ion-button {
         font-size: 12px;
-        color: var(--ion-color-primary);
+        color: #16a34a;
         text-decoration: none;
         --padding-start: 0;
         --padding-end: 0;
@@ -403,6 +752,14 @@ ion-item h3 {
 .contact-section {
   margin-top: 16px;
 
+  ion-button {
+    --color: #16a34a;
+  }
+
+  ion-button::part(native) {
+    color: #16a34a;
+  }
+
   .section-header {
     display: flex;
     justify-content: space-between;
@@ -418,11 +775,12 @@ ion-item h3 {
     ion-button {
       --padding-start: 0;
       --padding-end: 0;
-      color: var(--ion-color-primary);
+      color: #16a34a;
       margin: 0;
 
       ion-icon {
         font-size: 18px;
+        color: #16a34a;
       }
     }
   }
@@ -449,7 +807,7 @@ ion-item h3 {
 
     ion-icon {
       font-size: 18px;
-      color: var(--ion-color-primary);
+      color: #16a34a;
     }
 
     .contact-label {
@@ -469,7 +827,7 @@ ion-item h3 {
 
   .contact-link {
     font-size: 14px;
-    color: var(--ion-color-primary);
+    color: #16a34a;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -483,6 +841,7 @@ ion-item h3 {
     ion-icon {
       font-size: 12px;
       flex-shrink: 0;
+      color: #16a34a;
     }
   }
 
@@ -494,7 +853,7 @@ ion-item h3 {
     .contact-value {
       flex: 1;
       font-size: 13px;
-      color: var(--ion-color-primary);
+      color: #16a34a;
       word-break: break-all;
     }
 
@@ -503,9 +862,11 @@ ion-item h3 {
       --padding-end: 0;
       flex-shrink: 0;
       margin: 0;
+      --color: #16a34a;
 
       ion-icon {
         font-size: 16px;
+        color: #16a34a;
       }
     }
   }
@@ -520,7 +881,8 @@ ion-item h3 {
 
 .alumni-id-card {
   margin-top: 16px;
-  background: linear-gradient(135deg, var(--ion-color-primary-light), var(--ion-color-light));
+  background: rgba(42, 42, 42, 0.6);
+  border: 2px solid #16a34a;
 
   ion-card-header {
     ion-card-title {
@@ -530,10 +892,11 @@ ion-item h3 {
       font-size: 18px;
       font-weight: 600;
       margin: 0;
-      color: var(--ion-color-primary);
+      color: #16a34a;
 
       ion-icon {
         font-size: 24px;
+        color: #16a34a;
       }
     }
   }
@@ -541,13 +904,21 @@ ion-item h3 {
   ion-card-content {
     .alumni-description {
       font-size: 14px;
-      color: var(--ion-color-dark);
+      color: #ffffff;
       margin: 0 0 16px 0;
       line-height: 1.5;
     }
 
     ion-button {
       font-weight: 500;
+      --color: #16a34a;
+      --background: transparent;
+      --border-color: transparent;
+    }
+
+    ion-button::part(native) {
+      color: #16a34a;
+      border: none;
     }
 
     .request-status {
@@ -562,17 +933,19 @@ ion-item h3 {
 
         ion-icon {
           font-size: 24px;
+          color: #16a34a;
         }
 
         .status-text {
           font-size: 16px;
           font-weight: 600;
+          color: #ffffff;
         }
       }
 
       .request-date {
         font-size: 12px;
-        color: var(--ion-color-medium);
+        color: #e0e0e0;
         margin: 0 0 12px 0;
       }
 
@@ -587,6 +960,7 @@ ion-item h3 {
           display: flex;
           align-items: center;
           gap: 6px;
+          color: #ffffff;
 
           ion-icon {
             font-size: 16px;
@@ -595,27 +969,27 @@ ion-item h3 {
         }
 
         .info-text {
-          color: var(--ion-color-primary);
-          background: rgba(102, 205, 170, 0.1);
+          color: #ffffff;
+          background: rgba(22, 163, 74, 0.2);
         }
 
         .success-text {
-          color: var(--ion-color-success);
-          background: rgba(34, 197, 94, 0.1);
+          color: #ffffff;
+          background: rgba(34, 197, 94, 0.2);
         }
 
         .error-text {
-          color: var(--ion-color-danger);
-          background: rgba(239, 68, 68, 0.1);
+          color: #ffffff;
+          background: rgba(239, 68, 68, 0.2);
         }
       }
 
       &.status-pending {
-        background: rgba(102, 205, 170, 0.08);
-        border: 1px solid rgba(102, 205, 170, 0.3);
+        background: rgba(22, 163, 74, 0.08);
+        border: 1px solid rgba(22, 163, 74, 0.3);
 
         .status-badge {
-          color: var(--ion-color-primary);
+          color: #16a34a;
         }
       }
 
@@ -651,10 +1025,11 @@ ion-item h3 {
 // Dark mode for alumni card
 @media (prefers-color-scheme: dark) {
   .alumni-id-card {
-    background: linear-gradient(135deg, var(--ion-color-primary-shade), var(--ion-color-dark));
+    background: rgba(42, 42, 42, 0.8);
+    border: 2px solid #16a34a;
 
     ion-card-header ion-card-title {
-      color: var(--ion-color-primary);
+      color: #16a34a;
     }
 
     ion-card-content .alumni-description {
@@ -663,8 +1038,8 @@ ion-item h3 {
 
     .request-status {
       &.status-pending {
-        background: rgba(102, 205, 170, 0.15);
-        border-color: rgba(102, 205, 170, 0.4);
+        background: rgba(22, 163, 74, 0.15);
+        border-color: rgba(22, 163, 74, 0.4);
       }
 
       &.status-approved {
@@ -700,18 +1075,24 @@ ion-item h3 {
   gap: 12px;
   margin-bottom: 16px;
   align-items: flex-start;
+  padding: 12px;
+  background: rgba(22, 163, 74, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(22, 163, 74, 0.1);
 
   .company-logo {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
 
     ion-icon {
-      font-size: 24px;
+      font-size: 26px;
       color: white;
     }
   }
@@ -721,15 +1102,16 @@ ion-item h3 {
 
     .company-name {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       margin: 0 0 4px 0;
       color: var(--ion-color-dark);
     }
 
     .company-duration {
       font-size: 13px;
-      color: var(--ion-color-medium);
+      color: #16a34a;
       margin: 0;
+      font-weight: 500;
     }
   }
 }
@@ -745,13 +1127,17 @@ ion-item h3 {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(180deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+    background: linear-gradient(180deg, #16a34a, #15803d);
   }
 }
 
 .role {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(22, 163, 74, 0.03);
+  border-radius: 8px;
+  border-left: 3px solid #16a34a;
 
   &.last {
     margin-bottom: 0;
@@ -759,14 +1145,14 @@ ion-item h3 {
 
   .timeline-dot {
     position: absolute;
-    left: -17px;
-    top: 8px;
+    left: -16px;
+    top: 14px;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     background: white;
-    border: 3px solid var(--ion-color-primary);
-    box-shadow: 0 0 0 2px var(--ion-color-light);
+    border: 3px solid #16a34a;
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15);
   }
 
   .role-details {
@@ -826,6 +1212,13 @@ ion-item h3 {
   padding: 24px 16px;
   color: var(--ion-color-medium);
 
+  .empty-icon {
+    font-size: 48px;
+    color: #16a34a;
+    margin-bottom: 12px;
+    display: block;
+  }
+
   p {
     font-size: 14px;
     margin: 0 0 16px 0;
@@ -834,6 +1227,40 @@ ion-item h3 {
   ion-button {
     margin-top: 8px;
   }
+}
+
+// Activity Section
+.activity-section {
+  ion-button {
+    --color: #16a34a;
+    --border-color: #16a34a;
+  }
+
+  ion-button::part(native) {
+    color: #16a34a;
+    border-color: #16a34a;
+  }
+
+  ion-button[fill="outline"] {
+    --border-width: 0;
+    --border-color: transparent;
+    --background: transparent;
+  }
+
+  ion-button[fill="outline"]::part(native) {
+    border: 0;
+    background: transparent;
+  }
+}
+
+// Activity Section - More Posts Hint
+.more-posts-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #16a34a;
+  margin: 12px 0 0 0;
+  padding: 8px;
+  font-style: italic;
 }
 
 .digital-id-section {
@@ -854,6 +1281,10 @@ ion-item h3 {
 
 .digital-id-card.pending {
   min-height: 190px;
+  background: linear-gradient(135deg, rgba(186, 230, 253, 0.9), rgba(165, 243, 252, 0.9)),
+    url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1600&q=60');
+  background-size: cover;
+  background-position: center;
 }
 
 .digital-id-glass {

@@ -59,7 +59,7 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.3fr 1.2fr 1.2fr 1.2fr 1.4fr 1.3fr 1.3fr 1.3fr 1.3fr;
+  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.3fr 1.2fr 1.2fr 1.2fr 1.4fr 1.3fr 1.3fr 1.6fr 1.3fr 1.3fr;
   background: white;
   color: black;
   font-weight: 600;
@@ -70,7 +70,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.3fr 1.2fr 1.2fr 1.2fr 1.4fr 1.3fr 1.3fr 1.3fr 1.3fr;
+  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.3fr 1.2fr 1.2fr 1.2fr 1.4fr 1.3fr 1.3fr 1.6fr 1.3fr 1.3fr;
   padding: 0.75rem 1rem;
   align-items: center;
   background: white;
@@ -118,7 +118,8 @@
   }
 
   .col.batch,
-  .col.email {
+  .col.email,
+  .col.address {
     display: none;
   }
 }
@@ -131,7 +132,8 @@
 
   .col.dept,
   .col.batch,
-  .col.email {
+  .col.email,
+  .col.address {
     display: none;
   }
 }

@@ -1,13 +1,13 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="light">
     <ion-buttons slot="start">
       <ion-button (click)="cancel()">
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Edit Contact Info</ion-title>
+    <ion-title class="header-title">Edit Contact Info</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="save()" [disabled]="contactForm.invalid">
+      <ion-button (click)="save()" [disabled]="contactForm.invalid" color="success">
         Save
       </ion-button>
     </ion-buttons>
@@ -92,7 +92,7 @@
       <ion-button expand="block" fill="outline" (click)="cancel()">
         Cancel
       </ion-button>
-      <ion-button expand="block" (click)="save()" [disabled]="contactForm.invalid">
+      <ion-button expand="block" color="success" (click)="save()" [disabled]="contactForm.invalid">
         Save Contact Info
       </ion-button>
     </div>

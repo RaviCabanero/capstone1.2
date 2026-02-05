@@ -36,6 +36,11 @@ export class ProfilePage implements OnInit {
   currentUserId: string | null = null;
   isOwnProfile: boolean = true;
 
+  // Scroll handling
+  showHeader: boolean = true;
+  showFooter: boolean = true;
+  private lastScrollTop: number = 0;
+
   private monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December',
@@ -457,14 +462,23 @@ export class ProfilePage implements OnInit {
   /**
    * Open skill modal for adding new skill
    */
-  async openSkillModal() {
+  async openSkillModal(skill?: any) {
     const modal = await this.modalCtrl.create({
       component: SkillModalComponent,
+      componentProps: {
+        skill: skill || null,
+      },
     });
     await modal.present();
     const { data } = await modal.onWillDismiss();
     if (data) {
-      await this.addSkill(data);
+      if (skill) {
+        // Editing existing skill
+        await this.updateSkill(skill, data);
+      } else {
+        // Adding new skill
+        await this.addSkill(data);
+      }
     }
   }
 
@@ -508,6 +522,45 @@ export class ProfilePage implements OnInit {
       console.log('Skill added successfully');
     } catch (error) {
       console.error('Failed to add skill', error);
+    }
+  }
+
+  /**
+   * Update existing skill
+   */
+  async updateSkill(oldSkill: any, updatedSkill: any) {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      // Get current user profile
+      const userDoc = await new Promise<any>((resolve, reject) => {
+        const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
+          data => {
+            unsubscribe.unsubscribe();
+            resolve(data);
+          },
+          err => {
+            unsubscribe.unsubscribe();
+            reject(err);
+          }
+        );
+      });
+
+      // Find and update the skill
+      const skills = userDoc?.skills || [];
+      const updatedSkills = skills.map((skill: any) =>
+        skill.name === oldSkill.name ? { ...updatedSkill, updatedAt: new Date().toISOString() } : skill
+      );
+
+      await updateDoc(doc(this.firestore, `users/${uid}`), {
+        skills: updatedSkills,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('Skill updated successfully');
+    } catch (error) {
+      console.error('Failed to update skill', error);
     }
   }
 
@@ -729,5 +782,38 @@ export class ProfilePage implements OnInit {
    */
   goToHome() {
     this.router.navigate(['/home']);
+  }
+
+  /**
+   * Navigate to alumni network page
+   */
+  goToAlumniNetwork() {
+    this.router.navigate(['/alumni-network']);
+  }
+
+  /**
+   * Navigate to notifications page
+   */
+  goToNotifications() {
+    this.router.navigate(['/notifications']);
+  }
+
+  /**
+   * Handle scroll event to show/hide header and footer
+   */
+  onScroll(event: any) {
+    const scrollTop = event.detail.scrollTop;
+    
+    if (scrollTop > this.lastScrollTop) {
+      // Scrolling down
+      this.showHeader = false;
+      this.showFooter = false;
+    } else {
+      // Scrolling up
+      this.showHeader = true;
+      this.showFooter = true;
+    }
+    
+    this.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
   }
 }

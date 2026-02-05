@@ -1,13 +1,13 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="light">
     <ion-buttons slot="start">
       <ion-button (click)="cancel()">
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Add Skill</ion-title>
+    <ion-title class="header-title">Add Skill</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="save()" [disabled]="skillForm.invalid">
+      <ion-button (click)="save()" [disabled]="skillForm.invalid" color="success">
         Save
       </ion-button>
     </ion-buttons>
@@ -16,67 +16,76 @@
 
 <ion-content>
   <form [formGroup]="skillForm" class="skill-form-container">
-    <!-- Skill Name -->
-    <ion-item lines="full">
-      <ion-label position="floating">
-        Skill Name
-        <span class="required">*</span>
-      </ion-label>
-      <ion-input
-        formControlName="name"
-        type="text"
-        placeholder="e.g., Angular, Python, UI Design"
-      ></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="submitted && name?.invalid">
-      <p class="error-text" *ngIf="name?.hasError('required')">
-        <ion-icon name="alert-circle"></ion-icon>
-        Skill name is required
-      </p>
-      <p class="error-text" *ngIf="name?.hasError('minlength')">
-        <ion-icon name="alert-circle"></ion-icon>
-        Skill name must be at least 2 characters
-      </p>
-    </ion-text>
+    <!-- Skill Details Section -->
+    <ion-card class="form-card">
+      <!-- Skill Name -->
+      <div class="form-section">
+        <ion-item lines="full">
+          <ion-label position="floating">
+            Skill Name
+            <span class="required">*</span>
+          </ion-label>
+          <ion-input
+            formControlName="name"
+            type="text"
+            placeholder="e.g., Angular, Python, UI Design"
+          ></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="submitted && name?.invalid">
+          <p class="error-text" *ngIf="name?.hasError('required')">
+            <ion-icon name="alert-circle"></ion-icon>
+            Skill name is required
+          </p>
+          <p class="error-text" *ngIf="name?.hasError('minlength')">
+            <ion-icon name="alert-circle"></ion-icon>
+            Skill name must be at least 2 characters
+          </p>
+        </ion-text>
+      </div>
 
-    <!-- Category -->
-    <ion-item lines="full">
-      <ion-label position="floating">
-        Category
-        <span class="required">*</span>
-      </ion-label>
-      <ion-select formControlName="category" placeholder="Select category">
-        <ion-select-option *ngFor="let cat of categories" [value]="cat">
-          {{ cat }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-    <ion-text color="danger" *ngIf="submitted && category?.invalid">
-      <p class="error-text">
-        <ion-icon name="alert-circle"></ion-icon>
-        Category is required
-      </p>
-    </ion-text>
+      <!-- Category -->
+      <div class="form-section">
+        <ion-item lines="full">
+          <ion-label position="floating">
+            Category
+            <span class="required">*</span>
+          </ion-label>
+          <ion-select formControlName="category" placeholder="Select category">
+            <ion-select-option *ngFor="let cat of categories" [value]="cat">
+              {{ cat }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-text color="danger" *ngIf="submitted && category?.invalid">
+          <p class="error-text">
+            <ion-icon name="alert-circle"></ion-icon>
+            Category is required
+          </p>
+        </ion-text>
+      </div>
 
-    <!-- Proficiency Level -->
-    <ion-item lines="full">
-      <ion-label position="floating">
-        Proficiency Level
-        <span class="required">*</span>
-      </ion-label>
-      <ion-select formControlName="proficiency" placeholder="Select proficiency">
-        <ion-select-option *ngFor="let prof of proficiencies" [value]="prof">
-          {{ prof }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
+      <!-- Proficiency Level -->
+      <div class="form-section">
+        <ion-item lines="full">
+          <ion-label position="floating">
+            Proficiency Level
+            <span class="required">*</span>
+          </ion-label>
+          <ion-select formControlName="proficiency" placeholder="Select proficiency">
+            <ion-select-option *ngFor="let prof of proficiencies" [value]="prof">
+              {{ prof }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+    </ion-card>
 
     <!-- Action Buttons -->
     <div class="button-group">
       <ion-button expand="block" fill="outline" (click)="cancel()">
         Cancel
       </ion-button>
-      <ion-button expand="block" (click)="save()" [disabled]="skillForm.invalid">
+      <ion-button expand="block" color="success" (click)="save()" [disabled]="skillForm.invalid">
         Save Skill
       </ion-button>
     </div>

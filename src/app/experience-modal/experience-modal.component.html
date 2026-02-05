@@ -1,13 +1,13 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="light">
     <ion-buttons slot="start">
       <ion-button (click)="cancel()">
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="header-title">Add experience</ion-title>
+    <ion-title class="header-title">Add Experience</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="save()" [disabled]="experienceForm.invalid && submitted" color="primary" strong>
+      <ion-button (click)="save()" [disabled]="experienceForm.invalid && submitted" color="success" strong>
         Save
       </ion-button>
     </ion-buttons>
@@ -21,7 +21,7 @@
       <ion-card class="share-section">
         <ion-item lines="none">
           <ion-label>Share with network</ion-label>
-          <ion-toggle formControlName="shareWithNetwork"></ion-toggle>
+          <ion-toggle formControlName="shareWithNetwork" color="success"></ion-toggle>
         </ion-item>
         <p class="helper-text">
           If enabled, your network may be notified of job changes, education changes, and work anniversaries.
@@ -162,7 +162,7 @@
       <!-- Action Buttons -->
       <div class="button-group">
         <ion-button expand="block" fill="outline" (click)="cancel()">Cancel</ion-button>
-        <ion-button expand="block" [disabled]="experienceForm.invalid && submitted" (click)="save()">
+        <ion-button expand="block" color="success" [disabled]="experienceForm.invalid && submitted" (click)="save()">
           Save Experience
         </ion-button>
       </div>

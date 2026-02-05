@@ -20,14 +20,45 @@ export class CreateEventsPage implements OnInit {
   showForm = false;
   editingEventId: string | null = null;
   currentUserId: string | null = null;
+  minDate = new Date().toISOString();
   
+  // Event form model
   newEvent = {
     title: '',
     description: '',
     date: new Date().toISOString(),
     location: '',
-    capacity: null as number | null
+    capacity: null as number | null,
+    duration: '2',
+    startTime: new Date().toISOString(),
+    endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    color: '#16a34a',
+    availability: 'available',
+    visibility: 'public'
   };
+
+  // Color options for events
+  eventColors = [
+    '#16a34a', // green
+    '#3b82f6', // blue
+    '#f59e0b', // amber
+    '#ef4444', // red
+    '#8b5cf6', // purple
+    '#ec4899', // pink
+    '#06b6d4', // cyan
+    '#84cc16'  // lime
+  ];
+
+  // Guest management
+  guestEmail = '';
+  guests = [
+    { name: 'Abdul Hamid', email: 'abdul@example.com', initials: 'AH', color: '#3b82f6' },
+    { name: 'Khalessi', email: 'khalessi@example.com', initials: 'KH', color: '#ec4899' },
+    { name: 'Johnny Depp', email: 'johnny@example.com', initials: 'JD', color: '#8b5cf6' }
+  ];
+
+  // Attached file
+  attachedFile: string | null = null;
 
   constructor(
     private firestore: Firestore,
@@ -41,7 +72,82 @@ export class CreateEventsPage implements OnInit {
     if (this.auth.currentUser) {
       this.currentUserId = this.auth.currentUser.uid;
     }
-    this.loadEvents();
+  }
+
+  selectColor(color: string) {
+    this.newEvent.color = color;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Please select an image file', 'warning');
+      return;
+    }
+
+    // Check file size (limit to 500KB for Firestore)
+    if (file.size > 500000) {
+      this.showToast('Image size must be less than 500KB', 'warning');
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.attachedFile = reader.result as string;
+      this.showToast('Image attached successfully', 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeImage() {
+    this.attachedFile = null;
+    this.showToast('Image removed', 'success');
+  }
+
+  addGuest() {
+    if (!this.guestEmail.trim()) {
+      this.showToast('Please enter a guest email', 'warning');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.guestEmail)) {
+      this.showToast('Please enter a valid email address', 'warning');
+      return;
+    }
+
+    // Generate initials and random color
+    const name = this.guestEmail.split('@')[0];
+    const initials = name.substring(0, 2).toUpperCase();
+    const colors = ['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#06b6d4'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    this.guests.push({
+      name: name,
+      email: this.guestEmail,
+      initials: initials,
+      color: randomColor
+    });
+
+    this.guestEmail = '';
+    this.showToast('Guest added', 'success');
+  }
+
+  removeGuest(guest: any) {
+    const index = this.guests.indexOf(guest);
+    if (index > -1) {
+      this.guests.splice(index, 1);
+      this.showToast('Guest removed', 'success');
+    }
+  }
+
+  cancel() {
+    this.resetForm();
+    // Navigate back or close modal
   }
 
   loadEvents() {
@@ -84,17 +190,47 @@ export class CreateEventsPage implements OnInit {
       description: '',
       date: new Date().toISOString(),
       location: '',
-      capacity: null
+      capacity: null,
+      duration: '2',
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+      color: '#16a34a',
+      availability: 'available',
+      visibility: 'public'
     };
+    this.guests = [];
+    this.guestEmail = '';
+    this.attachedFile = null;
     this.editingEventId = null;
   }
 
   async createEvent() {
-    if (!this.newEvent.title.trim() || !this.newEvent.description.trim() || 
-        !this.newEvent.date || !this.newEvent.location.trim()) {
-      await this.showToast('Please fill in all required fields', 'warning');
+    // Validate required fields
+    if (!this.newEvent.title.trim()) {
+      await this.showToast('Event name is required', 'warning');
       return;
     }
+
+    if (!this.newEvent.date) {
+      await this.showToast('Event date is required', 'warning');
+      return;
+    }
+
+    if (!this.newEvent.location.trim()) {
+      await this.showToast('Location is required', 'warning');
+      return;
+    }
+
+    if (!this.newEvent.description.trim()) {
+      await this.showToast('Event description is required', 'warning');
+      return;
+    }
+
+    // Calculate end time based on duration
+    const startTime = new Date(this.newEvent.startTime);
+    const durationHours = parseInt(this.newEvent.duration);
+    const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+    this.newEvent.endTime = endTime.toISOString();
 
     try {
       console.log('📝 Current User ID:', this.currentUserId);
@@ -109,6 +245,14 @@ export class CreateEventsPage implements OnInit {
           date: this.newEvent.date,
           location: this.newEvent.location,
           capacity: this.newEvent.capacity || null,
+          duration: this.newEvent.duration,
+          startTime: this.newEvent.startTime,
+          endTime: this.newEvent.endTime,
+          color: this.newEvent.color,
+          availability: this.newEvent.availability,
+          visibility: this.newEvent.visibility,
+          guests: this.guests.map(g => ({ name: g.name, email: g.email })),
+          attachedFile: this.attachedFile,
           updatedAt: new Date()
         });
         await this.showToast('Event updated successfully!', 'success');
@@ -122,6 +266,14 @@ export class CreateEventsPage implements OnInit {
           date: this.newEvent.date,
           location: this.newEvent.location,
           capacity: this.newEvent.capacity || null,
+          duration: this.newEvent.duration,
+          startTime: this.newEvent.startTime,
+          endTime: this.newEvent.endTime,
+          color: this.newEvent.color,
+          availability: this.newEvent.availability,
+          visibility: this.newEvent.visibility,
+          guests: this.guests.map(g => ({ name: g.name, email: g.email })),
+          attachedFile: this.attachedFile,
           isGlobal: true,
           createdBy: this.currentUserId,
           createdAt: new Date(),
@@ -162,8 +314,23 @@ export class CreateEventsPage implements OnInit {
       description: event.description || '',
       date: event.date || '',
       location: event.location || '',
-      capacity: event.capacity ?? null
+      capacity: event.capacity ?? null,
+      duration: event.duration || '2',
+      startTime: event.startTime || new Date().toISOString(),
+      endTime: event.endTime || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+      color: event.color || '#16a34a',
+      availability: event.availability || 'available',
+      visibility: event.visibility || 'public'
     };
+    // Load guests if available
+    if (event.guests && Array.isArray(event.guests)) {
+      this.guests = event.guests.map((g: any) => ({
+        name: g.name,
+        email: g.email,
+        initials: g.name.substring(0, 2).toUpperCase(),
+        color: '#' + Math.floor(Math.random()*16777215).toString(16)
+      }));
+    }
   }
 
   async confirmDelete(event: any) {

@@ -59,7 +59,7 @@ export class ActivityPage implements OnInit {
       buttons: [
         {
           text: 'Share',
-          icon: 'share-social',
+          icon: 'arrow-redo-outline',
           handler: () => {
             this.sharePost(post);
           },
