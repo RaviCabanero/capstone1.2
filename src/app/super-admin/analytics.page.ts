@@ -2,8 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { AdminService } from '../services/admin.service';
-import { Observable, of, from, startWith } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, of, from, startWith, switchMap, map } from 'rxjs';
+
+interface DepartmentSummary {
+  department: string;
+  userCount: number;
+  percentage?: number;
+}
 
 @Component({
   selector: 'app-analytics',
@@ -14,7 +19,7 @@ import { switchMap } from 'rxjs/operators';
 })
 export class AnalyticsPage implements OnInit {
   analyticsData$: Observable<any>;
-  deptSummary$: Observable<any[]>;
+  deptSummary$: Observable<DepartmentSummary[]>;
 
   constructor(private adminService: AdminService) {
     this.analyticsData$ = of(null).pipe(
@@ -22,9 +27,20 @@ export class AnalyticsPage implements OnInit {
       startWith({})
     );
 
-    this.deptSummary$ = of(null).pipe(
-      switchMap(() => from(this.adminService.getDepartmentSummary())),
-      startWith([])
+    // Calculate percentage for each department based on total users
+    this.deptSummary$ = this.analyticsData$.pipe(
+      switchMap(stats => {
+        const totalUsers = stats?.totalUsers || 1;
+        return from(this.adminService.getDepartmentSummary()).pipe(
+          map((departments: any[]) =>
+            departments.map(dept => ({
+              ...dept,
+              percentage: Math.round((dept.userCount / totalUsers) * 100)
+            }))
+          ),
+          startWith([])
+        );
+      })
     );
   }
 
@@ -38,9 +54,19 @@ export class AnalyticsPage implements OnInit {
       startWith({})
     );
 
-    this.deptSummary$ = of(null).pipe(
-      switchMap(() => from(this.adminService.getDepartmentSummary())),
-      startWith([])
+    this.deptSummary$ = this.analyticsData$.pipe(
+      switchMap(stats => {
+        const totalUsers = stats?.totalUsers || 1;
+        return from(this.adminService.getDepartmentSummary()).pipe(
+          map((departments: any[]) =>
+            departments.map(dept => ({
+              ...dept,
+              percentage: Math.round((dept.userCount / totalUsers) * 100)
+            }))
+          ),
+          startWith([])
+        );
+      })
     );
   }
 }

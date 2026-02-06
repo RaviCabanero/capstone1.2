@@ -1,77 +1,139 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="danger">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/super-admin"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Lock/Disable Accounts</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="page-wrapper">
+  <div class="lock-accounts-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Lock Accounts</h1>
+        <p>Manage user access by locking or unlocking accounts.</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-badge total">
+          <ion-icon name="people-outline"></ion-icon>
+          <span class="stat-value">{{ totalUsersCount }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-badge locked">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <span class="stat-value">{{ lockedUsersCount }}</span>
+          <span class="stat-label">Locked</span>
+        </div>
+        <div class="stat-badge active">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <span class="stat-value">{{ activeUsersCount }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+      </div>
+    </div>
 
-<ion-content [fullscreen]="true">
-  <div class="container">
     <!-- Loading Spinner -->
-    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+    <div class="loading-spinner" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
 
-    <!-- Search and Filter -->
-    <ion-card *ngIf="!isLoading" class="controls-card">
-      <ion-card-content>
-        <ion-searchbar
-          placeholder="Search by name or email..."
-          [(ngModel)]="searchTerm"
-          (ionChange)="onSearchChange()"
-        ></ion-searchbar>
+    <!-- Controls -->
+    <div class="section-card controls-card" *ngIf="!isLoading">
+      <div class="controls-grid">
+        <div class="search-wrapper">
+          <ion-icon name="search-outline"></ion-icon>
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+          />
+        </div>
 
-        <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange()">
-          <ion-segment-button value="all">
-            <ion-label>All</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="locked">
-            <ion-label>Locked</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="active">
-            <ion-label>Active</ion-label>
-          </ion-segment-button>
-        </ion-segment>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Users List -->
-    <ion-card *ngIf="!isLoading">
-      <ion-card-header>
-        <ion-card-title>
-          Accounts ({{ filteredUsers.length }})
-        </ion-card-title>
-      </ion-card-header>
-
-      <ion-card-content *ngIf="filteredUsers.length > 0; else noUsers">
-        <ion-list lines="inset">
-          <ion-item *ngFor="let user of filteredUsers" class="user-item">
-            <ion-label>
-              <h2>{{ user.firstName }} {{ user.lastName }}</h2>
-              <p>{{ user.email }}</p>
-              <p class="status-text" [class.locked]="user.isLocked">
-                {{ user.isLocked ? '🔒 Locked' : '✅ Active' }}
-              </p>
-            </ion-label>
-            <ion-button
-              slot="end"
-              [color]="user.isLocked ? 'success' : 'danger'"
-              fill="outline"
-              (click)="toggleLockAccount(user)"
+        <div class="filter-group">
+          <label>Status Filter</label>
+          <div class="filter-buttons">
+            <button
+              type="button"
+              [class.active]="filterStatus === 'all'"
+              (click)="filterStatus = 'all'; onFilterChange()"
             >
-              {{ user.isLocked ? 'Unlock' : 'Lock' }}
-            </ion-button>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
+              All
+            </button>
+            <button
+              type="button"
+              [class.active]="filterStatus === 'locked'"
+              (click)="filterStatus = 'locked'; onFilterChange()"
+            >
+              Locked
+            </button>
+            <button
+              type="button"
+              [class.active]="filterStatus === 'active'"
+              (click)="filterStatus = 'active'; onFilterChange()"
+            >
+              Active
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accounts Table -->
+    <div class="section-card" *ngIf="!isLoading">
+      <div class="section-header">
+        <div class="section-title">
+          <ion-icon name="shield-outline"></ion-icon>
+          <h2>Account Security</h2>
+        </div>
+        <p class="section-subtitle">Review account status and manage access</p>
+      </div>
+
+      <div class="table-wrapper" *ngIf="filteredUsers.length > 0; else noUsers">
+        <table class="accounts-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th class="actions-col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers">
+              <td class="name-cell">
+                <div class="user-avatar">
+                  {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                </div>
+                <div class="user-info">
+                  <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="user-id">ID: {{ user.uid }}</span>
+                </div>
+              </td>
+              <td class="email-cell">
+                <a class="email-link" [href]="'mailto:' + user.email">{{ user.email }}</a>
+              </td>
+              <td class="status-cell">
+                <span class="status-badge" [class.locked]="user.isLocked" [class.active]="!user.isLocked">
+                  <ion-icon [name]="user.isLocked ? 'lock-closed-outline' : 'checkmark-circle-outline'"></ion-icon>
+                  {{ user.isLocked ? 'Locked' : 'Active' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <ion-button
+                  [color]="user.isLocked ? 'success' : 'danger'"
+                  fill="outline"
+                  size="small"
+                  (click)="toggleLockAccount(user)"
+                >
+                  {{ user.isLocked ? 'Unlock' : 'Lock' }}
+                </ion-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <ng-template #noUsers>
-        <ion-card-content>
-          <ion-text color="medium">
-            <p>No accounts found.</p>
-          </ion-text>
-        </ion-card-content>
+        <div class="empty-state">
+          <ion-icon name="lock-closed-outline" class="empty-icon"></ion-icon>
+          <h3>No accounts found</h3>
+          <p>Try adjusting your search or filter settings.</p>
+        </div>
       </ng-template>
-    </ion-card>
+    </div>
   </div>
-</ion-content>
+</div>

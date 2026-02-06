@@ -28,6 +28,9 @@ export class LockAccountsPage implements OnInit {
   isLoading = true;
   searchTerm = '';
   filterStatus = 'all';
+  totalUsersCount = 0;
+  lockedUsersCount = 0;
+  activeUsersCount = 0;
 
   constructor(
     private adminService: AdminService,
@@ -52,6 +55,7 @@ export class LockAccountsPage implements OnInit {
         status: user.status || '',
         isLocked: user.isLocked || false
       }));
+      this.updateCounts();
       this.filterUsers();
     } catch (error) {
       console.error('Error loading users:', error);
@@ -113,6 +117,7 @@ export class LockAccountsPage implements OnInit {
       await this.updateUserLockStatus(user.uid, user.isLocked);
       
       const action = user.isLocked ? 'locked' : 'unlocked';
+      this.updateCounts();
       this.showToast(`Account ${action} successfully`, 'success');
       this.filterUsers();
     } catch (error) {
@@ -121,6 +126,12 @@ export class LockAccountsPage implements OnInit {
       // Revert the change
       user.isLocked = !user.isLocked;
     }
+  }
+
+  private updateCounts() {
+    this.totalUsersCount = this.users.length;
+    this.lockedUsersCount = this.users.filter(user => user.isLocked).length;
+    this.activeUsersCount = this.totalUsersCount - this.lockedUsersCount;
   }
 
   private async updateUserLockStatus(uid: string, isLocked: boolean) {

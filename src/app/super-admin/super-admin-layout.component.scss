@@ -1,56 +1,351 @@
+// Header Styles
 ion-header.admin-header {
-  --background: linear-gradient(135deg, #148245 0%, #0f6138 100%);
+  --background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  box-shadow: 0 2px 16px rgba(20, 130, 69, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid rgba(20, 130, 69, 0.1);
+  position: relative;
+  z-index: 100;
 }
 
+ion-header {
+  ion-toolbar {
+    --background: transparent;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    --min-height: auto;
+  }
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  height: 70px;
+  gap: 24px;
+
+  @media (max-width: 768px) {
+    height: 64px;
+    padding: 10px 16px;
+    gap: 16px;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
+}
+
+.menu-button {
+  --color: #148245;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 20px;
+    color: #148245;
+  }
+
+  &:hover {
+    background: rgba(20, 130, 69, 0.08);
+  }
+
+  &:active {
+    background: rgba(20, 130, 69, 0.12);
+  }
+}
+
+.header-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.header-logo {
+  font-size: 28px;
+  color: #148245;
+  flex-shrink: 0;
+}
+
+.title-text {
+  min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (max-width: 576px) {
+      font-size: 16px;
+    }
+  }
+
+  p {
+    margin: 2px 0 0 0;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(20, 130, 69, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(20, 130, 69, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(20, 130, 69, 0.1);
+    border-color: rgba(20, 130, 69, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    gap: 8px;
+    padding: 6px 8px;
+  }
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+
+  @media (max-width: 576px) {
+    display: none;
+  }
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #148245 0%, #0f6138 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(20, 130, 69, 0.2);
+}
+
+.user-info {
+  min-width: 0;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.user-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    &.user-status {
+      font-size: 10px;
+      color: #10b981;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10b981;
+      }
+    }
+  }
+}
+
+.logout-btn {
+  --color: #ef4444;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 20px;
+    color: #ef4444;
+  }
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  &:active {
+    background: rgba(239, 68, 68, 0.15);
+  }
+}
+
+ion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+// Layout Container
 .layout-container {
   display: flex;
-  height: calc(100vh - var(--ion-toolbar-min-height));
+  flex: 1;
+  min-height: 0;
   background: #ffffff;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    position: relative;
+  }
 }
 
-/* Sidebar */
+// Sidebar Navigation
 .sidebar {
-  width: 280px;
-  background: #f8faf8;
+  width: 250px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfa 100%);
   border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
-  box-shadow: 2px 0 8px rgba(17, 24, 39, 0.08);
-  transition: transform 0.3s ease;
+  overflow-x: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (max-width: 768px) {
     position: fixed;
     left: 0;
-    top: 0;
-    height: 100%;
+    top: var(--ion-toolbar-min-height);
+    height: calc(100vh - var(--ion-toolbar-min-height));
     width: 280px;
     z-index: 999;
     transform: translateX(-100%);
+    border-radius: 0;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
 
     &.open {
       transform: translateX(0);
     }
   }
+
+  // Scrollbar Styling
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+
+    &:hover {
+      background: #9ca3af;
+    }
+  }
 }
 
+// Sidebar Header
 .sidebar-header {
   padding: 20px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #148245 0%, #0f6138 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  color: #1f2937;
+  border-bottom: 1px solid rgba(20, 130, 69, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
 
-  h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
+  .logo-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    h1 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #148245;
+    }
   }
 
   .close-icon {
     font-size: 24px;
     cursor: pointer;
     display: none;
+    padding: 8px;
+    border-radius: 6px;
+    color: #1f2937;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba(20, 130, 69, 0.1);
+      color: #148245;
+    }
 
     @media (max-width: 768px) {
       display: block;
@@ -58,81 +353,260 @@ ion-header.admin-header {
   }
 }
 
+// Sidebar Navigation Menu
 .sidebar-nav {
-  padding: 8px 0;
+  padding: 12px 8px;
   list-style: none;
   margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 
   .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 16px;
-    margin: 4px 8px;
-    color: #111827;
+    padding: 12px 14px;
+    margin: 0;
+    color: #374151;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    border-left: 3px solid transparent;
 
-    ion-icon {
-      font-size: 20px;
-      color: #148245;
+    .nav-icon {
+      font-size: 18px;
+      color: #9ca3af;
+      flex-shrink: 0;
+      transition: color 0.2s ease;
+    }
+
+    .nav-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+
+      &.badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+
+      &.badge-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      &.badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+      }
     }
 
     &:hover {
-      background: rgba(20, 130, 69, 0.08);
+      background-color: rgba(20, 130, 69, 0.08);
+      color: #1f2937;
+
+      .nav-icon {
+        color: #148245;
+      }
     }
 
     &.active {
-      background: linear-gradient(135deg, rgba(20, 130, 69, 0.15), rgba(15, 97, 56, 0.15));
-      border-left: 4px solid #148245;
-      padding-left: 12px;
+      background: linear-gradient(90deg, rgba(20, 130, 69, 0.1) 0%, rgba(20, 130, 69, 0.05) 100%);
+      border-left: 3px solid #148245;
+      padding-left: 11px;
       font-weight: 600;
+      color: #0f6138;
+      box-shadow: inset 0 0 0 1px rgba(20, 130, 69, 0.1);
 
-      ion-icon {
-        color: #0f6138;
+      .nav-icon {
+        color: #148245;
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding: 14px 16px;
+    }
+  }
+}
+
+// Sidebar Footer
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  flex-shrink: 0;
+
+  .admin-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(20, 130, 69, 0.05);
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #148245 0%, #0f6138 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(20, 130, 69, 0.2);
+    }
+
+    .admin-details {
+      min-width: 0;
+      flex: 1;
+
+      p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &.admin-name {
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        &.admin-role {
+          font-size: 12px;
+          color: #6b7280;
+          margin-top: 2px;
+        }
       }
     }
   }
 }
 
-/* Main Content */
+// Main Content Area
 .main-content {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+
+  .content-wrapper {
+
+        router-outlet {
+          display: contents;
+        }
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+
+    // Custom scrollbar for content
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+
+      &:hover {
+        background: #9ca3af;
+      }
+    }
+  }
+}
+
+// Child Page Content Styling
+.page-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   background: #ffffff;
 }
 
-/* Mobile Overlay */
+// Mobile Sidebar Overlay
 .sidebar-overlay {
   display: none;
 
   @media (max-width: 768px) {
     display: block;
     position: fixed;
-    top: 0;
+    top: var(--ion-toolbar-min-height);
     left: 0;
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 998;
+    animation: fadeIn 0.3s ease-out;
   }
 }
 
+// Responsive Adjustments
 @media (max-width: 768px) {
   .layout-container {
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
-    max-height: 300px;
+  ion-header.admin-header {
+    .menu-button {
+      display: block;
+    }
+  }
+}
+
+// Animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Print Styles
+@media print {
+  .sidebar,
+  ion-header.admin-header,
+  .sidebar-overlay {
+    display: none;
   }
 
   .main-content {
-    flex: 1;
+    width: 100%;
   }
 }

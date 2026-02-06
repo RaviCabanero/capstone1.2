@@ -1,47 +1,99 @@
 <ion-app>
-  <ion-header [translucent]="true" class="admin-header">
-    <ion-toolbar color="primary">
-      <ion-buttons slot="start">
-        <ion-menu-button (click)="toggleMenu()"></ion-menu-button>
-      </ion-buttons>
-      <ion-title>Super Admin Panel</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="logout()" color="light">
-          <ion-icon name="log-out-outline" slot="start"></ion-icon>
-          Logout
+  <!-- Header -->
+  <ion-header [translucent]="false" class="admin-header">
+    <div class="header-container">
+      <!-- Left Section: Menu & Title -->
+      <div class="header-left">
+        <ion-button (click)="toggleMenu()" class="menu-button" fill="clear">
+          <ion-icon name="menu-outline" slot="icon-only"></ion-icon>
         </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
+        <div class="header-title-section">
+          <ion-icon name="shield-checkmark-outline" class="header-logo"></ion-icon>
+          <div class="title-text">
+            <h1>Admin Dashboard</h1>
+            <p>System Management</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Section: User Menu -->
+      <div class="header-right">
+        <div class="user-menu">
+          <div class="user-profile">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <p class="user-name">Super Admin</p>
+              <p class="user-status">Online</p>
+            </div>
+          </div>
+          <ion-button (click)="logout()" fill="clear" class="logout-btn">
+            <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
   </ion-header>
 
+  <!-- Main Layout -->
   <div class="layout-container">
     <!-- Sidebar Navigation -->
-    <div class="sidebar" [class.open]="menuOpen">
+    <aside class="sidebar" [class.open]="menuOpen" role="navigation" aria-label="Main navigation">
       <div class="sidebar-header">
-        <h2>Menu</h2>
-        <ion-icon name="close-outline" (click)="toggleMenu()" class="close-icon"></ion-icon>
+        <div class="logo-section">
+          <h1>Admin Menu</h1>
+        </div>
+        <ion-icon 
+          name="close-outline" 
+          (click)="toggleMenu()" 
+          class="close-icon"
+          aria-label="Close menu"
+        ></ion-icon>
       </div>
       
+      <!-- Navigation Items -->
       <nav class="sidebar-nav">
         <a 
           *ngFor="let item of menuItems"
-          [href]="item.path"
-          [class.active]="currentPage === item.path"
-          (click)="navigate(item.path)"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          (click)="closeMobileMenu()"
           class="nav-item"
+          [attr.aria-current]="isActive(item.path) ? 'page' : null"
         >
-          <ion-icon [name]="item.icon"></ion-icon>
-          <span>{{ item.label }}</span>
+          <ion-icon [name]="item.icon" class="nav-icon"></ion-icon>
+          <span class="nav-label">{{ item.label }}</span>
+          <span class="nav-badge" *ngIf="item.badge" [class]="'badge-' + item.badge.type">
+            {{ item.badge.count }}
+          </span>
         </a>
       </nav>
-    </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <router-outlet></router-outlet>
-    </div>
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="admin-info">
+          <div class="admin-avatar">A</div>
+          <div class="admin-details">
+            <p class="admin-name">Super Admin</p>
+            <p class="admin-role">Administrator</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
   </div>
 
-  <!-- Overlay for mobile -->
-  <div class="sidebar-overlay" *ngIf="menuOpen" (click)="toggleMenu()"></div>
+  <!-- Mobile Overlay -->
+  <div 
+    class="sidebar-overlay" 
+    *ngIf="menuOpen" 
+    (click)="closeMobileMenu()"
+    aria-hidden="true"
+  ></div>
 </ion-app>

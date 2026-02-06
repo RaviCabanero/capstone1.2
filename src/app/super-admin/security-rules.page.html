@@ -1,82 +1,128 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="tertiary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/super-admin"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Security Rules</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="addNewRule()" color="light">
-        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-        Add
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="page-wrapper">
+  <div class="security-rules-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Security Rules</h1>
+        <p>Configure and monitor system security policies.</p>
+      </div>
+      <div class="header-actions">
+        <ion-button class="primary-btn" (click)="addNewRule()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Add Rule
+        </ion-button>
+      </div>
+    </div>
 
-<ion-content [fullscreen]="true">
-  <div class="container">
-    <!-- Search and Filter -->
-    <ion-card class="controls-card">
-      <ion-card-content>
-        <ion-searchbar
-          placeholder="Search rules..."
-          [(ngModel)]="searchTerm"
-          (ionChange)="onSearchChange()"
-        ></ion-searchbar>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-label">Total Rules</div>
+        <div class="stat-value">{{ totalRulesCount }}</div>
+      </div>
+      <div class="stat-card enabled">
+        <div class="stat-label">Enabled</div>
+        <div class="stat-value">{{ enabledRulesCount }}</div>
+      </div>
+      <div class="stat-card disabled">
+        <div class="stat-label">Disabled</div>
+        <div class="stat-value">{{ disabledRulesCount }}</div>
+      </div>
+    </div>
 
-        <ion-segment [(ngModel)]="severityFilter" (ionChange)="onSeverityFilterChange()">
-          <ion-segment-button value="all">
-            <ion-label>All</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="critical">
-            <ion-label>Critical</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="high">
-            <ion-label>High</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="medium">
-            <ion-label>Medium</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="low">
-            <ion-label>Low</ion-label>
-          </ion-segment-button>
-        </ion-segment>
-      </ion-card-content>
-    </ion-card>
+    <!-- Controls -->
+    <div class="section-card controls-card">
+      <div class="controls-grid">
+        <div class="search-wrapper">
+          <ion-icon name="search-outline"></ion-icon>
+          <input
+            type="text"
+            placeholder="Search rules by name or description..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+          />
+        </div>
+        <div class="filter-group">
+          <label>Severity</label>
+          <div class="filter-buttons">
+            <button type="button" [class.active]="severityFilter === 'all'" (click)="severityFilter = 'all'; onSeverityFilterChange()">
+              All
+            </button>
+            <button type="button" [class.active]="severityFilter === 'critical'" (click)="severityFilter = 'critical'; onSeverityFilterChange()">
+              Critical
+            </button>
+            <button type="button" [class.active]="severityFilter === 'high'" (click)="severityFilter = 'high'; onSeverityFilterChange()">
+              High
+            </button>
+            <button type="button" [class.active]="severityFilter === 'medium'" (click)="severityFilter = 'medium'; onSeverityFilterChange()">
+              Medium
+            </button>
+            <button type="button" [class.active]="severityFilter === 'low'" (click)="severityFilter = 'low'; onSeverityFilterChange()">
+              Low
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Rules List -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Security Rules ({{ filteredRules.length }})</ion-card-title>
-      </ion-card-header>
+    <!-- Rules Table -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <h2>Policy Controls</h2>
+        </div>
+        <p class="section-subtitle">Manage rule status and severity levels</p>
+      </div>
 
-      <ion-card-content *ngIf="filteredRules.length > 0; else noRules">
-        <ion-list lines="inset">
-          <ion-item *ngFor="let rule of filteredRules" class="rule-item">
-            <ion-label>
-              <h2>{{ rule.name }}</h2>
-              <p>{{ rule.description }}</p>
-              <ion-badge [color]="getSeverityColor(rule.severity)">
-                {{ rule.severity }}
-              </ion-badge>
-            </ion-label>
-            <ion-toggle
-              slot="end"
-              [(ngModel)]="rule.isEnabled"
-              (ionChange)="toggleRule(rule)"
-              [color]="rule.isEnabled ? 'success' : 'danger'"
-            ></ion-toggle>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
+      <div class="table-wrapper" *ngIf="filteredRules.length > 0; else noRules">
+        <table class="rules-table">
+          <thead>
+            <tr>
+              <th>Rule</th>
+              <th>Description</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th class="actions-col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let rule of filteredRules">
+              <td class="rule-name">
+                <div class="rule-title">{{ rule.name }}</div>
+                <div class="rule-id">ID: {{ rule.id }}</div>
+              </td>
+              <td class="rule-desc">{{ rule.description }}</td>
+              <td class="rule-severity">
+                <span class="severity-badge" [class]="rule.severity">
+                  {{ rule.severity }}
+                </span>
+              </td>
+              <td class="rule-status">
+                <span class="status-badge" [class.enabled]="rule.isEnabled" [class.disabled]="!rule.isEnabled">
+                  <ion-icon [name]="rule.isEnabled ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
+                  {{ rule.isEnabled ? 'Enabled' : 'Disabled' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <ion-toggle
+                  [(ngModel)]="rule.isEnabled"
+                  (ionChange)="toggleRule(rule)"
+                  [color]="rule.isEnabled ? 'success' : 'danger'"
+                ></ion-toggle>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <ng-template #noRules>
-        <ion-card-content>
-          <ion-text color="medium">
-            <p>No security rules found.</p>
-          </ion-text>
-        </ion-card-content>
+        <div class="empty-state">
+          <ion-icon name="shield-outline" class="empty-icon"></ion-icon>
+          <h3>No security rules found</h3>
+          <p>Try adjusting your search or add a new rule.</p>
+        </div>
       </ng-template>
-    </ion-card>
+    </div>
   </div>
-</ion-content>
+</div>
