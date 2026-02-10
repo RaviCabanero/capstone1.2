@@ -61,7 +61,10 @@ export class LoginPage implements OnInit {
         });
 
         // Check if user is approved (skip for admin accounts)
-        const isAdminAccount = userDoc?.role === 'super_admin' || userDoc?.role === 'alumni_association_admin';
+        const isAdminAccount =
+          userDoc?.role === 'super_admin' ||
+          userDoc?.role === 'alumni_association_admin' ||
+          userDoc?.role === 'alumni_admin';
         if (userDoc?.status !== 'approved' && !isAdminAccount) {
           await this.auth.logout();
           await this.showPendingApprovalAlert();
@@ -74,7 +77,7 @@ export class LoginPage implements OnInit {
         // Redirect based on role
         if (userDoc?.role === 'super_admin') {
           this.router.navigateByUrl('/super-admin', { replaceUrl: true });
-        } else if (userDoc?.role === 'alumni_association_admin') {
+        } else if (userDoc?.role === 'alumni_association_admin' || userDoc?.role === 'alumni_admin') {
           this.router.navigateByUrl('/alumni-admin', { replaceUrl: true });
         } else {
           this.router.navigateByUrl('/home', { replaceUrl: true });

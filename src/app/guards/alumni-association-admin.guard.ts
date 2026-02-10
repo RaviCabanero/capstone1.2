@@ -18,7 +18,11 @@ export const alumniAssociationAdminGuard = async () => {
     const userDoc = await getDoc(doc(firestore, 'users', user.uid));
     const userData = userDoc.data();
     
-    if (userData?.['role'] === 'alumni_association_admin' || userData?.['role'] === 'super_admin') {
+    if (
+      userData?.['role'] === 'alumni_association_admin' ||
+      userData?.['role'] === 'alumni_admin' ||
+      userData?.['role'] === 'super_admin'
+    ) {
       return true;
     }
     
