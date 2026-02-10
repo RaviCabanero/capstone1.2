@@ -59,6 +59,12 @@
       <div class="user-header">
         <div class="user-info">
           <h2 class="user-name">{{ profile.firstName }} {{ profile.lastName }}</h2>
+          <ng-container *ngIf="profile?.isDepartmentHead">
+          <ion-chip color="tertiary" class="dept-head-chip">
+          <ion-icon name="ribbon" slot="start"></ion-icon>
+          Department Head
+          </ion-chip>
+          </ng-container>
           <p class="user-university">{{ profile.university || 'University of San Jose-Recoletos' }}</p>
           <p class="user-course">{{ profile.course || 'Course not provided' }}</p>
           <p class="user-address" *ngIf="profile.address">

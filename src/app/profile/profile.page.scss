@@ -1415,6 +1415,11 @@ ion-item h3 {
   font-size: 13px;
 }
 
+.dept-head-chip { margin-top: 6px; font-weight: 600; }
+.dept-head { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.dept-badge { width:24px; height:24px; object-fit:contain; }
+.dept-title { font-size:0.92rem; font-weight:600; color:#2b6cb0; }
+
 // Dark mode support
 @media (prefers-color-scheme: dark) {
   .company-header .company-logo {

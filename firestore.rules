@@ -31,9 +31,9 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['alumni_association_admin', 'super_admin'] &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['digitalIdStatus', 'digitalIdApprovedAt', 'digitalIdRejectedAt', 'updatedAt']);
       
-      // Only super admin can modify other users' roles (only to alumni or dept_head)
+      // Alumni association admin or super admin can modify other users' roles (only to alumni or dept_head)
       allow update: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['alumni_association_admin', 'super_admin'] &&
         (request.resource.data.role == 'alumni' || request.resource.data.role == 'dept_head');
       
       // Only super admin can delete users

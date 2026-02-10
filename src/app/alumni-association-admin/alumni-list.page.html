@@ -85,4 +85,51 @@
       </div>
     </div>
   </div>
+
+  <!-- Department Selection Modal -->
+  <ion-modal [isOpen]="showDepartmentModal" (didDismiss)="closeDepartmentModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Assign Department Head</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeDepartmentModal()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div *ngIf="selectedAlumniForDept" class="modal-content">
+          <p class="selected-user">
+            <strong>{{ selectedAlumniForDept.firstName }} {{ selectedAlumniForDept.lastName }}</strong><br/>
+            <small>{{ selectedAlumniForDept.email }}</small>
+          </p>
+          
+          <ion-label class="department-label">Select Department</ion-label>
+          <ion-select 
+            [(ngModel)]="selectedDepartment"
+            placeholder="Choose a department..."
+            interface="popover">
+            <ion-select-option *ngFor="let dept of departments" [value]="dept">
+              {{ dept }}
+            </ion-select-option>
+          </ion-select>
+
+          <div class="button-group">
+            <ion-button (click)="closeDepartmentModal()" fill="outline" expand="block">
+              Cancel
+            </ion-button>
+            <ion-button 
+              (click)="confirmDepartmentHeadAssignment()" 
+              color="success" 
+              expand="block"
+              [disabled]="!selectedDepartment">
+              Assign Department Head
+            </ion-button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

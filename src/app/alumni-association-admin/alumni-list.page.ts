@@ -17,12 +17,23 @@ export class AlumniListPage implements OnInit {
   loading = true;
   searchTerm = '';
   isDeptHead = false;
+  departments: string[] = [];
+  showDepartmentModal = false;
+  selectedDepartment = '';
+  selectedAlumniForDept: any = null;
 
   constructor(private adminService: AdminService) {}
 
   async ngOnInit() {
     const role = await this.adminService.getUserRole();
     this.isDeptHead = role === 'dept_head';
+    
+    // Load departments
+    try {
+      this.departments = await this.adminService.getAllDepartments();
+    } catch (error) {
+      console.error('Error loading departments:', error);
+    }
     
     await this.loadAlumni();
   }
@@ -133,11 +144,66 @@ export class AlumniListPage implements OnInit {
 
   async assignRole(alumni: any, newRole: 'alumni' | 'dept_head') {
     if (!alumni?.uid || alumni?.role === newRole) return;
+    // Verify current admin permissions before attempting write
+    const myRole = await this.adminService.getUserRole();
+    if (!myRole || (myRole !== 'alumni_association_admin' && myRole !== 'super_admin')) {
+      alert('You do not have permission to change user roles. Contact a super admin.');
+      return;
+    }
+
+    // If assigning as department head, show department selection modal
+    if (newRole === 'dept_head') {
+      this.selectedAlumniForDept = alumni;
+      this.selectedDepartment = alumni.schoolDepartment || '';
+      this.showDepartmentModal = true;
+      return;
+    }
+
+    // For alumni role, just update without department prompt
     try {
       await this.adminService.changeUserRole(alumni.uid, newRole);
       alumni.role = newRole;
     } catch (error) {
-      console.error('Failed to assign role:', error);
+      console.error('Failed to assign role:', (error as any));
+      alert(`Error assigning role: ${(error as any)?.message || JSON.stringify(error)}`);
+    }
+  }
+
+  closeDepartmentModal() {
+    this.showDepartmentModal = false;
+    this.selectedAlumniForDept = null;
+    this.selectedDepartment = '';
+  }
+
+  async confirmDepartmentHeadAssignment() {
+    if (!this.selectedAlumniForDept?.uid || !this.selectedDepartment) {
+      alert('Please select a department');
+      return;
+    }
+
+    // Verify current admin permissions before attempting write
+    const myRole = await this.adminService.getUserRole();
+    if (!myRole || (myRole !== 'alumni_association_admin' && myRole !== 'super_admin')) {
+      alert('You do not have permission to assign department heads. Contact a super admin.');
+      this.closeDepartmentModal();
+      return;
+    }
+
+    try {
+      const uid = this.selectedAlumniForDept.uid;
+      // Update both role and department
+      await this.adminService.changeUserRole(uid, 'dept_head');
+      await this.adminService.assignDepartment(uid, this.selectedDepartment);
+      
+      // Update local data
+      this.selectedAlumniForDept.role = 'dept_head';
+      this.selectedAlumniForDept.schoolDepartment = this.selectedDepartment;
+      
+      alert(`✓ ${this.selectedAlumniForDept.firstName} is now Department Head of ${this.selectedDepartment}`);
+      this.closeDepartmentModal();
+    } catch (error) {
+      console.error('Failed to assign department head:', error);
+      alert(`Error: ${(error as any)?.message || 'Failed to assign'}`);
     }
   }
 }

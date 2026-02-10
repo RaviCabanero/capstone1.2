@@ -79,6 +79,7 @@ export class AdminService {
   async changeUserRole(uid: string, newRole: 'alumni' | 'dept_head') {
     await updateDoc(doc(this.firestore, `users/${uid}`), {
       role: newRole,
+      isDepartmentHead: newRole === 'dept_head',
       updatedAt: new Date().toISOString(),
     });
   }
