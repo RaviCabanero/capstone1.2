@@ -18,12 +18,22 @@ export class AlumniAssociationAdminDashboardPage implements OnInit {
     recentAnnouncements: 0
   };
 
+  isDepartmentHead = false;
+
   constructor(
     private router: Router,
     private adminService: AdminService
   ) {}
 
   async ngOnInit() {
+    try {
+      const role = await this.adminService.getUserRole();
+      this.isDepartmentHead = role === 'dept_head';
+    } catch (error) {
+      console.error('Error getting user role:', error);
+      this.isDepartmentHead = false;
+    }
+
     await this.loadStats();
   }
 
@@ -57,7 +67,21 @@ export class AlumniAssociationAdminDashboardPage implements OnInit {
     this.router.navigate(['/alumni-admin/alumni-id-approval']);
   }
 
+  navigateToDepartmentEvents() {
+    this.router.navigate(['/department-events']);
+  }
+
   logout() {
     this.router.navigate(['/login']);
+  }
+
+  async getUserRole() {
+    try {
+      const role = await this.adminService.getUserRole();
+      return role;
+    } catch (error) {
+      console.error('Error getting user role:', error);
+      return null;
+    }
   }
 }

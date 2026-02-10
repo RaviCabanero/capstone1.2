@@ -17,9 +17,9 @@
 
 <ion-content class="ion-padding">
   <div class="page-header">
-    <h2>Complete Alumni List</h2>
-    <p>{{ filteredAlumni.length }} registered users</p>
-  </div>
+  <h2>{{ isDeptHead ? 'Department Alumni' : 'Complete Alumni List' }}</h2>
+  <p>{{ filteredAlumni.length }} registered users</p>
+</div>
 
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">

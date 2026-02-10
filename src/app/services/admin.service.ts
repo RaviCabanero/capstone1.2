@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, query, where, getDocs, updateDoc, doc, collectionData, orderBy, Query } from '@angular/fire/firestore';
+import { Firestore, collection, query, where, getDocs, getDoc, updateDoc, doc, collectionData, orderBy, Query } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, from, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  constructor(private firestore: Firestore, private functions: Functions) {}
+  constructor(private firestore: Firestore, private functions: Functions, private auth: Auth) {}
 
   /**
    * Get all pending user approvals
@@ -231,4 +232,58 @@ export class AdminService {
       // Don't throw - email failure shouldn't block rejection
     }
   }
+
+  // Add these methods to the AdminService class
+
+/**
+ * Get current user's information including department
+ */
+async getCurrentUserDetails() {
+  const user = this.auth.currentUser;
+  if (!user) return null;
+  
+  const userDoc = await getDoc(doc(this.firestore, 'users', user.uid));
+  return userDoc.exists() ? userDoc.data() : null;
+}
+
+/**
+ * Get alumni by specific department
+ */
+async getAlumniByDepartment(department: string) {
+  try {
+    const usersRef = collection(this.firestore, 'users');
+    const q = query(
+      usersRef,
+      where('status', '==', 'approved'),
+      where('department', '==', department)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      uid: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching department alumni:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get user role
+ */
+async getUserRole(uid?: string): Promise<string | null> {
+  const userId = uid || this.auth.currentUser?.uid;
+  if (!userId) return null;
+  
+  const userDoc = await getDoc(doc(this.firestore, 'users', userId));
+  return userDoc.exists() ? userDoc.data()['role'] : null;
+}
+
+/**
+ * Check if user is department head
+ */
+async isDepartmentHead(): Promise<boolean> {
+  const role = await this.getUserRole();
+  return role === 'dept_head';
+}
 }

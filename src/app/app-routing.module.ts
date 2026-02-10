@@ -12,6 +12,7 @@ import { LockAccountsPage } from './super-admin/lock-accounts.page';
 import { SecurityRulesPage } from './super-admin/security-rules.page';
 import { ViewAllDataPage } from './super-admin/view-all-data.page';
 import { alumniAssociationAdminGuard } from './guards/alumni-association-admin.guard';
+import { DeptHeadGuard } from './guards/dept-head.guard';
 import { AlumniAssociationAdminDashboardPage } from './alumni-association-admin/alumni-association-admin-dashboard.page';
 import { ApproveAlumniPage } from './alumni-association-admin/approve-alumni.page';
 import { AnnouncementsPage } from './alumni-association-admin/announcements.page';
@@ -145,6 +146,11 @@ const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full'
   },
+  {
+  path: 'department-events',
+  loadComponent: () => import('./alumni-association-admin/department-events.page').then(m => m.DepartmentEventsPage),
+  canActivate: [DeptHeadGuard]
+  }
 
 ];
 

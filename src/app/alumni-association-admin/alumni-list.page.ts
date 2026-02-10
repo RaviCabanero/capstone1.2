@@ -16,24 +16,44 @@ export class AlumniListPage implements OnInit {
   filteredAlumni: any[] = [];
   loading = true;
   searchTerm = '';
+  isDeptHead = false;
 
   constructor(private adminService: AdminService) {}
 
   async ngOnInit() {
+    const role = await this.adminService.getUserRole();
+    this.isDeptHead = role === 'dept_head';
+    
     await this.loadAlumni();
   }
 
   async loadAlumni() {
-    try {
-      this.loading = true;
+  try {
+    this.loading = true;
+    
+    // Check if current user is department head
+    const role = await this.adminService.getUserRole();
+    const isDeptHead = role === 'dept_head';
+    
+    if (isDeptHead) {
+      // Get department head's department
+      const userDetails = await this.adminService.getCurrentUserDetails();
+      const dept = (userDetails as any)?.['department'] || (userDetails as any)?.['schoolDepartment'];
+      if (dept) {
+        this.allAlumni = await this.adminService.getAlumniByDepartment(dept);
+      }
+    } else {
+      // Show all alumni for association admin
       this.allAlumni = await this.adminService.getAllUsers();
-      this.filteredAlumni = [...this.allAlumni];
-    } catch (error) {
-      console.error('Error loading alumni:', error);
-    } finally {
-      this.loading = false;
     }
+    
+    this.filteredAlumni = [...this.allAlumni];
+  } catch (error) {
+    console.error('Error loading alumni:', error);
+  } finally {
+    this.loading = false;
   }
+}
 
   searchAlumni() {
     const term = this.searchTerm.toLowerCase().trim();
@@ -43,26 +63,30 @@ export class AlumniListPage implements OnInit {
       return;
     }
 
-    this.filteredAlumni = this.allAlumni.filter(alumni => 
-      alumni.firstName?.toLowerCase().includes(term) ||
-      alumni.lastName?.toLowerCase().includes(term) ||
-      alumni.displayName?.toLowerCase().includes(term) ||
-      alumni.email?.toLowerCase().includes(term) ||
-      alumni.phone?.toLowerCase().includes(term) ||
-      alumni.department?.toLowerCase().includes(term) ||
-      alumni.schoolDepartment?.toLowerCase().includes(term) ||
-      alumni.course?.toLowerCase().includes(term) ||
-      alumni.address?.toLowerCase().includes(term) ||
-      alumni.province?.toLowerCase().includes(term) ||
-      alumni.studentId?.toLowerCase().includes(term) ||
-      alumni.role?.toLowerCase().includes(term) ||
-      alumni.status?.toLowerCase().includes(term) ||
-      String(alumni.yearGraduated || '').toLowerCase().includes(term)
-    );
+    this.filteredAlumni = this.allAlumni.filter(alumni => {
+      const dept = (alumni as any)['department'] as string | undefined;
+      const schoolDept = (alumni as any)['schoolDepartment'] as string | undefined;
+      return (
+        (alumni.firstName as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.lastName as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.displayName as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.email as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.phone as string | undefined)?.toLowerCase().includes(term) ||
+        (dept)?.toLowerCase().includes(term) ||
+        (schoolDept)?.toLowerCase().includes(term) ||
+        (alumni.course as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.address as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.province as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.studentId as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.role as string | undefined)?.toLowerCase().includes(term) ||
+        (alumni.status as string | undefined)?.toLowerCase().includes(term) ||
+        String((alumni.yearGraduated as string | number | undefined) || '').toLowerCase().includes(term)
+      );
+    });
   }
 
   getDepartment(user: any): string {
-    return user.department || user.schoolDepartment || 'N/A';
+    return (user && ((user as any)['department'] || (user as any)['schoolDepartment'])) || 'N/A';
   }
 
   getBatchYear(user: any): string {

@@ -1,0 +1,163 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Department Events</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleForm()">
+        <ion-icon [name]="showForm ? 'close' : 'add'"></ion-icon>
+        {{ showForm ? 'Cancel' : 'New' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page-header">
+    <h2>{{ userDepartment }} Events</h2>
+    <p>Create and manage events for your department</p>
+  </div>
+
+  <!-- Create Event Form -->
+  <ion-card *ngIf="showForm" class="create-form">
+    <ion-card-header>
+      <ion-card-title>New Department Event</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Event Title <span class="required">*</span></ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.title" 
+          placeholder="Enter event title"
+          type="text">
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Description <span class="required">*</span></ion-label>
+        <ion-textarea 
+          [(ngModel)]="newEvent.description" 
+          placeholder="Enter event details"
+          rows="4"
+          auto-grow="true">
+        </ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Date <span class="required">*</span></ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.date" 
+          type="date">
+        </ion-input>
+      </ion-item>
+
+      <ion-row>
+        <ion-col size="6">
+          <ion-item>
+            <ion-label position="stacked">Start Time</ion-label>
+            <ion-input 
+              [(ngModel)]="newEvent.startTime" 
+              type="time">
+            </ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6">
+          <ion-item>
+            <ion-label position="stacked">End Time</ion-label>
+            <ion-input 
+              [(ngModel)]="newEvent.endTime" 
+              type="time">
+            </ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-item>
+        <ion-label position="stacked">Location</ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.location" 
+          placeholder="Enter event location"
+          type="text">
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Capacity</ion-label>
+        <ion-input 
+          [(ngModel)]="newEvent.capacity" 
+          placeholder="Number of attendees"
+          type="number">
+        </ion-input>
+      </ion-item>
+
+      <div class="color-section">
+        <ion-label class="section-label">Event Color</ion-label>
+        <div class="color-picker">
+          <div 
+            *ngFor="let color of eventColors" 
+            class="color-dot" 
+            [style.backgroundColor]="color"
+            [class.selected]="selectedColor === color"
+            (click)="selectColor(color)">
+          </div>
+        </div>
+      </div>
+
+      <ion-button 
+        expand="block" 
+        color="success" 
+        (click)="createEvent()"
+        [disabled]="!newEvent.title.trim() || !newEvent.description.trim()">
+        <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+        Create Event
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent" color="success"></ion-spinner>
+    <p>Loading events...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && events.length === 0" class="empty-state">
+    <ion-icon name="calendar-outline" color="medium"></ion-icon>
+    <h3>No Events Yet</h3>
+    <p>Create your first department event</p>
+  </div>
+
+  <!-- Events List -->
+  <div *ngIf="!loading && events.length > 0">
+    <ion-card *ngFor="let event of events" class="event-card">
+      <div class="color-bar" [style.backgroundColor]="event.color"></div>
+      <ion-card-header>
+        <ion-card-title>{{ event.title }}</ion-card-title>
+        <ion-card-subtitle>
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ event.date | date:'short' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="event-description">{{ event.description }}</p>
+        <div class="event-details">
+          <div *ngIf="event.location" class="detail-item">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>{{ event.location }}</span>
+          </div>
+          <div *ngIf="event.capacity" class="detail-item">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Capacity: {{ event.capacity }}</span>
+          </div>
+          <div class="detail-item">
+            <ion-icon name="clock-outline"></ion-icon>
+            <span>{{ event.startTime | date:'short' }} - {{ event.endTime | date:'short' }}</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
