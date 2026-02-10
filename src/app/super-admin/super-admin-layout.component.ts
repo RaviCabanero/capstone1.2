@@ -1,45 +1,125 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+
+interface MenuItem {
+  icon: string;
+  label: string;
+  path: string;
+  badge?: {
+    type: string;
+    count: number;
+  };
+}
 
 @Component({
   selector: 'app-super-admin-layout',
   templateUrl: './super-admin-layout.component.html',
   styleUrls: ['./super-admin-layout.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterOutlet],
+  imports: [CommonModule, IonicModule, RouterModule],
 })
 export class SuperAdminLayoutComponent implements OnInit {
   menuOpen = false;
-  currentPage = '';
 
-  menuItems = [
-    { icon: 'home-outline', label: 'Dashboard', path: '/super-admin' },
-    { icon: 'checkmark-done-outline', label: 'User Approvals', path: '/super-admin/user-approvals' },
-    { icon: 'person-outline', label: 'Department Heads', path: '/super-admin/department-heads' },
-    { icon: 'git-branch-outline', label: 'Departments', path: '/super-admin/departments' },
-    { icon: 'lock-closed-outline', label: 'Lock Accounts', path: '/super-admin/lock-accounts' },
-    { icon: 'eye-outline', label: 'View All Data', path: '/super-admin/view-all-data' },
-    { icon: 'shield-checkmark-outline', label: 'Security Rules', path: '/super-admin/security-rules' },
-    { icon: 'calendar-outline', label: 'Events Moderation', path: '/super-admin/events-moderation' },
-    { icon: 'analytics-outline', label: 'Analytics', path: '/super-admin/analytics' },
+  menuItems: MenuItem[] = [
+    {
+      icon: 'home-outline',
+      label: 'Dashboard',
+      path: '/super-admin',
+    },
+    {
+      icon: 'checkmark-done-outline',
+      label: 'User Approvals',
+      path: '/super-admin/user-approvals',
+      badge: { type: 'warning', count: 5 },
+    },
+    {
+      icon: 'person-outline',
+      label: 'Department Heads',
+      path: '/super-admin/department-heads',
+    },
+    {
+      icon: 'git-branch-outline',
+      label: 'Departments',
+      path: '/super-admin/departments',
+    },
+    {
+      icon: 'lock-closed-outline',
+      label: 'Lock Accounts',
+      path: '/super-admin/lock-accounts',
+      badge: { type: 'danger', count: 2 },
+    },
+    {
+      icon: 'eye-outline',
+      label: 'View All Data',
+      path: '/super-admin/view-all-data',
+    },
+    {
+      icon: 'shield-checkmark-outline',
+      label: 'Security Rules',
+      path: '/super-admin/security-rules',
+    },
+    {
+      icon: 'calendar-outline',
+      label: 'Events Moderation',
+      path: '/super-admin/events-moderation',
+    },
+    {
+      icon: 'analytics-outline',
+      label: 'Analytics',
+      path: '/super-admin/analytics',
+    },
   ];
 
-  constructor() {}
+  constructor(private router: Router) {}
 
-  ngOnInit() {}
-
-  logout() {
-    // Handle logout logic
+  ngOnInit(): void {
+    // Initialize component
   }
 
-  toggleMenu() {
+  /**
+   * Check if a menu item is currently active
+   */
+  isActive(path: string): boolean {
+    return this.router.url.includes(path);
+  }
+
+  /**
+   * Toggle sidebar menu visibility (mobile)
+   */
+  toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }
 
-  navigate(path: string) {
-    this.currentPage = path;
-    this.menuOpen = false;
+  /**
+   * Close mobile menu
+   */
+  closeMobileMenu(): void {
+    // Only close on mobile
+    if (window.innerWidth < 768) {
+      this.menuOpen = false;
+    }
+  }
+
+  /**
+   * Navigate to route using router
+   * This is handled by routerLink in template
+   */
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
+    this.closeMobileMenu();
+  }
+
+  /**
+   * Handle logout
+   */
+  logout(): void {
+    // TODO: Implement logout logic
+    // Example: this.authService.logout().then(() => {
+    //   this.router.navigate(['/login']);
+    // });
+    console.log('Logout clicked');
   }
 }

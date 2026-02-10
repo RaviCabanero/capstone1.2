@@ -69,6 +69,9 @@ export class SecurityRulesPage implements OnInit {
   filteredRules: SecurityRule[] = [];
   severityFilter = 'all';
   searchTerm = '';
+  totalRulesCount = 0;
+  enabledRulesCount = 0;
+  disabledRulesCount = 0;
 
   constructor(
     private alertController: AlertController,
@@ -91,6 +94,7 @@ export class SecurityRulesPage implements OnInit {
 
       return matchesSearch && matchesSeverity;
     });
+    this.updateCounts();
   }
 
   onSearchChange() {
@@ -141,6 +145,7 @@ export class SecurityRulesPage implements OnInit {
     try {
       rule.isEnabled = !rule.isEnabled;
       const action = rule.isEnabled ? 'enabled' : 'disabled';
+      this.updateCounts();
       this.showToast(`Rule "${rule.name}" ${action}`, 'success');
     } catch (error) {
       console.error('Error toggling rule:', error);
@@ -231,6 +236,12 @@ export class SecurityRulesPage implements OnInit {
       ],
     });
     await alert.present();
+  }
+
+  private updateCounts() {
+    this.totalRulesCount = this.securityRules.length;
+    this.enabledRulesCount = this.securityRules.filter(rule => rule.isEnabled).length;
+    this.disabledRulesCount = this.totalRulesCount - this.enabledRulesCount;
   }
 
   private async showToast(message: string, color: string = 'primary') {

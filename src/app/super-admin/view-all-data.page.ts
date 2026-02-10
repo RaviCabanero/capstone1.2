@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonModal } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminService } from '../services/admin.service';
@@ -14,6 +14,12 @@ interface UserData {
   role: string;
   status: string;
   schoolDepartment?: string;
+  course?: string;
+  yearGraduated?: string;
+  birthdate?: string;
+  mobile?: string;
+  address?: string;
+  province?: string;
   createdAt?: string;
 }
 
@@ -25,6 +31,8 @@ interface UserData {
   imports: [CommonModule, IonicModule, FormsModule],
 })
 export class ViewAllDataPage implements OnInit {
+  @ViewChild('detailModal') detailModal!: IonModal;
+
   allUsers: UserData[] = [];
   filteredUsers: UserData[] = [];
   isLoading = true;
@@ -33,6 +41,7 @@ export class ViewAllDataPage implements OnInit {
   filterStatus = 'all';
   dataTab = 'users';
   exportFormat = 'json';
+  selectedUser: UserData | null = null;
 
   constructor(
     private adminService: AdminService,
@@ -56,6 +65,12 @@ export class ViewAllDataPage implements OnInit {
         role: user.role || 'alumni',
         status: user.status || 'pending',
         schoolDepartment: user.schoolDepartment || undefined,
+        course: user.course || undefined,
+        yearGraduated: user.yearGraduated || undefined,
+        birthdate: user.birthdate || undefined,
+        mobile: user.mobile || undefined,
+        address: user.address || undefined,
+        province: user.province || undefined,
         createdAt: user.createdAt || undefined
       }));
       this.filterUsers();
@@ -172,6 +187,16 @@ export class ViewAllDataPage implements OnInit {
   async refreshData() {
     this.showToast('Refreshing data...', 'primary');
     await this.loadAllData();
+  }
+
+  openUserDetail(user: UserData) {
+    this.selectedUser = user;
+    this.detailModal.present();
+  }
+
+  closeUserDetail() {
+    this.detailModal.dismiss();
+    this.selectedUser = null;
   }
 
   private async showToast(message: string, color: string = 'primary') {

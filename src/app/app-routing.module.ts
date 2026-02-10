@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { ActivityPage } from './activity/activity.page';
 import { AlumniIdRequestPage } from './alumni-id-request/alumni-id-request.page';
+import { SuperAdminLayoutComponent } from './super-admin/super-admin-layout.component';
 import { SuperAdminDashboardPage } from './super-admin/super-admin-dashboard.page';
 import { UserApprovalsPage } from './super-admin/user-approvals.page';
 import { AnalyticsPage } from './super-admin/analytics.page';
@@ -72,39 +73,45 @@ const routes: Routes = [
   },
   {
     path: 'super-admin',
-    component: SuperAdminDashboardPage
-  },
-  {
-    path: 'super-admin/user-approvals',
-    component: UserApprovalsPage
-  },
-  {
-    path: 'super-admin/department-heads',
-    component: DepartmentHeadsPage
-  },
-  {
-    path: 'super-admin/departments',
-    component: DepartmentsPage
-  },
-  {
-    path: 'super-admin/events-moderation',
-    component: EventsModerationPage
-  },
-  {
-    path: 'super-admin/analytics',
-    component: AnalyticsPage
-  },
-  {
-    path: 'super-admin/lock-accounts',
-    component: LockAccountsPage
-  },
-  {
-    path: 'super-admin/security-rules',
-    component: SecurityRulesPage
-  },
-  {
-    path: 'super-admin/view-all-data',
-    component: ViewAllDataPage
+    component: SuperAdminLayoutComponent,
+    children: [
+      {
+        path: '',
+        component: SuperAdminDashboardPage
+      },
+      {
+        path: 'user-approvals',
+        component: UserApprovalsPage
+      },
+      {
+        path: 'department-heads',
+        component: DepartmentHeadsPage
+      },
+      {
+        path: 'departments',
+        component: DepartmentsPage
+      },
+      {
+        path: 'events-moderation',
+        component: EventsModerationPage
+      },
+      {
+        path: 'analytics',
+        component: AnalyticsPage
+      },
+      {
+        path: 'lock-accounts',
+        component: LockAccountsPage
+      },
+      {
+        path: 'security-rules',
+        component: SecurityRulesPage
+      },
+      {
+        path: 'view-all-data',
+        component: ViewAllDataPage
+      }
+    ]
   },
   {
     path: 'alumni-admin',

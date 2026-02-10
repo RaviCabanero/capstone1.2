@@ -1,214 +1,176 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-title>Super Admin Dashboard 👑</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()" color="light">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        Logout
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="dashboard-layout">
-  <div class="dashboard-wrapper">
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h2>Management</h2>
-        <p class="subtitle">Super Admin Control</p>
-      </div>
-
-      <nav class="sidebar-nav">
-        <button
-          *ngFor="let item of managementItems"
-          class="nav-item"
-          [class.active]="selectedSection === item.id"
-          (click)="navigateTo(item.id)"
-        >
-          <ion-icon [name]="item.icon"></ion-icon>
-          <span>{{ item.label }}</span>
-          <ion-badge *ngIf="item.id === 'user-approvals' && (analyticsData$ | async)?.pendingUsers">
-            {{ (analyticsData$ | async)?.pendingUsers }}
-          </ion-badge>
-        </button>
-      </nav>
-
-      <div class="sidebar-stats">
-        <h4>Quick Stats</h4>
-        <div class="stat-item">
-          <span class="label">Total Users</span>
-          <span class="value">{{ (analyticsData$ | async)?.totalUsers || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Pending</span>
-          <span class="value pending">{{ (analyticsData$ | async)?.pendingUsers || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Approved</span>
-          <span class="value approved">{{ (analyticsData$ | async)?.approvedUsers || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Alumni</span>
-          <span class="value">{{ (analyticsData$ | async)?.alumniCount || 0 }}</span>
-        </div>
-      </div>
+<div class="page-wrapper ion-padding">
+  <div class="dashboard-content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Dashboard Overview</h1>
+      <p>Welcome to the Super Admin Control Center</p>
     </div>
 
-    <!-- Main Content Panel -->
-    <div class="main-content">
-      <!-- Welcome Section -->
-      <div class="welcome-section" *ngIf="selectedSection === null">
-        <ion-card class="welcome-card">
-          <ion-card-header>
-            <ion-card-title>Welcome, Super Admin</ion-card-title>
-            <ion-card-subtitle>JosenianLink Network Control Center</ion-card-subtitle>
-          </ion-card-header>
+  <!-- Key Metrics Grid -->
+  <ion-grid class="metrics-grid">
+    <ion-row>
+      <!-- Total Users Card -->
+      <ion-col size="12" sizeMd="6" sizeLg="3">
+        <ion-card class="stat-card">
           <ion-card-content>
-            <p>Select a management option from the sidebar to get started.</p>
-            <div class="quick-start">
-              <h4>Quick Access</h4>
-              <div class="quick-buttons">
-                <ion-button
-                  color="primary"
-                  (click)="selectSection('user-approvals')"
-                  class="quick-btn"
-                >
-                  <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
-                  Approve Users
-                </ion-button>
-                <ion-button
-                  color="secondary"
-                  (click)="selectSection('analytics')"
-                  class="quick-btn"
-                >
-                  <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
-                  View Analytics
-                </ion-button>
-                <ion-button
-                  color="danger"
-                  (click)="selectSection('lock-accounts')"
-                  class="quick-btn"
-                >
-                  <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-                  Lock Accounts
-                </ion-button>
-              </div>
+            <div class="stat-icon total-users">
+              <ion-icon name="people-outline"></ion-icon>
             </div>
+            <h3>Total Users</h3>
+            <p class="stat-value">{{ (analyticsData$ | async)?.totalUsers || 0 }}</p>
+            <p class="stat-label">Registered accounts</p>
           </ion-card-content>
         </ion-card>
-      </div>
+      </ion-col>
 
-      <!-- User Approvals Section -->
-      <div class="content-section" *ngIf="selectedSection === 'user-approvals'">
-        <div class="section-header">
-          <h2>User Approvals</h2>
-          <p>Review and approve pending user registrations</p>
-        </div>
-        <!-- Embedded User Approvals Content will go here -->
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title color="warning">
-              <ion-icon name="time-outline" slot="start"></ion-icon>
-              Pending Approvals
-            </ion-card-title>
-          </ion-card-header>
+      <!-- Pending Approvals Card -->
+      <ion-col size="12" sizeMd="6" sizeLg="3">
+        <ion-card class="stat-card pending">
           <ion-card-content>
-            <p>Loading user approvals...</p>
+            <div class="stat-icon pending-icon">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <h3>Pending Approval</h3>
+            <p class="stat-value">{{ (analyticsData$ | async)?.pendingUsers || 0 }}</p>
+            <p class="stat-label">Awaiting review</p>
           </ion-card-content>
         </ion-card>
-      </div>
+      </ion-col>
 
-      <!-- Department Heads Section -->
-      <div class="content-section" *ngIf="selectedSection === 'department-heads'">
-        <div class="section-header">
-          <h2>Department Heads</h2>
-          <p>Manage department head assignments</p>
-        </div>
-        <ion-card>
+      <!-- Approved Users Card -->
+      <ion-col size="12" sizeMd="6" sizeLg="3">
+        <ion-card class="stat-card approved">
           <ion-card-content>
-            <p>Department heads interface coming soon...</p>
+            <div class="stat-icon approved-icon">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <h3>Approved Users</h3>
+            <p class="stat-value">{{ (analyticsData$ | async)?.approvedUsers || 0 }}</p>
+            <p class="stat-label">Active members</p>
           </ion-card-content>
         </ion-card>
-      </div>
+      </ion-col>
 
-      <!-- Departments Section -->
-      <div class="content-section" *ngIf="selectedSection === 'departments'">
-        <div class="section-header">
-          <h2>School Departments</h2>
-          <p>Manage school departments and configurations</p>
-        </div>
-        <ion-card>
+      <!-- Alumni Count Card -->
+      <ion-col size="12" sizeMd="6" sizeLg="3">
+        <ion-card class="stat-card alumni">
           <ion-card-content>
-            <p>Department management coming soon...</p>
+            <div class="stat-icon alumni-icon">
+              <ion-icon name="school-outline"></ion-icon>
+            </div>
+            <h3>Alumni</h3>
+            <p class="stat-value">{{ (analyticsData$ | async)?.alumniCount || 0 }}</p>
+            <p class="stat-label">Total alumni</p>
           </ion-card-content>
         </ion-card>
-      </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
-      <!-- Events Section -->
-      <div class="content-section" *ngIf="selectedSection === 'events-moderation'">
-        <div class="section-header">
-          <h2>Events Moderation</h2>
-          <p>Review and moderate alumni events</p>
-        </div>
-        <ion-card>
-          <ion-card-content>
-            <p>Events moderation interface coming soon...</p>
-          </ion-card-content>
-        </ion-card>
-      </div>
+  <!-- Quick Actions Section -->
+  <ion-card class="quick-actions-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="flash-outline"></ion-icon>
+        Quick Actions
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" sizeMd="6" sizeLg="4">
+            <ion-button expand="block" color="primary" [routerLink]="'/super-admin/user-approvals'">
+              <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+              Review User Approvals
+            </ion-button>
+          </ion-col>
+          <ion-col size="12" sizeMd="6" sizeLg="4">
+            <ion-button expand="block" color="secondary" [routerLink]="'/super-admin/analytics'">
+              <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+              View Analytics
+            </ion-button>
+          </ion-col>
+          <ion-col size="12" sizeMd="6" sizeLg="4">
+            <ion-button expand="block" color="danger" [routerLink]="'/super-admin/lock-accounts'">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              Lock Accounts
+            </ion-button>
+          </ion-col>
 
-      <!-- Analytics Section -->
-      <div class="content-section" *ngIf="selectedSection === 'analytics'">
-        <div class="section-header">
-          <h2>Analytics</h2>
-          <p>System-wide analytics and reports</p>
-        </div>
-        <ion-card>
-          <ion-card-content>
-            <p>Analytics interface coming soon...</p>
-          </ion-card-content>
-        </ion-card>
-      </div>
+          <ion-col size="12" sizeMd="6" sizeLg="4">
+            <ion-button expand="block" [routerLink]="'/super-admin/departments'">
+              <ion-icon name="git-branch-outline" slot="start"></ion-icon>
+              Manage Departments
+            </ion-button>
+          </ion-col>
+          <ion-col size="12" sizeMd="6" sizeLg="4">
+            <ion-button expand="block" [routerLink]="'/super-admin/security-rules'">
+              <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+              Security Settings
+            </ion-button>
+          </ion-col>
+          <ion-col size="12" sizeMd="6" sizeLg="4">
+            <ion-button expand="block" [routerLink]="'/super-admin/events-moderation'">
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              Moderate Events
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
 
-      <!-- Lock Accounts Section -->
-      <div class="content-section" *ngIf="selectedSection === 'lock-accounts'">
-        <div class="section-header">
-          <h2>Lock/Disable Accounts</h2>
-          <p>Manage account access and security</p>
-        </div>
-        <ion-card>
-          <ion-card-content>
-            <p>Account management interface coming soon...</p>
-          </ion-card-content>
-        </ion-card>
-      </div>
-
-      <!-- Security Rules Section -->
-      <div class="content-section" *ngIf="selectedSection === 'security-rules'">
-        <div class="section-header">
-          <h2>Security Rules</h2>
-          <p>Configure system security and rules</p>
-        </div>
-        <ion-card>
-          <ion-card-content>
-            <p>Security rules interface coming soon...</p>
-          </ion-card-content>
-        </ion-card>
-      </div>
-
-      <!-- View All Data Section -->
-      <div class="content-section" *ngIf="selectedSection === 'view-all-data'">
-        <div class="section-header">
-          <h2>View All Data</h2>
-          <p>Complete system data overview</p>
-        </div>
-        <ion-card>
-          <ion-card-content>
-            <p>Data viewer interface coming soon...</p>
-          </ion-card-content>
-        </ion-card>
-      </div>
-    </div>
+  <!-- System Status Section -->
+    <ion-card class="system-status-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="information-circle-outline"></ion-icon>
+          System Status
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" sizeMd="6">
+              <div class="status-item">
+                <div class="status-dot active"></div>
+                <div>
+                  <p class="status-title">System Status</p>
+                  <p class="status-desc">All systems operational</p>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="12" sizeMd="6">
+              <div class="status-item">
+                <div class="status-dot active"></div>
+                <div>
+                  <p class="status-title">Database</p>
+                  <p class="status-desc">Connection healthy</p>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="12" sizeMd="6">
+              <div class="status-item">
+                <div class="status-dot active"></div>
+                <div>
+                  <p class="status-title">API Services</p>
+                  <p class="status-desc">All endpoints responding</p>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="12" sizeMd="6">
+              <div class="status-item">
+                <div class="status-dot active"></div>
+                <div>
+                  <p class="status-title">Authentication</p>
+                  <p class="status-desc">All secure</p>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
   </div>
-</ion-content>
+</div>
+

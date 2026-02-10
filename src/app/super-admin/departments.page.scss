@@ -1,5 +1,278 @@
-.container {
-  padding: 16px;
-  max-width: 900px;
-  margin: 0 auto;
+.page-wrapper {
+  padding: 0 !important;
 }
+
+.depts-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+
+  ion-spinner {
+    --color: #148245;
+  }
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f3f4f6;
+
+  .header-content {
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 32px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #6b7280;
+    }
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 16px;
+  }
+}
+
+/* Stat Badges */
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+
+  ion-icon {
+    font-size: 20px;
+  }
+
+  &.dept-count {
+    background: #fef3c7;
+    color: #92400e;
+  }
+}
+
+/* Section Cards */
+.section-card {
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  border: none;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(20, 130, 69, 0.15);
+    border-top: 3px solid #148245;
+  }
+}
+
+/* Table Wrapper */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.depts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead {
+    background: #ffffff;
+    border-bottom: 2px solid #e5e7eb;
+
+    th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.actions-col {
+        text-align: center;
+      }
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+    background-color: #ffffff;
+
+    &:hover {
+      background-color: #f0fdf4;
+    }
+  }
+
+  td {
+    padding: 16px;
+    color: #111827;
+
+    &.dept-name-cell {
+      font-weight: 600;
+      color: #1f2937;
+
+      .dept-badge {
+        display: inline-block;
+        background: #e8f5e9;
+        color: #148245;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+    }
+
+    &.desc-cell {
+      color: #6b7280;
+      font-size: 13px;
+      max-width: 300px;
+      word-break: break-word;
+    }
+
+    &.head-cell {
+      color: #374151;
+      font-weight: 500;
+    }
+
+    &.contact-cell .email-link {
+      color: #148245;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &:hover {
+        text-decoration: underline;
+        color: #0f6138;
+      }
+    }
+
+    &.actions-cell {
+      text-align: center;
+
+      .view-btn {
+        --padding-top: 6px;
+        --padding-bottom: 6px;
+        --padding-start: 6px;
+        --padding-end: 6px;
+
+        ion-icon {
+          font-size: 20px;
+          color: #148245;
+        }
+
+        &:hover {
+          ion-icon {
+            color: #0f6138;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 64px;
+    color: #d1d5db;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  p {
+    margin: 0;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header-stats {
+    width: 100%;
+  }
+
+  .depts-table {
+    font-size: 13px;
+
+    td, th {
+      padding: 12px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .depts-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+
+    .header-content h1 {
+      font-size: 24px;
+    }
+  }
+
+  .header-stats {
+    flex-wrap: wrap;
+  }
+
+  .stat-badge {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .depts-table {
+    font-size: 12px;
+
+    td, th {
+      padding: 8px;
+    }
+
+    thead {
+      font-size: 11px;
+    }
+  }
+}
+

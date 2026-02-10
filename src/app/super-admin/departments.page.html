@@ -1,23 +1,65 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="tertiary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/super-admin"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Departments</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="page-wrapper ion-padding">
+  <div class="depts-container">
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
 
-<ion-content [fullscreen]="true">
-  <div class="container">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>School Departments</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-text color="medium">
-          <p>Department management coming soon...</p>
-        </ion-text>
-      </ion-card-content>
+    <!-- Page Header -->
+    <div class="page-header" *ngIf="!isLoading">
+      <div class="header-content">
+        <h1>Departments</h1>
+        <p>View all school departments and their information</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-badge dept-count">
+          <ion-icon name="business-outline"></ion-icon>
+          <span>{{ departments.length }} Departments</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Departments Table -->
+    <ion-card *ngIf="!isLoading" class="section-card">
+      <div class="table-wrapper" *ngIf="departments.length > 0; else noData">
+        <table class="depts-table">
+          <thead>
+            <tr>
+              <th>Department Name</th>
+              <th>Description</th>
+              <th>Department Head</th>
+              <th>Contact</th>
+              <th class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dept of departments">
+              <td class="dept-name-cell">
+                <span class="dept-badge">{{ dept.name }}</span>
+              </td>
+              <td class="desc-cell">{{ dept.description || '—' }}</td>
+              <td class="head-cell">{{ dept.head || '—' }}</td>
+              <td class="contact-cell">
+                <a *ngIf="dept.email" [href]="'mailto:' + dept.email" class="email-link">{{ dept.email }}</a>
+                <span *ngIf="!dept.email">—</span>
+              </td>
+              <td class="actions-cell">
+                <ion-button fill="clear" size="small" class="view-btn">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                </ion-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noData>
+        <div class="empty-state">
+          <ion-icon name="business-outline" class="empty-icon"></ion-icon>
+          <h3>No departments found</h3>
+          <p>Start by adding your first department</p>
+        </div>
+      </ng-template>
     </ion-card>
   </div>
-</ion-content>
+</div>

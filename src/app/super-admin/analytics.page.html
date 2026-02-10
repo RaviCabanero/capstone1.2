@@ -1,101 +1,160 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="success">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/super-admin"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Analytics & Reports</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
+<div class="page-wrapper ion-padding" *ngIf="(analyticsData$ | async) as stats">
   <div class="analytics-container">
-    <ion-card *ngIf="(analyticsData$ | async) as stats">
-      <ion-card-header>
-        <ion-card-title>System Overview</ion-card-title>
-      </ion-card-header>
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Analytics & Reports</h1>
+        <p>System overview and user statistics</p>
+      </div>
+    </div>
 
-      <ion-card-content>
-        <ion-list lines="inset">
-          <ion-item>
-            <ion-label>Total Registered Users</ion-label>
-            <ion-note slot="end" color="primary">
-              <strong>{{ stats.totalUsers }}</strong>
-            </ion-note>
-          </ion-item>
+    <!-- Key Metrics Grid -->
+    <div class="metrics-grid" *ngIf="stats.totalUsers">
+      <!-- Total Users Card -->
+      <div class="metric-card">
+        <div class="metric-icon total">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <div class="metric-content">
+          <h3>Total Users</h3>
+          <div class="metric-value">{{ stats.totalUsers }}</div>
+          <p class="metric-label">Registered users</p>
+        </div>
+      </div>
 
-          <ion-item>
-            <ion-label>Pending Approval</ion-label>
-            <ion-note slot="end" color="warning">
-              <strong>{{ stats.pendingUsers }}</strong>
-            </ion-note>
-          </ion-item>
+      <!-- Pending Approvals Card -->
+      <div class="metric-card">
+        <div class="metric-icon pending">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="metric-content">
+          <h3>Pending</h3>
+          <div class="metric-value">{{ stats.pendingUsers }}</div>
+          <p class="metric-label">Awaiting approval</p>
+        </div>
+      </div>
 
-          <ion-item>
-            <ion-label>Approved Users</ion-label>
-            <ion-note slot="end" color="success">
-              <strong>{{ stats.approvedUsers }}</strong>
-            </ion-note>
-          </ion-item>
+      <!-- Approved Users Card -->
+      <div class="metric-card">
+        <div class="metric-icon approved">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <div class="metric-content">
+          <h3>Approved</h3>
+          <div class="metric-value">{{ stats.approvedUsers }}</div>
+          <p class="metric-label">Active users</p>
+        </div>
+      </div>
 
-          <ion-item>
-            <ion-label>Approval Rate</ion-label>
-            <ion-note slot="end">
-              <strong>{{ stats.approvalRate }}%</strong>
-            </ion-note>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+      <!-- Approval Rate Card -->
+      <div class="metric-card">
+        <div class="metric-icon rate">
+          <ion-icon name="trending-up-outline"></ion-icon>
+        </div>
+        <div class="metric-content">
+          <h3>Approval Rate</h3>
+          <div class="metric-value">{{ stats.approvalRate }}%</div>
+          <p class="metric-label">Conversion rate</p>
+        </div>
+      </div>
+    </div>
 
-    <ion-card *ngIf="(analyticsData$ | async) as stats">
-      <ion-card-header>
-        <ion-card-title>User Distribution</ion-card-title>
-      </ion-card-header>
+    <!-- User Distribution Section -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>User Distribution by Role</h2>
+        <p>Breakdown of users across different roles</p>
+      </div>
 
-      <ion-card-content>
-        <ion-list lines="inset">
-          <ion-item>
-            <ion-label>Alumni</ion-label>
-            <ion-note slot="end">
-              <strong>{{ stats.alumniCount }}</strong>
-            </ion-note>
-          </ion-item>
+      <div class="distribution-grid" *ngIf="stats.totalUsers">
+        <!-- Alumni -->
+        <div class="distribution-card">
+          <div class="distribution-header">
+            <ion-icon name="school-outline"></ion-icon>
+            <h3>Alumni</h3>
+          </div>
+          <div class="distribution-stat">
+            <div class="stat-number">{{ stats.alumniCount }}</div>
+            <div class="stat-bar">
+              <div class="stat-fill" [style.width.%]="(stats.alumniCount / stats.totalUsers) * 100"></div>
+            </div>
+            <div class="stat-percent">{{ ((stats.alumniCount / stats.totalUsers) * 100).toFixed(1) }}%</div>
+          </div>
+        </div>
 
-          <ion-item>
-            <ion-label>Department Heads</ion-label>
-            <ion-note slot="end">
-              <strong>{{ stats.deptHeadCount }}</strong>
-            </ion-note>
-          </ion-item>
+        <!-- Department Heads -->
+        <div class="distribution-card">
+          <div class="distribution-header">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <h3>Department Heads</h3>
+          </div>
+          <div class="distribution-stat">
+            <div class="stat-number">{{ stats.deptHeadCount }}</div>
+            <div class="stat-bar">
+              <div class="stat-fill" [style.width.%]="(stats.deptHeadCount / stats.totalUsers) * 100"></div>
+            </div>
+            <div class="stat-percent">{{ ((stats.deptHeadCount / stats.totalUsers) * 100).toFixed(1) }}%</div>
+          </div>
+        </div>
 
-          <ion-item>
-            <ion-label>Rejected</ion-label>
-            <ion-note slot="end" color="danger">
-              <strong>{{ stats.rejectedUsers }}</strong>
-            </ion-note>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+        <!-- Rejected -->
+        <div class="distribution-card">
+          <div class="distribution-header">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <h3>Rejected</h3>
+          </div>
+          <div class="distribution-stat">
+            <div class="stat-number">{{ stats.rejectedUsers }}</div>
+            <div class="stat-bar">
+              <div class="stat-fill rejected" [style.width.%]="(stats.rejectedUsers / stats.totalUsers) * 100"></div>
+            </div>
+            <div class="stat-percent">{{ ((stats.rejectedUsers / stats.totalUsers) * 100).toFixed(1) }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <ion-card *ngIf="(deptSummary$ | async) as departments">
-      <ion-card-header>
-        <ion-card-title>Users by Department</ion-card-title>
-      </ion-card-header>
+    <!-- Department Summary Section -->
+    <div class="section-card" *ngIf="(deptSummary$ | async) as departments">
+      <div class="section-header">
+        <h2>Users by Department</h2>
+        <p>Distribution of users across school departments</p>
+      </div>
 
-      <ion-card-content>
-        <ion-list lines="inset">
-          <ion-item *ngFor="let dept of departments">
-            <ion-label>
-              {{ dept.department }}
-              <p>{{ dept.userCount }} users</p>
-            </ion-label>
-            <ion-note slot="end" color="primary">
-              {{ dept.userCount }}
-            </ion-note>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+      <div class="table-wrapper" *ngIf="departments.length > 0; else noDepts">
+        <table class="dept-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>User Count</th>
+              <th>Percentage</th>
+              <th>Distribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dept of departments">
+              <td class="dept-name">
+                <span class="dept-badge">{{ dept.department }}</span>
+              </td>
+              <td class="count-cell">{{ dept.userCount }}</td>
+              <td class="percent-cell">{{ dept.percentage || '0' }}%</td>
+              <td class="bar-cell">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="dept.percentage || 0"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noDepts>
+        <div class="empty-state">
+          <ion-icon name="layers-outline" class="empty-icon"></ion-icon>
+          <h3>No Department Data</h3>
+          <p>Department statistics will appear once users are assigned</p>
+        </div>
+      </ng-template>
+    </div>
   </div>
-</ion-content>
+</div>
