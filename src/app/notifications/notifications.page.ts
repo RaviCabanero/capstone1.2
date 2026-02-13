@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { 
   Firestore, 
   collection, 
@@ -8,11 +8,14 @@ import {
   where, 
   orderBy, 
   collectionData, 
-  doc, 
+  doc,
+  docData,
   updateDoc,
   deleteDoc 
 } from '@angular/fire/firestore';
 import { AlertController } from '@ionic/angular';
+import { Observable, from } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 
 export interface Notification {
   id?: string;
@@ -34,16 +37,88 @@ export interface Notification {
 export class NotificationsPage implements OnInit {
   notifications: Notification[] = [];
   loading = true;
+  userProfile: any = {}; // Initialize with empty object
+  userProfile$: Observable<any> | undefined;
+  searchQuery: string = '';
 
   constructor(
     private router: Router,
     private auth: Auth,
     private firestore: Firestore,
     private alertCtrl: AlertController
-  ) {}
+  ) {
+    console.log('🎯 NotificationsPage constructor');
+  }
 
   ngOnInit() {
+    console.log('🔍 NotificationsPage Init');
+    this.loadUserProfile();
     this.loadNotifications();
+    
+    // Retry loading profile after a short delay if auth wasn't ready
+    setTimeout(() => {
+      if (!this.userProfile?.photoDataUrl) {
+        console.log('⏱️ Retrying profile load after delay');
+        this.loadUserProfile();
+      }
+    }, 1000);
+  }
+
+  /**
+   * Load current user profile - Using RxJS Observable approach
+   */
+  loadUserProfile() {
+    console.log('📱 loadUserProfile called');
+    
+    // Create an observable from auth state
+    this.userProfile$ = from(
+      new Promise<string>((resolve) => {
+        onAuthStateChanged(this.auth, (user) => {
+          console.log('🔐 Auth state changed - User:', user);
+          console.log('🔐 User UID:', user?.uid);
+          
+          if (user) {
+            resolve(user.uid);
+          } else {
+            const currentUser = this.auth.currentUser;
+            console.log('❌ currentUser fallback:', currentUser?.uid);
+            resolve(currentUser?.uid || '');
+          }
+        });
+      })
+    ).pipe(
+      switchMap((uid: string) => {
+        console.log('🔄 Switching to profile data for UID:', uid);
+        if (!uid) {
+          console.error('❌ No UID available');
+          return new Observable<any>(observer => observer.error('No UID'));
+        }
+        return docData(doc(this.firestore, `users`, uid));
+      }),
+      catchError((error) => {
+        console.error('❌ Error in profile loading:', error);
+        return new Observable<any>(observer => observer.next({}));
+      })
+    );
+    
+    // Subscribe to the observable
+    this.userProfile$?.subscribe(
+      (profile: any) => {
+        console.log('✅ Profile data received:', profile);
+        console.log('📸 Full profile object:', JSON.stringify(profile, null, 2));
+        console.log('📸 photoDataUrl:', profile?.photoDataUrl);
+        console.log('📸 All fields:', Object.keys(profile || {}));
+        
+        this.userProfile = profile;
+        console.log('✅ userProfile updated:', this.userProfile);
+      },
+      (error: any) => {
+        console.error('❌ Error in subscription:', error);
+      },
+      () => {
+        console.log('✅ Profile subscription completed');
+      }
+    );
   }
 
   /**
@@ -201,6 +276,59 @@ export class NotificationsPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  /**
+   * Navigate to profile
+   */
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
+
+  /**
+   * Navigate to messages
+   */
+  goToMessages() {
+    this.router.navigate(['/messages']);
+  }
+
+  /**
+   * Search alumni
+   */
+  searchAlumni(event: any) {
+    this.searchQuery = event.target.value.toLowerCase().trim();
+    // Add search logic here if needed
+  }
+
+  /**
+   * Handle image loading errors
+   */
+  handleImageError(event: any) {
+    console.error('❌ Image loading error:', event);
+    event.target.style.display = 'none';
+  }
+
+  /**
+   * Open notification settings
+   */
+  openSettings() {
+    // Navigate to settings or show a settings modal
+    console.log('Opening notification settings');
+    // You can add navigation or modal logic here
+  }
+
+  /**
+   * Open post modal
+   */
+  openPostModal() {
+    this.router.navigate(['/create-post']);
+  }
+
+  /**
+   * Open menu
+   */
+  openMenu() {
+    this.router.navigate(['/menu']);
   }
 
   /**

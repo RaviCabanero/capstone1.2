@@ -1,14 +1,14 @@
 <!-- Top Header -->
-<ion-header [translucent]="true">
+<ion-header [translucent]="false">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button (click)="goToProfile()">
-        <ion-avatar class="header-avatar" *ngIf="userProfile?.photoDataUrl; else defaultAvatar">
-          <img [src]="userProfile.photoDataUrl" alt="Profile avatar" />
-        </ion-avatar>
-        <ng-template #defaultAvatar>
-          <ion-icon name="person-circle"></ion-icon>
-        </ng-template>
+        <div class="profile-avatar-wrapper">
+          <img *ngIf="userProfile?.photoDataUrl" [src]="userProfile.photoDataUrl" alt="Profile avatar" class="profile-image" />
+          <div *ngIf="!userProfile?.photoDataUrl" class="profile-placeholder">
+            <ion-icon name="person-circle"></ion-icon>
+          </div>
+        </div>
       </ion-button>
     </ion-buttons>
 
@@ -31,6 +31,22 @@
 </ion-header>
 
 <ion-content>
+  <!-- Invite Card Section -->
+  <div class="invite-card">
+    <div class="invite-text">
+      <h3>Invite 3 of your alumni to connect today</h3>
+    </div>
+    <div class="invite-avatars">
+      <div class="invite-avatar" *ngFor="let user of inviteAvatars">
+        <img [src]="user.photoDataUrl || 'assets/icon/favicon.png'" [alt]="user.firstName" />
+      </div>
+    </div>
+    <ion-button expand="block" color="light" class="search-btn" (click)="searchAlumniToInvite()">
+      <ion-icon name="search" slot="start"></ion-icon>
+      Search Alumni You Know
+    </ion-button>
+  </div>
+
   <!-- Network Overview Section -->
   <div class="network-overview">
     <h3 class="section-title">Network Overview</h3>
@@ -77,8 +93,8 @@
     </h3>
 
     <div class="alumni-grid" *ngIf="suggestedAlumni.length > 0; else noAlumni">
-      <div class="alumni-card-item" *ngFor="let alumnus of suggestedAlumni; let i = index">
-        <div class="card-dismiss">
+      <div class="alumni-card-item" *ngFor="let alumnus of suggestedAlumni; let i = index" (click)="goToAlumniProfile(alumnus.id)">
+        <div class="card-dismiss" (click)="$event.stopPropagation()">
           <ion-button fill="clear" size="small" (click)="dismissAlumnus(i)">
             <ion-icon name="close"></ion-icon>
           </ion-button>
@@ -94,16 +110,22 @@
           <p class="alumni-department">{{ alumnus.schoolDepartment || alumnus.department || 'No department' }}</p>
         </div>
 
-        <ion-button expand="block" color="success" size="small" (click)="connectWithAlumnus(alumnus.id)">
+        <ion-button expand="block" color="success" size="small" (click)="$event.stopPropagation(); connectWithAlumnus(alumnus.id)">
           Connect
         </ion-button>
       </div>
     </div>
 
+    <div class="show-all-container" *ngIf="suggestedAlumni.length > 0 && !isSearching">
+      <ion-button fill="clear" expand="block" (click)="showAllAlumni()">
+        Show all
+      </ion-button>
+    </div>
+
     <ng-template #noAlumni>
       <div class="empty-state">
         <ion-icon name="people-outline"></ion-icon>
-        <p *ngIf="!isSearching">No other users found in {{ userDepartment }}</p>
+        <p *ngIf="!isSearching">No other alumni found in {{ userDepartment }}</p>
         <p *ngIf="isSearching">No users found matching "{{ searchQuery }}"</p>
         <small *ngIf="!isSearching">Check the browser console for debugging info</small>
       </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, collection, query, where, orderBy, collectionData, doc, docData, deleteDoc, addDoc, updateDoc, arrayUnion, arrayRemove } from '@angular/fire/firestore';
 import { Observable, of, map } from 'rxjs';
 import { ModalController, ActionSheetController, AlertController, IonContent } from '@ionic/angular';
@@ -34,6 +34,8 @@ export class HomePage implements OnInit {
   private lastScrollTop = 0;
   showHeader = true;
   showFooter = true;
+  currentUserId: string | null = null;
+  currentUserConnections: string[] = [];
 
   constructor(
     private router: Router,
@@ -45,6 +47,8 @@ export class HomePage implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.currentUserId = this.auth.currentUser?.uid || null;
+    this.loadCurrentUserConnections();
     this.loadAllPosts();
     this.loadCurrentUserProfile();
     this.loadAllAlumniForSearch();
@@ -151,12 +155,39 @@ export class HomePage implements OnInit {
    * Load current user profile for avatar
    */
   loadCurrentUserProfile() {
-    const uid = this.auth.currentUser?.uid;
-    if (uid) {
-      docData(doc(this.firestore, `users/${uid}`)).subscribe(profile => {
+    console.log('📱 Loading current user profile');
+    
+    onAuthStateChanged(this.auth, (user) => {
+      console.log('🔐 Auth state changed - User UID:', user?.uid);
+      
+      if (!user) {
+        const currentUser = this.auth.currentUser;
+        console.log('❌ No user in onAuthStateChanged, trying currentUser:', currentUser?.uid);
+        if (!currentUser) return;
+        this.loadProfileData(currentUser.uid);
+      } else {
+        console.log('✅ User authenticated:', user.uid);
+        this.loadProfileData(user.uid);
+      }
+    });
+  }
+
+  /**
+   * Load profile data from Firestore
+   */
+  private loadProfileData(uid: string) {
+    console.log('🔄 Loading profile data for UID:', uid);
+    
+    docData(doc(this.firestore, `users/${uid}`)).subscribe(
+      (profile: any) => {
+        console.log('✅ Profile loaded:', profile);
+        console.log('📸 Photo URL:', profile?.photoDataUrl);
         this.userProfile = profile;
-      });
-    }
+      },
+      (error) => {
+        console.error('❌ Error loading profile:', error);
+      }
+    );
   }
 
   /**
@@ -170,12 +201,61 @@ export class HomePage implements OnInit {
     
     this.allPosts$ = collectionData(postsQuery, { idField: 'id' }).pipe(
       map((posts: any[]) =>
-        posts.map(post => ({
-          ...post,
-          timestamp: this.convertTimestamp(post.timestamp),
-        }))
+        posts
+          .map(post => ({
+            ...post,
+            timestamp: this.convertTimestamp(post.timestamp),
+          }))
+          .filter(post => this.canViewPost(post))
       )
     ) as Observable<any[]>;
+  }
+
+  /**
+   * Check if current user can view a post based on visibility settings
+   */
+  private canViewPost(post: any): boolean {
+    // Own posts are always visible
+    if (post.userId === this.currentUserId) {
+      return true;
+    }
+
+    // Post visibility check
+    const postVisibility = post.visibility || 'public';
+
+    // Public posts are always visible
+    if (postVisibility === 'public') {
+      return true;
+    }
+
+    // Friends-only posts are visible if we're connected
+    if (postVisibility === 'friends') {
+      return this.currentUserConnections.includes(post.userId);
+    }
+
+    // Private posts (only me) are never visible to others
+    if (postVisibility === 'onlyme') {
+      return false;
+    }
+
+    return false;
+  }
+
+  /**
+   * Load current user's connections
+   */
+  private loadCurrentUserConnections() {
+    if (!this.currentUserId) return;
+    
+    docData(doc(this.firestore, `users/${this.currentUserId}`)).subscribe(
+      (profile: any) => {
+        this.currentUserConnections = profile?.connections || [];
+      },
+      (error) => {
+        console.error('Error loading connections:', error);
+        this.currentUserConnections = [];
+      }
+    );
   }
 
   /**
@@ -540,6 +620,13 @@ export class HomePage implements OnInit {
    */
   goToNotifications() {
     this.router.navigate(['/notifications']);
+  }
+
+  /**
+   * Navigate to Messages/Activity page
+   */
+  goToMessages() {
+    this.router.navigate(['/activity']);
   }
 
   /**

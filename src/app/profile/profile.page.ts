@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController, ToastController } from '@ionic/angular';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
 import { Firestore, doc, docData, updateDoc, collection, addDoc, query, where, orderBy, collectionData } from '@angular/fire/firestore';
 import { Observable, of, map, catchError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { NotificationService } from '../services/notification.service';
 import { PostModalComponent } from '../post-modal/post-modal.component';
 import { ExperienceModalComponent } from '../experience-modal/experience-modal.component';
 import { SkillModalComponent } from '../skill-modal/skill-modal.component';
@@ -35,6 +36,10 @@ export class ProfilePage implements OnInit {
   viewedUserId: string | null = null;
   currentUserId: string | null = null;
   isOwnProfile: boolean = true;
+  
+  // Track connections
+  currentUserConnections: string[] = [];
+  isConnectedWithViewed: boolean = false;
 
   // Scroll handling
   showHeader: boolean = true;
@@ -52,12 +57,20 @@ export class ProfilePage implements OnInit {
     private authService: AuthService,
     private router: Router,
     private modalCtrl: ModalController,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private alertController: AlertController,
+    private toastController: ToastController,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
     const uid = this.auth.currentUser?.uid;
     this.currentUserId = uid || null;
+
+    // Load current user's connections
+    if (uid) {
+      this.loadCurrentUserConnections(uid);
+    }
 
     // Check if viewing another user's profile from route params
     this.activatedRoute.params.subscribe(params => {
@@ -87,6 +100,10 @@ export class ProfilePage implements OnInit {
         if (profile?.experiences) {
           this.groupedExperiences = this.groupAndSortExperiences(profile.experiences);
         }
+        // Check if we're connected with this user
+        if (profile?.connections && this.currentUserId) {
+          this.isConnectedWithViewed = profile.connections.includes(this.currentUserId);
+        }
         return profile;
       })
     ) as Observable<any>;
@@ -105,13 +122,61 @@ export class ProfilePage implements OnInit {
       orderBy('timestamp', 'desc')
     );
     this.userPosts$ = collectionData(postsQuery, { idField: 'id' }).pipe(
-      map((posts: any[]) =>
-        posts.map(post => ({
-          ...post,
-          timestamp: this.convertTimestamp(post.timestamp),
-        }))
-      )
+      map((posts: any[]) => {
+        // Filter posts based on visibility and connection status
+        return posts
+          .map(post => ({
+            ...post,
+            timestamp: this.convertTimestamp(post.timestamp),
+          }))
+          .filter(post => this.canViewPost(post));
+      })
     ) as Observable<any[]>;
+  }
+
+  /**
+   * Check if current user can view a post based on visibility settings
+   */
+  private canViewPost(post: any): boolean {
+    // Own posts are always visible
+    if (this.isOwnProfile) {
+      return true;
+    }
+
+    // Post visibility check
+    const postVisibility = post.visibility || 'public';
+
+    // Public posts are always visible
+    if (postVisibility === 'public') {
+      return true;
+    }
+
+    // Friends-only posts are visible if we're connected
+    if (postVisibility === 'friends') {
+      return this.isConnectedWithViewed;
+    }
+
+    // Private posts (only me) are never visible to others
+    if (postVisibility === 'onlyme') {
+      return false;
+    }
+
+    return false;
+  }
+
+  /**
+   * Load current user's connections
+   */
+  private loadCurrentUserConnections(uid: string) {
+    docData(doc(this.firestore, `users/${uid}`)).subscribe(
+      (profile: any) => {
+        this.currentUserConnections = profile?.connections || [];
+      },
+      (error) => {
+        console.error('Error loading connections:', error);
+        this.currentUserConnections = [];
+      }
+    );
   }
 
   private convertTimestamp(timestamp: any): number {
@@ -186,6 +251,121 @@ export class ProfilePage implements OnInit {
 
   goToActivity() {
     this.router.navigate(['/activity']);
+  }
+
+  /**
+   * Send a connection request to another alumni
+   */
+  async connectWithAlumni(alumniId: string | null) {
+    if (!alumniId || !this.currentUserId) {
+      console.error('Invalid user IDs');
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Send Connection Request',
+      message: 'Would you like to add this alumni to your friends list?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Connect',
+          handler: async () => {
+            try {
+              // Get the current user's profile information
+              const currentUserProfile = await new Promise<any>((resolve, reject) => {
+                const unsubscribe = docData(doc(this.firestore, `users/${this.currentUserId}`)).subscribe(
+                  (data) => {
+                    unsubscribe.unsubscribe();
+                    resolve(data);
+                  },
+                  (err) => {
+                    unsubscribe.unsubscribe();
+                    reject(err);
+                  }
+                );
+              });
+
+              // Get the target user's profile to update their connections
+              const targetUserProfile = await new Promise<any>((resolve, reject) => {
+                const unsubscribe = docData(doc(this.firestore, `users/${alumniId}`)).subscribe(
+                  (data) => {
+                    unsubscribe.unsubscribe();
+                    resolve(data);
+                  },
+                  (err) => {
+                    unsubscribe.unsubscribe();
+                    reject(err);
+                  }
+                );
+              });
+
+              // Update current user's connections
+              const currentUserConnections = currentUserProfile?.connections || [];
+              if (!currentUserConnections.includes(alumniId)) {
+                currentUserConnections.push(alumniId);
+                await updateDoc(doc(this.firestore, `users/${this.currentUserId}`), {
+                  connections: currentUserConnections,
+                  updatedAt: new Date().toISOString(),
+                });
+                // Update local connections array
+                this.currentUserConnections = currentUserConnections;
+              }
+
+              // Update target user's connections
+              const targetUserConnections = targetUserProfile?.connections || [];
+              if (!targetUserConnections.includes(this.currentUserId)) {
+                targetUserConnections.push(this.currentUserId);
+                await updateDoc(doc(this.firestore, `users/${alumniId}`), {
+                  connections: targetUserConnections,
+                  updatedAt: new Date().toISOString(),
+                });
+              }
+
+              // Send a notification to the target alumni
+              await this.notificationService.createNotification({
+                userId: alumniId,
+                type: 'general',
+                title: 'New Connection',
+                message: `${currentUserProfile?.firstName} ${currentUserProfile?.lastName} is now connected with you`,
+                data: {
+                  fromUserId: this.currentUserId,
+                  fromUserName: `${currentUserProfile?.firstName} ${currentUserProfile?.lastName}`,
+                  type: 'connection_established',
+                }
+              });
+
+              // Update the connection status
+              this.isConnectedWithViewed = true;
+
+              // Show success toast
+              const toast = await this.toastController.create({
+                message: 'Connected successfully!',
+                duration: 2000,
+                position: 'bottom',
+                color: 'success'
+              });
+              await toast.present();
+
+              console.log('✅ Connection established successfully');
+            } catch (error) {
+              console.error('❌ Error establishing connection:', error);
+              const toast = await this.toastController.create({
+                message: 'Failed to establish connection',
+                duration: 2000,
+                position: 'bottom',
+                color: 'danger'
+              });
+              await toast.present();
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   async openExperienceModal() {

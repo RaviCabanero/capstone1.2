@@ -23,7 +23,7 @@
       </ion-avatar>
       <div class="user-details">
         <h3 class="user-name">{{ userName }}</h3>
-        <ion-select value="public" interface="popover" class="visibility-select">
+        <ion-select [(ngModel)]="selectedVisibility" interface="popover" class="visibility-select">
           <ion-select-option value="public">
             <ion-icon name="globe-outline"></ion-icon>
             Public

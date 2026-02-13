@@ -1,13 +1,13 @@
-<ion-header [translucent]="true" [class.header-hidden]="!showHeader">
-  <ion-toolbar>
+<ion-header [translucent]="false" [class.header-hidden]="!showHeader">
+  <ion-toolbar class="home-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goToProfile()">
-        <ion-avatar class="header-avatar" *ngIf="userProfile?.photoDataUrl; else defaultAvatar">
-          <img [src]="userProfile.photoDataUrl" alt="Profile avatar" />
-        </ion-avatar>
-        <ng-template #defaultAvatar>
-          <ion-icon name="person-circle"></ion-icon>
-        </ng-template>
+      <ion-button (click)="goToProfile()" class="avatar-button">
+        <div class="profile-avatar-wrapper">
+          <img *ngIf="userProfile?.photoDataUrl" [src]="userProfile.photoDataUrl" alt="Profile" class="profile-image" />
+          <div *ngIf="!userProfile?.photoDataUrl" class="profile-placeholder">
+            <ion-icon name="person-circle"></ion-icon>
+          </div>
+        </div>
       </ion-button>
     </ion-buttons>
 
@@ -22,7 +22,7 @@
     </ion-searchbar>
 
     <ion-buttons slot="end">
-      <ion-button>
+      <ion-button (click)="goToMessages()">
         <ion-icon name="chatbubbles" class="chat-icon"></ion-icon>
       </ion-button>
     </ion-buttons>

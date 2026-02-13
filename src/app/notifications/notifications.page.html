@@ -1,12 +1,45 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar class="search-toolbar">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-button (click)="goToProfile()">
+        <div class="profile-avatar-wrapper">
+          <!-- Try to display photo either from sync or async data -->
+          <img *ngIf="userProfile?.photoDataUrl || (userProfile$ | async)?.photoDataUrl" 
+               [src]="userProfile?.photoDataUrl || (userProfile$ | async)?.photoDataUrl" 
+               alt="Profile" 
+               class="profile-image" 
+               (error)="handleImageError($event)" />
+          <div *ngIf="!(userProfile?.photoDataUrl || (userProfile$ | async)?.photoDataUrl)" class="profile-placeholder">
+            <ion-icon name="person-circle"></ion-icon>
+          </div>
+        </div>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Notifications</ion-title>
+
+    <ion-searchbar
+      placeholder="Search alumni..."
+      mode="ios"
+      class="searchbar"
+      [(ngModel)]="searchQuery"
+      (ionInput)="searchAlumni($event)"
+      debounce="500"
+      animated="true">
+    </ion-searchbar>
+
     <ion-buttons slot="end">
-      <ion-button (click)="markAllAsRead()" *ngIf="hasUnreadNotifications()">
-        <ion-icon name="checkmark-done-outline"></ion-icon>
+      <ion-button (click)="goToMessages()">
+        <ion-icon name="chatbubbles" class="chat-icon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="false">
+  <ion-toolbar class="notifications-header">
+    <ion-title class="header-title">Notifications</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSettings()" class="settings-btn">
+        <ion-icon name="settings"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -68,3 +101,32 @@
     </div>
   </div>
 </ion-content>
+<!-- Bottom Tab Bar -->
+<ion-footer>
+  <ion-tab-bar slot="bottom" class="custom-tab-bar">
+    <ion-tab-button tab="home" routerLink="/home">
+      <ion-icon name="home"></ion-icon>
+      <ion-label>Home</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="alumni" routerLink="/alumni-network">
+      <ion-icon name="people"></ion-icon>
+      <ion-label>Alumni</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="post" (click)="openPostModal()">
+      <ion-icon name="add-circle"></ion-icon>
+      <ion-label>Post</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="notification" routerLink="/notifications">
+      <ion-icon name="notifications"></ion-icon>
+      <ion-label>Notification</ion-label>
+    </ion-tab-button>
+    
+    <ion-tab-button tab="menu" (click)="openMenu()">
+      <ion-icon name="menu"></ion-icon>
+      <ion-label>Menu</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-footer>

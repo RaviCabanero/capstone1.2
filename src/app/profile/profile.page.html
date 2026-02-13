@@ -60,25 +60,35 @@
         <div class="user-info">
           <h2 class="user-name">{{ profile.firstName }} {{ profile.lastName }}</h2>
           <ng-container *ngIf="profile?.isDepartmentHead">
-          <ion-chip color="tertiary" class="dept-head-chip">
-          <ion-icon name="ribbon" slot="start"></ion-icon>
-          Department Head
-          </ion-chip>
+            <ion-chip color="warning" class="dept-head-chip">
+              <ion-icon name="ribbon" slot="start"></ion-icon>
+              <span class="chip-text">Department Head</span>
+            </ion-chip>
           </ng-container>
-          <p class="user-university">{{ profile.university || 'University of San Jose-Recoletos' }}</p>
-          <p class="user-course">{{ profile.course || 'Course not provided' }}</p>
-          <p class="user-address" *ngIf="profile.address">
-            {{ profile.address }}
+          <p class="user-details-row">
+            <span class="detail-label">{{ profile.university || 'University of San Jose-Recoletos' }}</span>
           </p>
-          <p class="user-department" *ngIf="profile.schoolDepartment">
-            <ion-icon name="business"></ion-icon>
-            {{ profile.schoolDepartment }}
+          <p class="user-details-row">
+            <span class="detail-label">{{ profile.course || 'Course not provided' }}</span>
+          </p>
+          <p class="user-details-row" *ngIf="profile.schoolDepartment">
+            <ion-icon name="business" class="detail-icon"></ion-icon>
+            <span class="detail-label">{{ profile.schoolDepartment }}</span>
+          </p>
+          <p class="user-details-row" *ngIf="profile.address">
+            <ion-icon name="location" class="detail-icon"></ion-icon>
+            <span class="detail-label">{{ profile.address }}</span>
           </p>
         </div>
-        <ion-button fill="outline" size="small" routerLink="/profile-edit" *ngIf="isOwnProfile" class="edit-profile-btn">
-          <ion-icon name="pencil" slot="start"></ion-icon>
-          Edit
-        </ion-button>
+        <div class="profile-actions">
+          <ion-button fill="outline" size="small" routerLink="/profile-edit" *ngIf="isOwnProfile" class="edit-profile-btn">
+            <ion-icon name="pencil" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button fill="solid" color="success" size="small" (click)="connectWithAlumni(viewedUserId)" *ngIf="!isOwnProfile" class="connect-btn">
+            <ion-icon name="person-add" slot="start"></ion-icon>
+            <span>Connect</span>
+          </ion-button>
+        </div>
       </div>
     </div>
 
@@ -139,10 +149,10 @@
 
     <!-- About Section -->
     <ion-card class="about-section">
-      <ion-card-header>
-        <ion-card-title>About</ion-card-title>
+      <ion-card-header class="section-header-compact">
+        <ion-card-title class="section-title-compact">About</ion-card-title>
       </ion-card-header>
-      <ion-card-content>
+      <ion-card-content class="section-content-compact">
         <ng-container *ngIf="!editingSummary || !isOwnProfile; else editSummaryForm">
           <p *ngIf="profile.summary; else noSummary">{{ profile.summary }}</p>
           <ng-template #noSummary>
@@ -175,10 +185,10 @@
 
     <!-- Activity Section -->
     <ion-card class="activity-section">
-      <ion-card-header>
-        <ion-card-title>Activity</ion-card-title>
+      <ion-card-header class="section-header-compact">
+        <ion-card-title class="section-title-compact">Activity</ion-card-title>
       </ion-card-header>
-      <ion-card-content>
+      <ion-card-content class="section-content-compact">
         <ion-list lines="none" *ngIf="(userPosts$ | async) as posts; else noPosts">
           <ion-item *ngFor="let post of posts | slice:0:3">
             <ion-label>
@@ -277,12 +287,14 @@
 
     <!-- Skills Section -->
     <ion-card class="skills-section">
-      <ion-card-header>
-        <div class="section-header">
-          <ion-card-title>Skills</ion-card-title>
-        </div>
+      <ion-card-header class="section-header-with-action">
+        <ion-card-title class="section-title-compact">Skills</ion-card-title>
+        <ion-button fill="clear" size="small" color="primary" (click)="openSkillModal()" *ngIf="isOwnProfile" class="add-skill-btn">
+          <ion-icon name="add-circle" slot="start"></ion-icon>
+          <span>Add Skills</span>
+        </ion-button>
       </ion-card-header>
-      <ion-card-content>
+      <ion-card-content class="section-content-compact">
         <div class="skills-container" *ngIf="profile.skills && profile.skills.length > 0; else noSkills">
           <div class="skill-card" *ngFor="let skill of profile.skills">
             <div class="skill-header">
@@ -311,12 +323,8 @@
           </div>
         </div>
         <ng-template #noSkills>
-          <div class="empty-state">
-            <p>No skills added yet</p>
-            <ion-button fill="clear" color="primary" size="small" (click)="openSkillModal()" *ngIf="isOwnProfile">
-              <ion-icon name="add-circle" slot="start"></ion-icon>
-              Add your first skill
-            </ion-button>
+          <div class="empty-state-centered">
+            <p class="empty-state-text">Add skills to highlight your expertise</p>
           </div>
         </ng-template>
       </ion-card-content>
@@ -324,10 +332,11 @@
 
     <!-- Accomplishments Section -->
     <ion-card class="accomplishments-section">
-      <ion-card-header>
-        <div class="section-header">
-          <ion-card-title>Accomplishments</ion-card-title>
-        </div>
+      <ion-card-header class="section-header-with-action">
+        <ion-card-title class="section-title-compact">Accomplishments</ion-card-title>
+        <ion-button fill="clear" size="small" color="primary" (click)="openAccomplishmentModal()" *ngIf="isOwnProfile" class="add-accomplishment-btn">
+          <span class="add-link">+ Add Accomplishments</span>
+        </ion-button>
       </ion-card-header>
       <ion-card-content>
         <div class="accomplishments-container" *ngIf="profile.accomplishments && profile.accomplishments.length > 0; else noAccomplishments">
@@ -372,13 +381,11 @@
 
     <!-- Contact Section -->
     <ion-card class="contact-section">
-      <ion-card-header>
-        <div class="section-header">
-          <ion-card-title>Contact Information</ion-card-title>
-          <ion-button fill="clear" color="primary" size="small" (click)="openContactModal()" *ngIf="isOwnProfile">
-            <ion-icon name="pencil"></ion-icon>
-          </ion-button>
-        </div>
+      <ion-card-header class="section-header-with-action">
+        <ion-card-title class="section-title-compact">Contact</ion-card-title>
+        <ion-button fill="clear" color="primary" size="small" (click)="openContactModal()" *ngIf="isOwnProfile" class="edit-contact-btn">
+          <ion-icon name="pencil" slot="icon-only"></ion-icon>
+        </ion-button>
       </ion-card-header>
       <ion-card-content>
         <!-- Email -->

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
-import { Auth } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, doc, docData, collection, query, where, collectionData } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
@@ -17,18 +17,14 @@ export class AlumniNetworkPage implements OnInit {
   userDepartment: string = '';
 
   // Invite Section
-  inviteAvatars: string[] = [
-    'assets/icon/favicon.png',
-    'assets/icon/favicon.png',
-    'assets/icon/favicon.png',
-  ];
+  inviteAvatars: any[] = [];
 
   // Network Overview Stats
   inviteSent: number = 0;
   connections: number = 0;
   following: number = 0;
 
-  // Department
+  // Department Filter
   selectedDepartment: string = 'School of Education';
   selectedDepartmentFilter: string = 'my'; // 'my', 'all', or specific department name
 
@@ -51,29 +47,107 @@ export class AlumniNetworkPage implements OnInit {
 
   ngOnInit() {
     console.log('🚀 Alumni Network Page Initializing...');
+    
+    // Initialize invite avatars with placeholders
+    this.inviteAvatars = [
+      { firstName: 'User', lastName: '1', photoDataUrl: 'assets/icon/favicon.png' },
+      { firstName: 'User', lastName: '2', photoDataUrl: 'assets/icon/favicon.png' },
+      { firstName: 'User', lastName: '3', photoDataUrl: 'assets/icon/favicon.png' },
+    ];
+    
     this.loadUserProfile();
     this.loadNetworkStats();
+    this.loadAlumniDirectly();
+  }
+
+  /**
+   * Load alumni directly without waiting for profile
+   */
+  loadAlumniDirectly() {
+    // Wait for auth state to be ready
+    onAuthStateChanged(this.auth, (user) => {
+      if (!user) {
+        console.log('❌ No authenticated user');
+        return;
+      }
+
+      console.log('👤 Auth ready - User UID:', user.uid);
+      this.loadAllUsers(user.uid);
+    });
+  }
+
+  /**
+   * Load all users from Firestore
+   */
+  private loadAllUsers(currentUserId: string) {
+    console.log('🔄 Loading all users from Firestore...');
+    const alumniQuery = query(collection(this.firestore, 'users'));
+
+    collectionData(alumniQuery, { idField: 'id' }).subscribe(
+      (users: any[]) => {
+        console.log('📊 Total users in database:', users.length);
+        
+        if (users.length === 0) {
+          console.warn('⚠️ No users found in database');
+          this.suggestedAlumni = [];
+          return;
+        }
+        
+        // Filter out current user
+        const filteredUsers = users.filter(user => user.id !== currentUserId);
+        console.log('📊 Users after filtering (excluding current):', filteredUsers.length);
+        console.log('📊 User details:', filteredUsers);
+        
+        // Update arrays
+        this.allAlumni = filteredUsers;
+        this.allSearchAlumni = filteredUsers;
+        this.suggestedAlumni = filteredUsers;
+        this.populateInviteAvatars(filteredUsers);
+        
+        console.log('✅ Alumni loaded and displayed successfully');
+      },
+      (error) => {
+        console.error('❌ Error loading alumni from Firestore:', error);
+      }
+    );
   }
 
   /**
    * Load current user profile
    */
   loadUserProfile() {
-    const uid = this.auth.currentUser?.uid;
+    console.log('🔐 Starting profile load with auth state check...');
     
-    if (!uid) {
-      console.log('❌ No authenticated user');
-      return;
-    }
+    onAuthStateChanged(this.auth, (user) => {
+      if (!user) {
+        console.log('❌ No authenticated user in loadUserProfile');
+        return;
+      }
 
-    console.log('👤 Loading profile for user:', uid);
+      console.log('🔐 Auth state ready, User UID:', user.uid);
+      this.loadProfileData(user.uid);
+    });
+  }
+
+  /**
+   * Load profile data from Firestore
+   */
+  private loadProfileData(uid: string) {
+    console.log('📸 Loading profile data for UID:', uid);
+    
     docData(doc(this.firestore, `users/${uid}`)).subscribe(
       (profile: any) => {
-        console.log('✅ Profile loaded:', profile);
+        console.log('✅ Profile data received:', profile);
+        console.log('📸 Photo URL:', profile?.photoDataUrl);
+        
         this.userProfile = profile;
         this.userDepartment = profile?.schoolDepartment || profile?.department || 'School of Education';
-        this.selectedDepartmentFilter = 'my'; // Default to user's department
-        this.selectedDepartment = `Josenian you may know in ${this.userDepartment}`;
+        
+        console.log('👤 User Department:', this.userDepartment);
+        console.log('📸 Full profile object:', this.userProfile);
+        
+        this.selectedDepartmentFilter = 'all';
+        this.selectedDepartment = 'All Alumni';
         this.loadSuggestedAlumni();
         this.loadAllAlumni();
       },
@@ -90,9 +164,16 @@ export class AlumniNetworkPage implements OnInit {
     const uid = this.auth.currentUser?.uid;
     if (uid) {
       docData(doc(this.firestore, `users/${uid}`)).subscribe((profile: any) => {
-        this.inviteSent = profile?.inviteSent || 0;
-        this.connections = profile?.connections || 0;
-        this.following = profile?.following || 0;
+        // Handle both number counts and array-based data
+        this.inviteSent = Array.isArray(profile?.inviteSent) ? profile.inviteSent.length : (profile?.inviteSent || 0);
+        this.connections = Array.isArray(profile?.connections) ? profile.connections.length : (profile?.connections || 0);
+        this.following = Array.isArray(profile?.following) ? profile.following.length : (profile?.following || 0);
+        
+        console.log('📊 Network Stats loaded:', {
+          inviteSent: this.inviteSent,
+          connections: this.connections,
+          following: this.following
+        });
       });
     }
   }
@@ -102,28 +183,30 @@ export class AlumniNetworkPage implements OnInit {
    */
   loadSuggestedAlumni() {
     const currentUserId = this.auth.currentUser?.uid;
-    const filterDept = this.getFilterDepartment();
 
-    let alumniQuery;
-    if (filterDept === 'all') {
-      console.log('🔄 Loading users from ALL departments');
-      alumniQuery = query(collection(this.firestore, 'users'));
-    } else {
-      console.log('🔄 Loading users from:', filterDept);
-      alumniQuery = query(
-        collection(this.firestore, 'users'),
-        where('schoolDepartment', '==', filterDept)
-      );
-    }
+    console.log(' Loading users...');
+    // Load all users first
+    const alumniQuery = query(collection(this.firestore, 'users'));
 
     collectionData(alumniQuery, { idField: 'id' }).subscribe(
       (users: any[]) => {
-        this.allAlumni = users.filter(user => user.id !== currentUserId);
-        this.suggestedAlumni = this.allAlumni;
-        console.log('✅ Loaded users:', this.allAlumni.length, this.allAlumni);
+        console.log(' Total users in database:', users.length);
+        console.log(' All users:', users);
+        
+        // Filter only current user out
+        let filteredUsers = users.filter(user => user.id !== currentUserId);
+        console.log(' Users excluding current:', filteredUsers.length);
+        
+        // No department filtering - just show all other users
+        console.log(` Final filtered users: ${filteredUsers.length}`);
+        this.allAlumni = filteredUsers;
+        this.suggestedAlumni = filteredUsers;
+        
+        // Populate invite avatars with random users
+        this.populateInviteAvatars(filteredUsers);
       },
       (error) => {
-        console.error('❌ Permission Error:', error.message);
+        console.error(' Error loading users:', error);
       }
     );
   }
@@ -135,29 +218,48 @@ export class AlumniNetworkPage implements OnInit {
    */
   loadAllAlumni() {
     const currentUserId = this.auth.currentUser?.uid;
-    const filterDept = this.getFilterDepartment();
 
-    let alumniQuery;
-    if (filterDept === 'all') {
-      console.log('🔍 Loading search cache from ALL departments');
-      alumniQuery = query(collection(this.firestore, 'users'));
-    } else {
-      console.log('🔍 Loading search cache from:', filterDept);
-      alumniQuery = query(
-        collection(this.firestore, 'users'),
-        where('schoolDepartment', '==', filterDept)
-      );
-    }
+    console.log(' Loading all alumni for search...');
+    const alumniQuery = query(collection(this.firestore, 'users'));
 
     collectionData(alumniQuery, { idField: 'id' }).subscribe(
       (users: any[]) => {
-        this.allSearchAlumni = users.filter(user => user.id !== currentUserId);
-        console.log('✅ Search cache loaded:', this.allSearchAlumni.length, 'users');
+        let filteredUsers = users.filter(user => user.id !== currentUserId);
+        
+        // No department filtering - show all
+        this.allSearchAlumni = filteredUsers;
+        console.log(' Search cache loaded:', this.allSearchAlumni.length, 'users');
+        
+        // Populate invite avatars with 3 random users
+        this.populateInviteAvatars(filteredUsers);
       },
       (error) => {
-        console.error('❌ Search cache error:', error.message);
+        console.error(' Search cache error:', error);
       }
     );
+  }
+
+  /**
+   * Populate invite avatars with 3 random users
+   */
+  private populateInviteAvatars(users: any[]) {
+    if (users.length === 0) {
+      this.inviteAvatars = [];
+      return;
+    }
+
+    // Get 3 random unique users
+    const randomUsers: any[] = [];
+    const usersCopy = [...users];
+    
+    for (let i = 0; i < Math.min(3, usersCopy.length); i++) {
+      const randomIndex = Math.floor(Math.random() * usersCopy.length);
+      randomUsers.push(usersCopy[randomIndex]);
+      usersCopy.splice(randomIndex, 1);
+    }
+
+    this.inviteAvatars = randomUsers;
+    console.log(' Invite avatars populated with 3 random users:', this.inviteAvatars);
   }
 
   /**
@@ -235,6 +337,13 @@ export class AlumniNetworkPage implements OnInit {
   }
 
   /**
+   * Navigate to alumni profile
+   */
+  goToAlumniProfile(alumniId: string) {
+    this.router.navigate(['/profile', alumniId]);
+  }
+
+  /**
    * Search alumni across all departments
    */
   searchAlumni(event: any) {
@@ -252,7 +361,6 @@ export class AlumniNetworkPage implements OnInit {
         const lastName = user.lastName?.toLowerCase() || '';
         const fullName = `${firstName} ${lastName}`;
         const email = user.email?.toLowerCase() || '';
-        const major = user.major?.toLowerCase() || '';
         const department = (user.schoolDepartment || user.department || '').toLowerCase();
 
         return (
@@ -260,7 +368,6 @@ export class AlumniNetworkPage implements OnInit {
           firstName.includes(this.searchQuery) ||
           lastName.includes(this.searchQuery) ||
           email.includes(this.searchQuery) ||
-          major.includes(this.searchQuery) ||
           department.includes(this.searchQuery)
         );
       });
@@ -280,6 +387,14 @@ export class AlumniNetworkPage implements OnInit {
     this.searchQuery = '';
     this.isSearching = false;
     this.suggestedAlumni = this.allAlumni;
+  }
+
+  /**
+   * Show all alumni
+   */
+  showAllAlumni() {
+    // Navigate to a full alumni list page or expand the view
+    this.router.navigate(['/alumni-search']);
   }
 
   /**

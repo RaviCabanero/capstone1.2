@@ -13,6 +13,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
 export class PostModalComponent implements OnInit {
   postText = '';
   selectedImage: string | null = null;
+  selectedVisibility: string = 'public';
   userName = 'User Name';
   userAvatar = '';
 
@@ -31,7 +32,7 @@ export class PostModalComponent implements OnInit {
     const postData = {
       text: this.postText,
       image: this.selectedImage,
-      visibility: 'public',
+      visibility: this.selectedVisibility,
       timestamp: new Date().toISOString(),
     };
     

@@ -72,6 +72,10 @@ const routes: Routes = [
     component: AlumniIdRequestPage
   },
   {
+    path: 'menu',
+    loadChildren: () => import('./menu/menu.module').then(m => m.MenuPageModule)
+  },
+  {
     path: 'super-admin',
     component: SuperAdminLayoutComponent,
     children: [
