@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 interface MenuItem {
   icon: string;
@@ -73,7 +74,10 @@ export class SuperAdminLayoutComponent implements OnInit {
     },
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     // Initialize component
@@ -115,11 +119,7 @@ export class SuperAdminLayoutComponent implements OnInit {
   /**
    * Handle logout
    */
-  logout(): void {
-    // TODO: Implement logout logic
-    // Example: this.authService.logout().then(() => {
-    //   this.router.navigate(['/login']);
-    // });
-    console.log('Logout clicked');
+  async logout(): Promise<void> {
+    await this.authService.logoutAndRedirect('/login');
   }
 }
