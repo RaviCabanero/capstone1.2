@@ -147,7 +147,7 @@ export class AlumniNetworkPage implements OnInit {
         console.log('Full profile object:', this.userProfile);
         
         this.selectedDepartmentFilter = 'all';
-        this.selectedDepartment = 'All Alumni';
+        this.selectedDepartment = 'All Departments';
         this.loadSuggestedAlumni();
         this.loadAllAlumni();
       },
@@ -196,12 +196,19 @@ export class AlumniNetworkPage implements OnInit {
         // Filter only current user out
         let filteredUsers = users.filter(user => user.id !== currentUserId);
         console.log(' Users excluding current:', filteredUsers.length);
-        
-        // No department filtering - just show all other users
+
+        // Apply department filter if one is selected
+        const filterDept = this.getFilterDepartment();
+        if (filterDept !== 'all') {
+          const deptLower = filterDept.toLowerCase();
+          filteredUsers = filteredUsers.filter(u => ((u.schoolDepartment || u.department || '')).toLowerCase() === deptLower);
+          console.log(` Applied department filter (${filterDept}): ${filteredUsers.length} users`);
+        }
+
         console.log(` Final filtered users: ${filteredUsers.length}`);
         this.allAlumni = filteredUsers;
         this.suggestedAlumni = filteredUsers;
-        
+
         // Populate invite avatars with random users
         this.populateInviteAvatars(filteredUsers);
       },
@@ -225,13 +232,19 @@ export class AlumniNetworkPage implements OnInit {
     collectionData(alumniQuery, { idField: 'id' }).subscribe(
       (users: any[]) => {
         let filteredUsers = users.filter(user => user.id !== currentUserId);
-        
-        // No department filtering - show all
-        this.allSearchAlumni = filteredUsers;
-        console.log(' Search cache loaded:', this.allSearchAlumni.length, 'users');
-        
-        // Populate invite avatars with 3 random users
-        this.populateInviteAvatars(filteredUsers);
+
+            // Apply department filter to search cache as well
+            const filterDept = this.getFilterDepartment();
+            if (filterDept !== 'all') {
+              const deptLower = filterDept.toLowerCase();
+              filteredUsers = filteredUsers.filter(u => ((u.schoolDepartment || u.department || '')).toLowerCase() === deptLower);
+            }
+
+            this.allSearchAlumni = filteredUsers;
+            console.log(' Search cache loaded:', this.allSearchAlumni.length, 'users');
+
+            // Populate invite avatars with 3 random users
+            this.populateInviteAvatars(filteredUsers);
       },
       (error) => {
         console.error(' Search cache error:', error);
@@ -416,12 +429,15 @@ export class AlumniNetworkPage implements OnInit {
   onDepartmentChange() {
     const filterDept = this.getFilterDepartment();
     
-    if (filterDept === 'all') {
-      this.selectedDepartment = 'All Josenians';
+    if (this.selectedDepartmentFilter === 'all' || filterDept === 'all') {
+      this.selectedDepartment = 'All Departments';
+    } else if (this.selectedDepartmentFilter === 'my') {
+      this.selectedDepartment = `My Department (${this.userDepartment})`;
     } else {
-      this.selectedDepartment = `Josenian you may know in ${filterDept}`;
+      this.selectedDepartment = filterDept;
     }
-    
+
+    // Reload lists applying the chosen department filter
     this.loadSuggestedAlumni();
     this.loadAllAlumni();
   }

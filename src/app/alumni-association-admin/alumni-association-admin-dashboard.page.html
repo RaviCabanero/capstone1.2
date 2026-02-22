@@ -1,124 +1,175 @@
-<ion-header>
-  <ion-toolbar class="admin-toolbar">
-    <ion-title class="admin-title">Alumni Association Admin</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()" class="logout-btn">
-        <ion-icon name="log-out-outline"></ion-icon>
-        Logout
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<!-- SIDEBAR -->
+<ion-menu contentId="main-content" type="overlay" class="admin-menu">
+  <ion-header>
+    <ion-toolbar class="menu-toolbar">
+      <ion-title class="menu-title">Admin Panel</ion-title>
+    </ion-toolbar>
+  </ion-header>
 
-<ion-content class="dashboard-content">
-  <div class="welcome-section">
-    <div class="welcome-content">
-      <h1>Welcome, Alumni Association Admin</h1>
-      <p>Manage alumni registrations, announcements, events, and more</p>
+  <ion-content class="menu-content">
+    <div class="menu-profile">
+      <div class="menu-avatar">AA</div>
+      <div class="menu-meta">
+        <div class="menu-name">Alumni Admin</div>
+        <div class="menu-sub">Association Management</div>
+      </div>
     </div>
-  </div>
 
-  <!-- Stats Cards -->
-  <div class="stats-section">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12" size-sm="6" size-md="4">
-          <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-number">{{stats.totalAlumni}}</div>
-            <div class="stat-label">Total Alumni</div>
-          </div>
-        </ion-col>
-        <ion-col size="12" size-sm="6" size-md="4">
-          <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-number">{{stats.activeEvents}}</div>
-            <div class="stat-label">Active Events</div>
-          </div>
-        </ion-col>
-        <ion-col size="12" size-sm="6" size-md="4">
-          <div class="stat-card">
-            <div class="stat-icon">📢</div>
-            <div class="stat-number">{{stats.recentAnnouncements}}</div>
-            <div class="stat-label">Announcements</div>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
+    <ion-list class="menu-list" lines="none">
+      <ion-item button class="menu-item" (click)="navigateToAnnouncements()">
+        <ion-icon name="megaphone-outline" slot="start"></ion-icon>
+        <ion-label>Announcements</ion-label>
+      </ion-item>
 
-  <!-- Function Cards -->
-  <div class="functions-section">
-    <h2 class="section-title">Quick Actions</h2>
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12" size-md="6">
-          <div class="function-card" (click)="navigateToAnnouncements()">
-            <div class="card-header">
-              <ion-icon name="megaphone-outline" class="function-icon"></ion-icon>
-              <h3>Post Announcements</h3>
-            </div>
-            <p>Create announcements for all alumni members</p>
-            <div class="card-arrow">→</div>
-          </div>
-        </ion-col>
+      <ion-item button class="menu-item" (click)="navigateToEvents()">
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
+        <ion-label>Global Events</ion-label>
+      </ion-item>
 
-        <ion-col size="12" size-md="6">
-          <div class="function-card" (click)="navigateToEvents()">
-            <div class="card-header">
-              <ion-icon name="calendar-outline" class="function-icon"></ion-icon>
-              <h3>Create Global Events</h3>
-            </div>
-            <p>Organize events for the entire alumni network</p>
-            <div class="card-arrow">→</div>
-          </div>
-        </ion-col>
+      <ion-item button class="menu-item" (click)="navigateToAlumniList()">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        <ion-label>Alumni List</ion-label>
+      </ion-item>
 
-        <ion-col size="12" size-md="6">
-          <div class="function-card" (click)="navigateToAlumniList()">
-            <div class="card-header">
-              <ion-icon name="people-outline" class="function-icon"></ion-icon>
-              <h3>View Alumni List</h3>
-            </div>
-            <p>Browse and search the complete alumni directory</p>
-            <div class="card-arrow">→</div>
-          </div>
-        </ion-col>
+      <ion-item button class="menu-item" (click)="navigateToReports()">
+        <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+        <ion-label>Reports</ion-label>
+      </ion-item>
 
-        <ion-col size="12" size-md="6">
-          <div class="function-card" (click)="navigateToReports()">
-            <div class="card-header">
-              <ion-icon name="stats-chart-outline" class="function-icon"></ion-icon>
-              <h3>Generate Reports</h3>
-            </div>
-            <p>View analytics and generate alumni reports</p>
-            <div class="card-arrow">→</div>
-          </div>
-        </ion-col>
+      <ion-item button class="menu-item" (click)="navigateToIdApprovals()">
+        <ion-icon name="card-outline" slot="start"></ion-icon>
+        <ion-label>Digital ID Approvals</ion-label>
+      </ion-item>
 
-        <ion-col size="12" size-md="6">
-          <div class="function-card" (click)="navigateToIdApprovals()">
-            <div class="card-header">
-              <ion-icon name="card-outline" class="function-icon"></ion-icon>
-              <h3>Digital ID Approvals</h3>
-            </div>
-            <p>Review and approve alumni digital ID requests</p>
-            <div class="card-arrow">→</div>
-          </div>
-        </ion-col>
+      <ion-item
+        button
+        class="menu-item"
+        *ngIf="isDepartmentHead"
+        (click)="navigateToDepartmentEvents()"
+      >
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
+        <ion-label>Department Events</ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
 
-        <!-- Department Events (visible to department heads only) -->
-        <ion-col size="12" size-md="6" *ngIf="isDepartmentHead">
-          <div class="function-card" (click)="navigateToDepartmentEvents()">
-            <div class="card-header">
-              <ion-icon name="calendar-outline" class="function-icon"></ion-icon>
-              <h3>Department Events</h3>
-            </div>
-            <p>Create events for your department</p>
-            <div class="card-arrow">→</div>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
-</ion-content>
+<!-- MAIN PAGE -->
+<div class="admin-shell" id="main-content">
+  <ion-header>
+    <ion-toolbar class="admin-toolbar">
+      <ion-buttons slot="start">
+        <ion-menu-button class="menu-btn"></ion-menu-button>
+      </ion-buttons>
+
+      <ion-title class="admin-title">Alumni Association Admin</ion-title>
+
+      <ion-buttons slot="end">
+        <ion-button (click)="logout()" class="logout-btn">
+          <ion-icon name="log-out-outline"></ion-icon>
+          Logout
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="dashboard-content">
+    <!-- WELCOME -->
+    <div class="welcome-section">
+      <div class="page-wrap">
+        <div class="welcome-content">
+          <h1>Welcome, Alumni Association Admin</h1>
+          <p>Manage alumni registrations, announcements, events, and more</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-section">
+      <div class="page-wrap">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-sm="6" size-md="4">
+              <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">{{stats.totalAlumni}}</div>
+                <div class="stat-label">Total Alumni</div>
+              </div>
+            </ion-col>
+
+            <ion-col size="12" size-sm="6" size-md="4">
+              <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-number">{{stats.activeEvents}}</div>
+                <div class="stat-label">Active Events</div>
+              </div>
+            </ion-col>
+
+            <ion-col size="12" size-sm="6" size-md="4">
+              <div class="stat-card">
+                <div class="stat-icon">📢</div>
+                <div class="stat-number">{{stats.recentAnnouncements}}</div>
+                <div class="stat-label">Announcements</div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    </div>
+
+    <!-- SIS-STYLE MENU SHORTCUTS -->
+    <div class="shortcuts-section">
+      <div class="page-wrap">
+        <div class="shortcuts-header">MENU SHORTCUTS</div>
+
+        <div class="shortcuts-box">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="6" size-sm="4" size-md="3" size-lg="2.4">
+                <button class="shortcut-tile" (click)="navigateToAnnouncements()">
+                  <ion-icon name="megaphone-outline" class="tile-icon"></ion-icon>
+                  <div class="tile-text">Post Announcements</div>
+                </button>
+              </ion-col>
+
+              <ion-col size="6" size-sm="4" size-md="3" size-lg="2.4">
+                <button class="shortcut-tile" (click)="navigateToEvents()">
+                  <ion-icon name="calendar-outline" class="tile-icon"></ion-icon>
+                  <div class="tile-text">Create Global Events</div>
+                </button>
+              </ion-col>
+
+              <ion-col size="6" size-sm="4" size-md="3" size-lg="2.4">
+                <button class="shortcut-tile" (click)="navigateToAlumniList()">
+                  <ion-icon name="people-outline" class="tile-icon"></ion-icon>
+                  <div class="tile-text">View Alumni List</div>
+                </button>
+              </ion-col>
+
+              <ion-col size="6" size-sm="4" size-md="3" size-lg="2.4">
+                <button class="shortcut-tile" (click)="navigateToReports()">
+                  <ion-icon name="stats-chart-outline" class="tile-icon"></ion-icon>
+                  <div class="tile-text">Generate Reports</div>
+                </button>
+              </ion-col>
+
+              <ion-col size="6" size-sm="4" size-md="3" size-lg="2.4">
+                <button class="shortcut-tile" (click)="navigateToIdApprovals()">
+                  <ion-icon name="card-outline" class="tile-icon"></ion-icon>
+                  <div class="tile-text">Digital ID Approvals</div>
+                </button>
+              </ion-col>
+
+              <ion-col size="6" size-sm="4" size-md="3" size-lg="2.4" *ngIf="isDepartmentHead">
+                <button class="shortcut-tile" (click)="navigateToDepartmentEvents()">
+                  <ion-icon name="calendar-outline" class="tile-icon"></ion-icon>
+                  <div class="tile-text">Department Events</div>
+                </button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+</div>

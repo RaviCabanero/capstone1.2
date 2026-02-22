@@ -146,7 +146,7 @@ export class AlumniListPage implements OnInit {
     if (!alumni?.uid || alumni?.role === newRole) return;
     // Verify current admin permissions before attempting write
     const myRole = await this.adminService.getUserRole();
-    if (!myRole || (myRole !== 'alumni_association_admin' && myRole !== 'super_admin')) {
+    if (!myRole || (myRole !== 'alumni_association_admin' && myRole !== 'alumni_admin' && myRole !== 'super_admin')) {
       alert('You do not have permission to change user roles. Contact a super admin.');
       return;
     }
@@ -183,7 +183,7 @@ export class AlumniListPage implements OnInit {
 
     // Verify current admin permissions before attempting write
     const myRole = await this.adminService.getUserRole();
-    if (!myRole || (myRole !== 'alumni_association_admin' && myRole !== 'super_admin')) {
+    if (!myRole || (myRole !== 'alumni_association_admin' && myRole !== 'alumni_admin' && myRole !== 'super_admin')) {
       alert('You do not have permission to assign department heads. Contact a super admin.');
       this.closeDepartmentModal();
       return;

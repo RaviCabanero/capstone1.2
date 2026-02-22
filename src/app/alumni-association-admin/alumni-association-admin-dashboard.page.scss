@@ -1,227 +1,280 @@
-// Primary green color
+// ===== VARIABLES =====
 $primary-green: #22dd22;
 $primary-green-dark: #1bb81b;
 $primary-green-light: #66ff66;
-$secondary-gray: #f8f9fa;
+$secondary-gray: #f4f6f8;
 $text-dark: #2d3748;
 $text-light: #718096;
 
-// Header and toolbar
+// ===== LAYOUT SHELL =====
+.admin-shell {
+  height: 100%;
+}
+
+// ===== TOP TOOLBAR =====
 .admin-toolbar {
   background: linear-gradient(135deg, $primary-green 0%, $primary-green-dark 100%);
   --background: linear-gradient(135deg, $primary-green 0%, $primary-green-dark 100%);
-  
+  --border-width: 0;
+  height: 70px;
+  --min-height: 70px;
+
   .admin-title {
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 0.3px;
   }
-  
+
+  .menu-btn {
+    color: white;
+  }
+
   .logout-btn {
     color: white;
-    font-weight: 600;
-    
-    &:hover {
-      opacity: 0.8;
-    }
+    font-weight: 800;
   }
 }
 
-// Main content
+// ===== PAGE BG =====
 .dashboard-content {
-  background-color: $secondary-gray;
-  --background: $secondary-gray;
-  padding: 0;
+  --background: #{$secondary-gray};
+  background: $secondary-gray;
 }
 
-// Welcome section
+// ===== CONSISTENT WIDTH =====
+.page-wrap {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+// ===== WELCOME =====
 .welcome-section {
   background: linear-gradient(135deg, $primary-green 0%, $primary-green-dark 100%);
   color: white;
-  padding: 2.5rem 1.5rem;
-  margin: 0;
-  
+  padding: 3.2rem 0 4.5rem;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   .welcome-content {
     text-align: center;
-    
+
     h1 {
-      margin: 0 0 0.75rem 0;
-      font-size: 2rem;
-      font-weight: 700;
+      margin: 0 0 0.8rem 0;
+      font-size: 2.2rem;
+      font-weight: 900;
       letter-spacing: -0.5px;
     }
-    
+
     p {
       margin: 0;
-      font-size: 1rem;
-      opacity: 0.95;
-      font-weight: 400;
-    }
-  }
-}
-
-// Stats section
-.stats-section {
-  padding: 2rem 1rem;
-  background-color: $secondary-gray;
-  
-  .stat-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.75rem 1rem;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    margin-bottom: 1rem;
-    
-    &:hover {
-      box-shadow: 0 4px 16px rgba(34, 221, 34, 0.12);
-      transform: translateY(-2px);
-    }
-    
-    .stat-icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.75rem;
-      display: block;
-    }
-    
-    .stat-number {
-      font-size: 2.2rem;
       font-weight: 700;
-      color: $primary-green;
-      margin-bottom: 0.5rem;
-      line-height: 1;
-    }
-    
-    .stat-label {
-      font-size: 0.85rem;
-      color: $text-light;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 1.05rem;
+      opacity: 0.95;
     }
   }
 }
 
-// Functions section
-.functions-section {
-  padding: 2rem 1rem;
-  background-color: $secondary-gray;
-  
-  .section-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: $text-dark;
-    margin-bottom: 1.5rem;
-    padding: 0 1rem;
-  }
-  
+// ===== STATS =====
+.stats-section {
+  margin-top: -2rem;
+  padding-bottom: 1.5rem;
+
   ion-grid {
     padding: 0;
   }
-  
-  ion-row {
-    margin-bottom: -1rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 18px;
+  padding: 1.6rem;
+  text-align: center;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(45, 55, 72, 0.06);
+  transition: 0.2s ease;
+  height: 100%;
+
+  .stat-icon {
+    font-size: 2.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: $primary-green-dark;
+    margin-bottom: 0.35rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: $text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
   }
 }
 
-// Function card
-.function-card {
+// ===== SIS-STYLE SHORTCUTS =====
+.shortcuts-section {
+  padding: 0 0 2.5rem;
+}
+
+.shortcuts-header {
+  background: #1aa6b7;
+  color: white;
+  font-weight: 900;
+  padding: 0.7rem 1rem;
+  border-radius: 10px 10px 0 0;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.6px;
+}
+
+.shortcuts-box {
   background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 14px 14px;
+  padding: 1.2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 0;
+}
+
+/* ===== DEFAULT TILE ===== */
+.shortcut-tile {
+  width: 100%;
+  background: linear-gradient(180deg, #0f3b1a 0%, #07230f 100%);
+  border-radius: 14px;
+  padding: 1.6rem 1.3rem;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 1rem;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, $primary-green, $primary-green-light);
-  }
-  
-  &:hover {
-    box-shadow: 0 8px 24px rgba(34, 221, 34, 0.15);
-    transform: translateY(-4px);
-    
-    .card-arrow {
-      opacity: 1;
-      transform: translateX(4px);
-    }
-    
-    .function-icon {
-      color: $primary-green-dark;
-      transform: scale(1.1);
-    }
-  }
-  
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    
-    h3 {
-      margin: 0;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: $text-dark;
-      line-height: 1.3;
-    }
-  }
-  
-  .function-icon {
-    font-size: 2.2rem;
-    color: $primary-green;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-  }
-  
-  p {
-    margin: 0 0 1rem 0;
-    color: $text-light;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    flex-grow: 1;
-  }
-  
-  .card-arrow {
-    color: $primary-green;
-    font-size: 1.5rem;
-    font-weight: 600;
-    opacity: 0;
-    transition: all 0.3s ease;
+  gap: 0.9rem;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+
+  /* Smooth animation */
+  transition: background 0.25s ease,
+              transform 0.25s ease,
+              box-shadow 0.25s ease,
+              filter 0.25s ease,
+              border 0.25s ease;
+}
+
+/* ===== ICON + TEXT DEFAULT ===== */
+.tile-icon {
+  font-size: 2.3rem;
+  color: white;
+  transition: color 0.25s ease;
+}
+
+.tile-text {
+  color: white;
+  font-weight: 900;
+  font-size: 1rem;
+  line-height: 1.25;
+  transition: color 0.25s ease;
+}
+
+/* ===== HOVER EFFECT (YELLOW) ===== */
+.shortcut-tile:hover {
+  background: #ffc83d !important;
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  filter: brightness(1.02);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* Change icon + text color when yellow */
+.shortcut-tile:hover .tile-icon,
+.shortcut-tile:hover .tile-text {
+  color: #0b2a12 !important;
+}
+
+.shortcuts-box ion-col {
+  margin-bottom: 1.3rem;
+}
+
+// ===== SIDEBAR MENU =====
+.admin-menu {
+  --width: 360px;
+}
+
+.menu-toolbar {
+  background: linear-gradient(135deg, $primary-green 0%, $primary-green-dark 100%);
+  --background: linear-gradient(135deg, $primary-green 0%, $primary-green-dark 100%);
+  --border-width: 0;
+
+  .menu-title {
+    color: white;
+    font-weight: 900;
+    letter-spacing: 0.4px;
   }
 }
 
-// Responsive adjustments
-@media (max-width: 768px) {
-  .welcome-section {
-    padding: 2rem 1rem;
-    
-    .welcome-content h1 {
-      font-size: 1.6rem;
+.menu-content {
+  --background: #ffffff;
+}
+
+.menu-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.2rem 1rem 1rem;
+  border-bottom: 1px solid rgba(45, 55, 72, 0.08);
+
+  .menu-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, $primary-green 0%, $primary-green-dark 100%);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+
+  .menu-meta {
+    .menu-name {
+      font-weight: 900;
+      color: $text-dark;
+      line-height: 1.1;
+    }
+
+    .menu-sub {
+      margin-top: 2px;
+      font-size: 0.85rem;
+      color: $text-light;
+      font-weight: 700;
     }
   }
-  
-  .function-card {
-    padding: 1.25rem;
-    
-    .card-header {
-      gap: 0.75rem;
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: 768px) {
+  .welcome-section {
+    padding: 2rem 0 2.6rem;
+
+    .welcome-content h1 {
+      font-size: 1.55rem;
     }
-    
-    .function-icon {
-      font-size: 1.8rem;
-    }
+  }
+
+  .shortcut-tile {
+    min-height: 92px;
+    padding: 1rem;
+  }
+
+  .tile-icon {
+    font-size: 1.65rem;
+  }
+
+  .tile-text {
+    font-size: 0.88rem;
   }
 }

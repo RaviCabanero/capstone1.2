@@ -212,6 +212,16 @@ ion-buttons ion-icon[name="person-circle"] {
       background: transparent !important;
       font-size: 14px !important;
       line-height: 40px !important;
+      color: #111 !important;
+      --color: #111 !important;
+
+      /* Ensure the visible text (shadow DOM part) is colored in all themes */
+      &::part(text) {
+        color: #111 !important;
+      }
+      &::part(native) {
+        color: #111 !important;
+      }
 
       // Hide ionic's default arrow completely
       &::part(icon) {
