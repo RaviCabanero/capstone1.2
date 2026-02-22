@@ -349,9 +349,9 @@ export class ProfilePage implements OnInit {
               });
               await toast.present();
 
-              console.log('✅ Connection established successfully');
+              console.log('Connection established successfully');
             } catch (error) {
-              console.error('❌ Error establishing connection:', error);
+              console.error('Error establishing connection:', error);
               const toast = await this.toastController.create({
                 message: 'Failed to establish connection',
                 duration: 2000,

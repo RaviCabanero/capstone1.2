@@ -73,10 +73,10 @@ export class HomePage implements OnInit {
     collectionData(alumniQuery, { idField: 'id' }).subscribe(
       (users: any[]) => {
         this.allAlumni = users.filter(user => user.id !== currentUserId && user.role === 'alumni');
-        console.log('✅ Alumni loaded for search:', this.allAlumni.length);
+        console.log('Alumni loaded for search:', this.allAlumni.length);
       },
       (error) => {
-        console.error('❌ Error loading alumni:', error.message);
+        console.error('Error loading alumni:', error.message);
       }
     );
   }
@@ -155,18 +155,18 @@ export class HomePage implements OnInit {
    * Load current user profile for avatar
    */
   loadCurrentUserProfile() {
-    console.log('📱 Loading current user profile');
+    console.log('Loading current user profile');
     
     onAuthStateChanged(this.auth, (user) => {
-      console.log('🔐 Auth state changed - User UID:', user?.uid);
+      console.log('Auth state changed - User UID:', user?.uid);
       
       if (!user) {
         const currentUser = this.auth.currentUser;
-        console.log('❌ No user in onAuthStateChanged, trying currentUser:', currentUser?.uid);
+        console.log('No user in onAuthStateChanged, trying currentUser:', currentUser?.uid);
         if (!currentUser) return;
         this.loadProfileData(currentUser.uid);
       } else {
-        console.log('✅ User authenticated:', user.uid);
+        console.log('User authenticated:', user.uid);
         this.loadProfileData(user.uid);
       }
     });
@@ -176,16 +176,16 @@ export class HomePage implements OnInit {
    * Load profile data from Firestore
    */
   private loadProfileData(uid: string) {
-    console.log('🔄 Loading profile data for UID:', uid);
+    console.log('Loading profile data for UID:', uid);
     
     docData(doc(this.firestore, `users/${uid}`)).subscribe(
       (profile: any) => {
-        console.log('✅ Profile loaded:', profile);
-        console.log('📸 Photo URL:', profile?.photoDataUrl);
+        console.log('Profile loaded:', profile);
+        console.log('Photo URL:', profile?.photoDataUrl);
         this.userProfile = profile;
       },
       (error) => {
-        console.error('❌ Error loading profile:', error);
+        console.error('Error loading profile:', error);
       }
     );
   }

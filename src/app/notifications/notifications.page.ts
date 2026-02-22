@@ -47,18 +47,18 @@ export class NotificationsPage implements OnInit {
     private firestore: Firestore,
     private alertCtrl: AlertController
   ) {
-    console.log('🎯 NotificationsPage constructor');
+    console.log('NotificationsPage constructor');
   }
 
   ngOnInit() {
-    console.log('🔍 NotificationsPage Init');
+    console.log(' NotificationsPage Init');
     this.loadUserProfile();
     this.loadNotifications();
     
     // Retry loading profile after a short delay if auth wasn't ready
     setTimeout(() => {
       if (!this.userProfile?.photoDataUrl) {
-        console.log('⏱️ Retrying profile load after delay');
+        console.log(' Retrying profile load after delay');
         this.loadUserProfile();
       }
     }, 1000);
@@ -68,35 +68,35 @@ export class NotificationsPage implements OnInit {
    * Load current user profile - Using RxJS Observable approach
    */
   loadUserProfile() {
-    console.log('📱 loadUserProfile called');
+    console.log('loadUserProfile called');
     
     // Create an observable from auth state
     this.userProfile$ = from(
       new Promise<string>((resolve) => {
         onAuthStateChanged(this.auth, (user) => {
-          console.log('🔐 Auth state changed - User:', user);
-          console.log('🔐 User UID:', user?.uid);
+          console.log('Auth state changed - User:', user);
+          console.log('User UID:', user?.uid);
           
           if (user) {
             resolve(user.uid);
           } else {
             const currentUser = this.auth.currentUser;
-            console.log('❌ currentUser fallback:', currentUser?.uid);
+            console.log('currentUser fallback:', currentUser?.uid);
             resolve(currentUser?.uid || '');
           }
         });
       })
     ).pipe(
       switchMap((uid: string) => {
-        console.log('🔄 Switching to profile data for UID:', uid);
+        console.log('Switching to profile data for UID:', uid);
         if (!uid) {
-          console.error('❌ No UID available');
+          console.error(' No UID available');
           return new Observable<any>(observer => observer.error('No UID'));
         }
         return docData(doc(this.firestore, `users`, uid));
       }),
       catchError((error) => {
-        console.error('❌ Error in profile loading:', error);
+        console.error(' Error in profile loading:', error);
         return new Observable<any>(observer => observer.next({}));
       })
     );
@@ -104,19 +104,19 @@ export class NotificationsPage implements OnInit {
     // Subscribe to the observable
     this.userProfile$?.subscribe(
       (profile: any) => {
-        console.log('✅ Profile data received:', profile);
-        console.log('📸 Full profile object:', JSON.stringify(profile, null, 2));
-        console.log('📸 photoDataUrl:', profile?.photoDataUrl);
-        console.log('📸 All fields:', Object.keys(profile || {}));
+        console.log('Profile data received:', profile);
+        console.log('Full profile object:', JSON.stringify(profile, null, 2));
+        console.log('photoDataUrl:', profile?.photoDataUrl);
+        console.log('All fields:', Object.keys(profile || {}));
         
         this.userProfile = profile;
-        console.log('✅ userProfile updated:', this.userProfile);
+        console.log('userProfile updated:', this.userProfile);
       },
       (error: any) => {
-        console.error('❌ Error in subscription:', error);
+        console.error('Error in subscription:', error);
       },
       () => {
-        console.log('✅ Profile subscription completed');
+        console.log('Profile subscription completed');
       }
     );
   }

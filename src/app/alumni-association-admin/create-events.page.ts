@@ -39,14 +39,14 @@ export class CreateEventsPage implements OnInit {
 
   // Color options for events
   eventColors = [
-    '#16a34a', // green
-    '#3b82f6', // blue
-    '#f59e0b', // amber
-    '#ef4444', // red
-    '#8b5cf6', // purple
-    '#ec4899', // pink
-    '#06b6d4', // cyan
-    '#84cc16'  // lime
+    '#16a34a', 
+    '#3b82f6', 
+    '#f59e0b', 
+    '#ef4444', 
+    '#8b5cf6', 
+    '#ec4899', 
+    '#06b6d4', 
+    '#84cc16'  
   ];
 
   // Guest management
@@ -233,12 +233,12 @@ export class CreateEventsPage implements OnInit {
     this.newEvent.endTime = endTime.toISOString();
 
     try {
-      console.log('📝 Current User ID:', this.currentUserId);
-      console.log('📝 Auth State:', this.auth.currentUser?.uid, this.auth.currentUser?.email);
-      console.log('📝 Creating event:', this.newEvent);
+      console.log('Current User ID:', this.currentUserId);
+      console.log('Auth State:', this.auth.currentUser?.uid, this.auth.currentUser?.email);
+      console.log('Creating event:', this.newEvent);
       
       if (this.editingEventId) {
-        console.log('✏️ Updating existing event:', this.editingEventId);
+        console.log(' Updating existing event:', this.editingEventId);
         await updateDoc(doc(this.firestore, `events/${this.editingEventId}`), {
           title: this.newEvent.title,
           description: this.newEvent.description,
@@ -257,8 +257,8 @@ export class CreateEventsPage implements OnInit {
         });
         await this.showToast('Event updated successfully!', 'success');
       } else {
-        console.log('➕ Attempting to add event to Firestore collection');
-        console.log('🔐 About to write to path: events/', 'with data:', this.newEvent);
+        console.log(' Attempting to add event to Firestore collection');
+        console.log(' About to write to path: events/', 'with data:', this.newEvent);
         
         const eventRef = await addDoc(collection(this.firestore, 'events'), {
           title: this.newEvent.title,
@@ -279,9 +279,9 @@ export class CreateEventsPage implements OnInit {
           createdAt: new Date(),
           attendees: []
         });
-        console.log('✅ Event created with ID:', eventRef.id);
+        console.log('Event created with ID:', eventRef.id);
 
-        console.log('➕ Adding notification');
+        console.log('Adding notification');
         await addDoc(collection(this.firestore, 'notifications'), {
           type: 'event',
           title: 'New Event Announcement',
@@ -290,7 +290,7 @@ export class CreateEventsPage implements OnInit {
           target: 'all',
           createdAt: new Date()
         });
-        console.log('✅ Notification created');
+        console.log(' Notification created');
 
         await this.showToast('Global event created successfully!', 'success');
       }
@@ -299,9 +299,9 @@ export class CreateEventsPage implements OnInit {
       this.showForm = false;
       this.loadEvents();
     } catch (error: any) {
-      console.error('❌ Error creating event:', error);
-      console.error('💥 Error code:', error.code);
-      console.error('💥 Error message:', error.message);
+      console.error('Error creating event:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
       await this.showToast('Failed to create event: ' + error.message, 'danger');
     }
   }

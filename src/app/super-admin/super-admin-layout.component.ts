@@ -80,45 +80,32 @@ export class SuperAdminLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Initialize component
+    
   }
 
-  /**
-   * Check if a menu item is currently active
-   */
+  
   isActive(path: string): boolean {
     return this.router.url.includes(path);
   }
 
-  /**
-   * Toggle sidebar menu visibility (mobile)
-   */
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }
 
-  /**
-   * Close mobile menu
-   */
   closeMobileMenu(): void {
-    // Only close on mobile
+    
     if (window.innerWidth < 768) {
       this.menuOpen = false;
     }
   }
 
-  /**
-   * Navigate to route using router
-   * This is handled by routerLink in template
-   */
+  
   navigateTo(path: string): void {
     this.router.navigate([path]);
     this.closeMobileMenu();
   }
 
-  /**
-   * Handle logout
-   */
+  
   async logout(): Promise<void> {
     await this.authService.logoutAndRedirect('/login');
   }
