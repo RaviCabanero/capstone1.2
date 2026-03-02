@@ -72,6 +72,11 @@ export class SuperAdminLayoutComponent implements OnInit {
       label: 'Analytics',
       path: '/super-admin/analytics',
     },
+    {
+      icon: 'document-text-outline',
+      label: 'Logs Tracking',
+      path: '/super-admin/logs-tracking',
+    },
   ];
 
   constructor(

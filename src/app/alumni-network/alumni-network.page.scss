@@ -75,7 +75,7 @@ ion-buttons ion-icon[name="person-circle"] {
 }
 
 .chat-icon {
-  color: #2ecc71;
+  color: #16a34a;
   font-size: 24px;
 }
 
@@ -526,4 +526,137 @@ ion-footer {
   transition: transform 0.3s ease-in-out;
   transform: translateY(0);
 }
+
+// Network Overview Modal Styles
+.stat-item {
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  border-radius: 8px;
+  padding: 12px;
+  
+  &:active {
+    transform: scale(0.95);
+    background: #f5f5f5;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  border-radius: 12px 12px 0 0;
+  
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.modal-body {
+  padding: 8px 0;
+  max-height: calc(80vh - 60px);
+  overflow-y: auto;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:active {
+    background: #f9f9f9;
+  }
+  
+  .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+    background: #e0e0e0;
+    flex-shrink: 0;
+  }
+  
+  .item-info {
+    flex: 1;
+    min-width: 0;
+    
+    .item-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin: 0 0 2px 0;
+    }
+    
+    .item-status {
+      font-size: 12px;
+      color: #999;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.modal-body .empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
 

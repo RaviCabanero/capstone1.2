@@ -3,7 +3,7 @@ import { Firestore, addDoc, collection } from '@angular/fire/firestore';
 
 export interface NotificationData {
   userId: string;
-  type: 'event' | 'announcement' | 'approval' | 'reminder' | 'general';
+  type: 'event' | 'announcement' | 'approval' | 'reminder' | 'general' | 'connection_request';
   title: string;
   message: string;
   data?: any;

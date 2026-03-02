@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
-import { Firestore, collection, addDoc, getDocs, query, where, orderBy, updateDoc, deleteDoc, doc, collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, getDocs, query, where, orderBy, updateDoc, deleteDoc, doc, collectionData, getDoc, documentId } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-events',
@@ -18,7 +19,9 @@ export class CreateEventsPage implements OnInit {
   events: any[] = [];
   loading = true;
   showForm = false;
+  viewMode: 'create' | 'list' | 'details' = 'create';
   editingEventId: string | null = null;
+  selectedEvent: any = null;
   currentUserId: string | null = null;
   minDate = new Date().toISOString();
   
@@ -57,6 +60,10 @@ export class CreateEventsPage implements OnInit {
     { name: 'Johnny Depp', email: 'johnny@example.com', initials: 'JD', color: '#8b5cf6' }
   ];
 
+  // Attendees management
+  eventAttendees: any[] = [];
+  loadingAttendees = false;
+
   // Attached file
   attachedFile: string | null = null;
 
@@ -64,7 +71,8 @@ export class CreateEventsPage implements OnInit {
     private firestore: Firestore,
     private toastController: ToastController,
     private alertController: AlertController,
-    private auth: Auth
+    private auth: Auth,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -72,6 +80,8 @@ export class CreateEventsPage implements OnInit {
     if (this.auth.currentUser) {
       this.currentUserId = this.auth.currentUser.uid;
     }
+    // Load events on initialization
+    this.loadEvents();
   }
 
   selectColor(color: string) {
@@ -307,6 +317,7 @@ export class CreateEventsPage implements OnInit {
   }
 
   editEvent(event: any) {
+    this.viewMode = 'create';
     this.showForm = true;
     this.editingEventId = event.id;
     this.newEvent = {
@@ -339,22 +350,128 @@ export class CreateEventsPage implements OnInit {
       message: `Are you sure you want to delete "${event.title}"?`,
       buttons: [
         { text: 'Cancel', role: 'cancel' },
-        { text: 'Delete', role: 'destructive', handler: () => this.deleteEvent(event) }
+        { text: 'Delete', role: 'destructive', handler: () => this.deleteEvent(event.id) }
       ]
     });
 
     await alert.present();
   }
 
-  async deleteEvent(event: any) {
+  async deleteEvent(eventId: string) {
     try {
-      await deleteDoc(doc(this.firestore, `events/${event.id}`));
+      await deleteDoc(doc(this.firestore, `events/${eventId}`));
       await this.showToast('Event deleted successfully', 'success');
       this.loadEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
       await this.showToast('Failed to delete event', 'danger');
     }
+  }
+
+  formatDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return dateString;
+    }
+  }
+
+  formatTime(timeString: string): string {
+    try {
+      const date = new Date(timeString);
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    } catch {
+      return timeString;
+    }
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .join('')
+      .substring(0, 2);
+  }
+
+  showEventDetails(event: any) {
+    this.selectedEvent = event;
+    this.viewMode = 'details';
+    this.loadEventAttendees(event.id);
+  }
+
+  async loadEventAttendees(eventId: string) {
+    try {
+      this.loadingAttendees = true;
+      console.log('🔍 Starting to load attendees for event:', eventId);
+      
+      // Get the event document to access the attendees array
+      const eventDocRef = doc(this.firestore, `events/${eventId}`);
+      const eventDocSnap = await getDoc(eventDocRef);
+      
+      let attendeeIds: string[] = [];
+      
+      if (eventDocSnap.exists()) {
+        const eventData = eventDocSnap.data();
+        attendeeIds = eventData['attendees'] || [];
+        console.log('📋 Event attendees array:', attendeeIds);
+      } else {
+        console.log('⚠️ Could not find event document');
+      }
+      
+      // If no attendees, show empty state
+      if (attendeeIds.length === 0) {
+        console.log('ℹ️ No attendees for this event');
+        this.eventAttendees = [];
+        this.loadingAttendees = false;
+        return;
+      }
+      
+      // Fetch user documents for each attendee ID
+      this.eventAttendees = [];
+      
+      for (const userId of attendeeIds) {
+        try {
+          const userDocRef = doc(this.firestore, `users/${userId}`);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            this.eventAttendees.push({
+              id: userId,
+              name: userData['name'] || userData['displayName'] || '',
+              email: userData['email'] || '',
+              schoolDepartment: userData['schoolDepartment'] || 'N/A',
+              createdAt: userData['createdAt'],
+              status: 'attending'
+            });
+            console.log('👤 Attendee loaded:', userData['name'] || userData['email']);
+          } else {
+            console.log('⚠️ User document not found:', userId);
+          }
+        } catch (error) {
+          console.error('Error loading attendee:', userId, error);
+        }
+      }
+      
+      console.log('✅ Finished loading all attendees. Total:', this.eventAttendees.length);
+      this.loadingAttendees = false;
+    } catch (error) {
+      console.error('Error loading event attendees:', error);
+      this.loadingAttendees = false;
+      this.eventAttendees = [];
+    }
+  }
+
+  async refreshEventAttendees() {
+    if (this.selectedEvent && this.selectedEvent.id) {
+      await this.loadEventAttendees(this.selectedEvent.id);
+    }
+  }
+
+  confirmDeleteEvent(event: any) {
+    this.confirmDelete(event);
   }
 
   private async showToast(message: string, color: string) {
@@ -365,5 +482,33 @@ export class CreateEventsPage implements OnInit {
       position: 'top'
     });
     await toast.present();
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/alumni-admin']);
+  }
+
+  navigateToAnnouncements() {
+    this.router.navigate(['/alumni-admin/announcements']);
+  }
+
+  navigateToEvents() {
+    this.router.navigate(['/alumni-admin/create-events']);
+  }
+
+  navigateToAlumniList() {
+    this.router.navigate(['/alumni-admin/alumni-list']);
+  }
+
+  navigateToReports() {
+    this.router.navigate(['/alumni-admin/reports']);
+  }
+
+  navigateToIdApprovals() {
+    this.router.navigate(['/alumni-admin/alumni-id-approval']);
+  }
+
+  isActiveTab(path: string): boolean {
+    return this.router.url === path;
   }
 }

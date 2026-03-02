@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -29,7 +29,8 @@ export class SkillModalComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {
@@ -53,23 +54,58 @@ export class SkillModalComponent implements OnInit {
     return this.skillForm.get('proficiency');
   }
 
-  save() {
+  async save() {
     this.submitted = true;
 
     if (this.skillForm.invalid) {
       return;
     }
 
-    const skill = {
-      ...this.skillForm.value,
-      id: new Date().getTime().toString(),
-      createdAt: new Date().toISOString(),
-    };
+    const alert = await this.alertCtrl.create({
+      header: 'Save Skill',
+      message: 'Do you want to save this skill?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save',
+          handler: () => {
+            const skill = {
+              ...this.skillForm.value,
+              id: new Date().getTime().toString(),
+              createdAt: new Date().toISOString(),
+            };
 
-    this.modalCtrl.dismiss(skill, 'save');
+            this.modalCtrl.dismiss(skill, 'save');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
-  cancel() {
-    this.modalCtrl.dismiss(null, 'cancel');
+  async cancel() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cancel Changes',
+      message: 'Are you sure you want to cancel? All changes will be lost.',
+      buttons: [
+        {
+          text: 'Continue Editing',
+          role: 'cancel'
+        },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          handler: () => {
+            this.modalCtrl.dismiss(null, 'cancel');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 }

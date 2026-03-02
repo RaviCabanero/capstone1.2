@@ -1,0 +1,51 @@
+<div class="page-wrapper ion-padding">
+  <div class="logs-container">
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Logs Tracking</h1>
+        <p>View tracked user and admin activities</p>
+      </div>
+      <ion-button color="success" fill="outline" (click)="loadLogs()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Refresh
+      </ion-button>
+    </div>
+
+    <div class="loading-spinner" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <ion-card class="section-card" *ngIf="!isLoading">
+      <div class="table-wrapper" *ngIf="logs.length > 0; else emptyLogs">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Actor</th>
+              <th>Target User</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of logs">
+              <td>{{ formatDate(log.createdAt) }}</td>
+              <td><span class="action-chip">{{ formatAction(log.action) }}</span></td>
+              <td>{{ log.actorName || log.actorUid || '—' }}</td>
+              <td>{{ log.targetUserId || '—' }}</td>
+              <td class="details-col">{{ stringifyDetails(log.details) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyLogs>
+        <div class="empty-state">
+          <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+          <h3>No logs yet</h3>
+          <p>Logs will appear here when tracked actions are performed.</p>
+        </div>
+      </ng-template>
+    </ion-card>
+  </div>
+</div>

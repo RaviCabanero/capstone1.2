@@ -86,6 +86,148 @@
   }
 }
 
+ion-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.department-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.department-radio-item {
+  --background: #f9fafb;
+  --border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  ion-label {
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.selected-dept-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.dept-color-default {
+  --background: #f9fafb;
+  border-color: #e5e7eb;
+
+  ion-label {
+    color: #1f2937;
+  }
+}
+
+/* School of Computer = orange-yellow */
+.dept-color-computer {
+  --background: #fff7ed;
+  border-color: #fdba74;
+
+  ion-label {
+    color: #9a3412;
+  }
+}
+
+/* School of Engineering = orange */
+.dept-color-engineering {
+  --background: #ffedd5;
+  border-color: #fb923c;
+
+  ion-label {
+    color: #c2410c;
+  }
+}
+
+/* School of Arts = dark green */
+.dept-color-arts {
+  --background: #dcfce7;
+  border-color: #22c55e;
+
+  ion-label {
+    color: #14532d;
+  }
+}
+
+/* School of Law = violet */
+.dept-color-law {
+  --background: #f5f3ff;
+  border-color: #a78bfa;
+
+  ion-label {
+    color: #5b21b6;
+  }
+}
+
+/* School of Allied Medical = light red */
+.dept-color-allied-medical {
+  --background: #fef2f2;
+  border-color: #fca5a5;
+
+  ion-label {
+    color: #b91c1c;
+  }
+}
+
+/* School of Business = yellow */
+.dept-color-business {
+  --background: #fefce8;
+  border-color: #facc15;
+
+  ion-label {
+    color: #854d0e;
+  }
+}
+
+/* School of Education = blue */
+.dept-color-education {
+  --background: #eff6ff;
+  border-color: #60a5fa;
+
+  ion-label {
+    color: #1d4ed8;
+  }
+}
+
+.selected-dept-chip.dept-color-computer,
+.selected-dept-chip.dept-color-engineering,
+.selected-dept-chip.dept-color-arts,
+.selected-dept-chip.dept-color-law,
+.selected-dept-chip.dept-color-allied-medical,
+.selected-dept-chip.dept-color-business,
+.selected-dept-chip.dept-color-education,
+.selected-dept-chip.dept-color-default {
+  background: currentColor;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.selected-dept-chip.dept-color-computer { color: #9a3412; }
+.selected-dept-chip.dept-color-engineering { color: #c2410c; }
+.selected-dept-chip.dept-color-arts { color: #14532d; }
+.selected-dept-chip.dept-color-law { color: #5b21b6; }
+.selected-dept-chip.dept-color-allied-medical { color: #b91c1c; }
+.selected-dept-chip.dept-color-business { color: #854d0e; }
+.selected-dept-chip.dept-color-education { color: #1d4ed8; }
+.selected-dept-chip.dept-color-default { color: #374151; }
+
+.users-table {
+  th,
+  td {
+    white-space: nowrap;
+  }
+}
+
 /* Table Wrapper */
 .table-wrapper {
   overflow-x: auto;
@@ -218,6 +360,10 @@
     color: #9ca3af;
     font-size: 14px;
   }
+}
+
+.compact-empty-state {
+  padding: 32px 16px;
 }
 
 /* Responsive */

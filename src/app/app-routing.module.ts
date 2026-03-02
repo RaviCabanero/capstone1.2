@@ -12,8 +12,10 @@ import { EventsModerationPage } from './super-admin/events-moderation.page';
 import { LockAccountsPage } from './super-admin/lock-accounts.page';
 import { SecurityRulesPage } from './super-admin/security-rules.page';
 import { ViewAllDataPage } from './super-admin/view-all-data.page';
+import { LogsTrackingPage } from './super-admin/logs-tracking.page';
 import { alumniAssociationAdminGuard } from './guards/alumni-association-admin.guard';
 import { DeptHeadGuard } from './guards/dept-head.guard';
+import { AlumniAssociationAdminLayoutComponent } from './alumni-association-admin/alumni-association-admin-layout.component';
 import { AlumniAssociationAdminDashboardPage } from './alumni-association-admin/alumni-association-admin-dashboard.page';
 import { ApproveAlumniPage } from './alumni-association-admin/approve-alumni.page';
 import { AnnouncementsPage } from './alumni-association-admin/announcements.page';
@@ -114,43 +116,47 @@ const routes: Routes = [
       {
         path: 'view-all-data',
         component: ViewAllDataPage
+      },
+      {
+        path: 'logs-tracking',
+        component: LogsTrackingPage
       }
     ]
   },
   {
     path: 'alumni-admin',
-    component: AlumniAssociationAdminDashboardPage,
-    canActivate: [alumniAssociationAdminGuard]
-  },
-  {
-    path: 'alumni-admin/approve-alumni',
-    component: ApproveAlumniPage,
-    canActivate: [alumniAssociationAdminGuard]
-  },
-  {
-    path: 'alumni-admin/announcements',
-    component: AnnouncementsPage,
-    canActivate: [alumniAssociationAdminGuard]
-  },
-  {
-    path: 'alumni-admin/create-events',
-    component: CreateEventsPage,
-    canActivate: [alumniAssociationAdminGuard]
-  },
-  {
-    path: 'alumni-admin/alumni-list',
-    component: AlumniListPage,
-    canActivate: [alumniAssociationAdminGuard]
-  },
-  {
-    path: 'alumni-admin/reports',
-    component: ReportsPage,
-    canActivate: [alumniAssociationAdminGuard]
-  },
-  {
-    path: 'alumni-admin/alumni-id-approval',
-    component: AlumniIdApprovalPage,
-    canActivate: [alumniAssociationAdminGuard]
+    component: AlumniAssociationAdminLayoutComponent,
+    canActivate: [alumniAssociationAdminGuard],
+    children: [
+      {
+        path: '',
+        component: AlumniAssociationAdminDashboardPage
+      },
+      {
+        path: 'approve-alumni',
+        component: ApproveAlumniPage
+      },
+      {
+        path: 'announcements',
+        component: AnnouncementsPage
+      },
+      {
+        path: 'create-events',
+        component: CreateEventsPage
+      },
+      {
+        path: 'alumni-list',
+        component: AlumniListPage
+      },
+      {
+        path: 'reports',
+        component: ReportsPage
+      },
+      {
+        path: 'alumni-id-approval',
+        component: AlumniIdApprovalPage
+      }
+    ]
   },
   {
     path: '',

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ModalController } from '@ionic/angular';
@@ -11,11 +11,12 @@ import { IonicModule, ModalController } from '@ionic/angular';
   imports: [IonicModule, CommonModule, FormsModule],
 })
 export class PostModalComponent implements OnInit {
+  @Input() userName: string = 'User Name';
+  @Input() userAvatar: string = '';
+  
   postText = '';
   selectedImage: string | null = null;
   selectedVisibility: string = 'public';
-  userName = 'User Name';
-  userAvatar = '';
 
   constructor(private modalCtrl: ModalController) {}
 

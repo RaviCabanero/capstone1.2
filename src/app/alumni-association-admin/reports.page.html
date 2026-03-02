@@ -1,23 +1,44 @@
-<ion-header>
-  <ion-toolbar style="--background: #22dd22; --color: white;">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Reports & Analytics</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="downloadReport()" [disabled]="loading">
-        <ion-icon name="download-outline"></ion-icon>
-        Export
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div class="page-header">
-    <h2>Alumni Statistics</h2>
-    <p>View and analyze alumni network data</p>
+<ion-content class="dashboard-content">
+  <!-- Export Button -->
+  <div class="floating-create-button">
+    <ion-button (click)="downloadReport()" [disabled]="loading" color="danger" size="large">
+      <ion-icon name="download-outline" slot="start"></ion-icon>
+      Export
+    </ion-button>
   </div>
+  <div class="dashboard-layout page-wrap">
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-title">Dashboard Tabs</div>
+      <button class="sidebar-item" [class.active]="isActiveTab('/alumni-admin')" (click)="navigateToDashboard()">
+        <ion-icon name="grid-outline"></ion-icon>
+        <span>Dashboard</span>
+      </button>
+      <button class="sidebar-item" [class.active]="isActiveTab('/alumni-admin/announcements')" (click)="navigateToAnnouncements()">
+        <ion-icon name="megaphone-outline"></ion-icon>
+        <span>Post Announcements</span>
+      </button>
+      <button class="sidebar-item" [class.active]="isActiveTab('/alumni-admin/create-events')" (click)="navigateToEvents()">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <span>Create Global Events</span>
+      </button>
+      <button class="sidebar-item" [class.active]="isActiveTab('/alumni-admin/alumni-list')" (click)="navigateToAlumniList()">
+        <ion-icon name="people-outline"></ion-icon>
+        <span>View Alumni List</span>
+      </button>
+      <button class="sidebar-item" [class.active]="isActiveTab('/alumni-admin/reports')" (click)="navigateToReports()">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        <span>Generate Reports</span>
+      </button>
+      <button class="sidebar-item" [class.active]="isActiveTab('/alumni-admin/alumni-id-approval')" (click)="navigateToIdApprovals()">
+        <ion-icon name="card-outline"></ion-icon>
+        <span>Digital ID Approval</span>
+      </button>
+    </aside>
+    <section class="dashboard-main ion-padding" style="width:100%;max-width:none;">
+      <div class="page-header">
+        <h2>Alumni Statistics</h2>
+        <p>View and analyze alumni network data</p>
+      </div>
 
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">
@@ -25,7 +46,7 @@
     <p>Generating reports...</p>
   </div>
 
-  <div *ngIf="!loading">
+      <div *ngIf="!loading">
     <!-- Summary Cards -->
     <ion-grid>
       <ion-row>
@@ -105,5 +126,7 @@
         </ion-button>
       </ion-card-content>
     </ion-card>
+      </div>
+    </section>
   </div>
 </ion-content>

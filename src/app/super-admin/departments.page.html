@@ -19,45 +19,57 @@
       </div>
     </div>
 
-    <!-- Departments Table -->
-    <ion-card *ngIf="!isLoading" class="section-card">
-      <div class="table-wrapper" *ngIf="departments.length > 0; else noData">
-        <table class="depts-table">
-          <thead>
-            <tr>
-              <th>Department Name</th>
-              <th>Description</th>
-              <th>Department Head</th>
-              <th>Contact</th>
-              <th class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let dept of departments">
-              <td class="dept-name-cell">
-                <span class="dept-badge">{{ dept.name }}</span>
-              </td>
-              <td class="desc-cell">{{ dept.description || '—' }}</td>
-              <td class="head-cell">{{ dept.head || '—' }}</td>
-              <td class="contact-cell">
-                <a *ngIf="dept.email" [href]="'mailto:' + dept.email" class="email-link">{{ dept.email }}</a>
-                <span *ngIf="!dept.email">—</span>
-              </td>
-              <td class="actions-cell">
-                <ion-button fill="clear" size="small" class="view-btn">
-                  <ion-icon name="information-circle-outline"></ion-icon>
-                </ion-button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <ion-card *ngIf="!isLoading && departments.length > 0" class="section-card">
+      <ion-card-header>
+        <ion-card-title>Select Department</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-radio-group [value]="selectedDepartment" (ionChange)="onDepartmentChange($event.detail.value)">
+          <div class="department-filter-grid">
+            <ion-item lines="none" class="department-radio-item" [ngClass]="getDepartmentColorClass(dept.name)" *ngFor="let dept of departments" button detail="false" (click)="onDepartmentChange(dept.name)">
+              <ion-radio slot="start" [value]="dept.name"></ion-radio>
+              <ion-label>{{ dept.name }}</ion-label>
+            </ion-item>
+          </div>
+        </ion-radio-group>
+      </ion-card-content>
+    </ion-card>
 
-      <ng-template #noData>
-        <div class="empty-state">
-          <ion-icon name="business-outline" class="empty-icon"></ion-icon>
-          <h3>No departments found</h3>
-          <p>Start by adding your first department</p>
+    <ion-card *ngIf="!isLoading && selectedDepartment" class="section-card">
+      <ion-card-header>
+        <ion-card-title>
+          Users in
+          <span class="selected-dept-chip" [ngClass]="getDepartmentColorClass(selectedDepartment)">{{ selectedDepartment }}</span>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="table-wrapper" *ngIf="filteredUsers.length > 0; else noUsersInDepartment">
+          <table class="depts-table users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of filteredUsers">
+                <td>{{ getUserDisplayName(user) }}</td>
+                <td>{{ user.email || '—' }}</td>
+                <td>{{ user.role || '—' }}</td>
+                <td>{{ user.status || '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+
+      <ng-template #noUsersInDepartment>
+        <div class="empty-state compact-empty-state">
+          <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+          <h3>No users found</h3>
+          <p>There are no users assigned to this department yet.</p>
         </div>
       </ng-template>
     </ion-card>

@@ -1,12 +1,17 @@
-import { Injectable } from '@angular/core';
-import { Firestore, collection, query, where, getDocs, getDoc, updateDoc, doc, collectionData, orderBy, Query } from '@angular/fire/firestore';
+import { Injectable, EnvironmentInjector, runInInjectionContext } from '@angular/core';
+import { Firestore, collection, query, where, getDocs, getDoc, updateDoc, doc, collectionData, orderBy, limit, addDoc, Query } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, from, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  constructor(private firestore: Firestore, private functions: Functions, private auth: Auth) {}
+  constructor(
+    private firestore: Firestore,
+    private functions: Functions,
+    private auth: Auth,
+    private injector: EnvironmentInjector
+  ) {}
 
   /**
    * Get all pending user approvals
@@ -61,6 +66,7 @@ export class AdminService {
       status: 'approved',
       updatedAt: new Date().toISOString(),
     });
+    await this.logAdminAction('approve_user', uid, { status: 'approved' });
   }
 
   /**
@@ -71,6 +77,7 @@ export class AdminService {
       status: 'rejected',
       updatedAt: new Date().toISOString(),
     });
+    await this.logAdminAction('reject_user', uid, { status: 'rejected' });
   }
 
   /**
@@ -82,6 +89,7 @@ export class AdminService {
       isDepartmentHead: newRole === 'dept_head',
       updatedAt: new Date().toISOString(),
     });
+    await this.logAdminAction('change_user_role', uid, { role: newRole });
   }
 
   /**
@@ -92,6 +100,63 @@ export class AdminService {
       schoolDepartment: department,
       updatedAt: new Date().toISOString(),
     });
+    await this.logAdminAction('assign_department', uid, { schoolDepartment: department });
+  }
+
+  /**
+   * Get latest logs for super admin tracking
+   */
+  async getLogsTracking(maxItems: number = 200) {
+    const logsRef = collection(this.firestore, 'logsTracking');
+    const q = query(logsRef, orderBy('createdAt', 'desc'), limit(maxItems));
+    const snapshot = await this.runFirestoreCall(() => getDocs(q));
+    return snapshot.docs.map((logDoc) => ({
+      id: logDoc.id,
+      ...logDoc.data()
+    }));
+  }
+
+  /**
+   * Create a tracking log entry (for page/system events)
+   */
+  async createTrackingLog(action: string, details: Record<string, any> = {}, targetUserId?: string) {
+    const currentUid = this.auth.currentUser?.uid || 'unknown';
+    await this.logAdminAction(action, targetUserId || currentUid, details);
+  }
+
+  /**
+   * Write a log entry for admin actions
+   */
+  private async logAdminAction(action: string, targetUserId: string, details: Record<string, any> = {}) {
+    try {
+      const actor = this.auth.currentUser;
+      const actorUid = actor?.uid || null;
+
+      let actorName = actor?.email || 'Unknown Admin';
+      if (actorUid) {
+        const actorDoc = await this.runFirestoreCall(() => getDoc(doc(this.firestore, `users/${actorUid}`)));
+        if (actorDoc.exists()) {
+          const actorData = actorDoc.data() as { firstName?: string; lastName?: string; email?: string };
+          const fullName = `${actorData.firstName || ''} ${actorData.lastName || ''}`.trim();
+          actorName = fullName || actorData.email || actorName;
+        }
+      }
+
+      await this.runFirestoreCall(() => addDoc(collection(this.firestore, 'logsTracking'), {
+        action,
+        actorUid,
+        actorName,
+        targetUserId,
+        details,
+        createdAt: new Date().toISOString(),
+      }));
+    } catch (error) {
+      console.error('Failed to write logs tracking entry:', error);
+    }
+  }
+
+  private runFirestoreCall<T>(operation: () => Promise<T>): Promise<T> {
+    return runInInjectionContext(this.injector, operation);
   }
 
   /**
@@ -234,57 +299,73 @@ export class AdminService {
     }
   }
 
-  // Add these methods to the AdminService class
-
-/**
- * Get current user's information including department
- */
-async getCurrentUserDetails() {
-  const user = this.auth.currentUser;
-  if (!user) return null;
-  
-  const userDoc = await getDoc(doc(this.firestore, 'users', user.uid));
-  return userDoc.exists() ? userDoc.data() : null;
-}
-
-/**
- * Get alumni by specific department
- */
-async getAlumniByDepartment(department: string) {
-  try {
-    const usersRef = collection(this.firestore, 'users');
-    const q = query(
-      usersRef,
-      where('status', '==', 'approved'),
-      where('department', '==', department)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error fetching department alumni:', error);
-    throw error;
+  /**
+   * Get current user's information including department
+   */
+  async getCurrentUserDetails() {
+    const user = this.auth.currentUser;
+    if (!user) return null;
+    
+    const userDoc = await getDoc(doc(this.firestore, 'users', user.uid));
+    return userDoc.exists() ? userDoc.data() : null;
   }
-}
 
-/**
- * Get user role
- */
-async getUserRole(uid?: string): Promise<string | null> {
-  const userId = uid || this.auth.currentUser?.uid;
-  if (!userId) return null;
-  
-  const userDoc = await getDoc(doc(this.firestore, 'users', userId));
-  return userDoc.exists() ? userDoc.data()['role'] : null;
-}
+  /**
+   * Get alumni by specific department
+   */
+  async getAlumniByDepartment(department: string) {
+    try {
+      const usersRef = collection(this.firestore, 'users');
+      const q = query(
+        usersRef,
+        where('status', '==', 'approved'),
+        where('department', '==', department)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({
+        uid: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error fetching department alumni:', error);
+      throw error;
+    }
+  }
 
-/**
- * Check if user is department head
- */
-async isDepartmentHead(): Promise<boolean> {
-  const role = await this.getUserRole();
-  return role === 'dept_head';
-}
+  /**
+   * Get user role
+   */
+  async getUserRole(uid?: string): Promise<string | null> {
+    const userId = uid || this.auth.currentUser?.uid;
+    if (!userId) return null;
+    
+    const userDoc = await getDoc(doc(this.firestore, 'users', userId));
+    return userDoc.exists() ? userDoc.data()['role'] : null;
+  }
+
+  /**
+   * Check if user is department head
+   */
+  async isDepartmentHead(): Promise<boolean> {
+    const role = await this.getUserRole();
+    return role === 'dept_head';
+  }
+
+  /**
+   * Get active events (stub implementation)
+   */
+  async getActiveEvents() {
+    // TODO: Replace with actual Firestore query for events
+    // Example: return await getDocs(query(collection(this.firestore, 'events'), where('status', '==', 'active')));
+    return [];
+  }
+
+  /**
+   * Get recent announcements (stub implementation)
+   */
+  async getRecentAnnouncements() {
+    // TODO: Replace with actual Firestore query for announcements
+    // Example: return await getDocs(query(collection(this.firestore, 'announcements'), orderBy('createdAt', 'desc'), limit(5)));
+    return [];
+  }
 }

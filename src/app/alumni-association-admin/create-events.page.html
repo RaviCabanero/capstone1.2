@@ -1,17 +1,35 @@
-<ion-header>
-  <ion-toolbar style="--background: #22dd22; --color: white;">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/alumni-admin"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Create Event</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content">
+  <div class="dashboard-main ion-padding">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Global Events Management</h1>
+      <p>Create new events or manage existing ones</p>
+    </div>
 
-<ion-content class="ion-padding">
-  <ion-card class="event-form-card">
-    <ion-grid>
-      <ion-row>
-        <!-- Left Column: Event Form -->
+    <!-- Toggle Buttons -->
+    <div class="view-toggle">
+      <ion-button 
+        [fill]="viewMode === 'create' ? 'solid' : 'outline'" 
+        color="primary"
+        (click)="viewMode = 'create'">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Create Event
+      </ion-button>
+      <ion-button 
+        [fill]="viewMode === 'list' ? 'solid' : 'outline'" 
+        color="primary"
+        (click)="viewMode = 'list'">
+        <ion-icon name="list-outline" slot="start"></ion-icon>
+        View Events
+      </ion-button>
+    </div>
+
+    <!-- Create Event Form View -->
+    <ion-card *ngIf="viewMode === 'create'" class="event-form-card">
+      <ion-card-content class="form-card-content">
+        <ion-grid>
+          <ion-row>
+            <!-- Left Column: Event Form -->
         <ion-col size="12" sizeMd="6" class="left-column">
           <div class="form-section">
             <h3 class="section-title">Event Details</h3>
@@ -215,18 +233,193 @@
             </div>
           </div>
         </ion-col>
-      </ion-row>
-    </ion-grid>
+          </ion-row>
+        </ion-grid>
 
-    <!-- Footer Actions -->
-    <div class="form-footer">
-      <ion-button fill="clear" (click)="cancel()">
-        Cancel
-      </ion-button>
-      <ion-button fill="solid" color="success" (click)="createEvent()">
-        <ion-icon name="checkmark" slot="start"></ion-icon>
-        Create Event
-      </ion-button>
+        <!-- Footer Actions -->
+        <div class="form-footer">
+          <ion-button fill="clear" (click)="cancel()">
+            Cancel
+          </ion-button>
+          <ion-button fill="solid" color="success" (click)="createEvent()">
+            <ion-icon name="checkmark" slot="start"></ion-icon>
+            Create Event
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+      <!-- Events List View -->
+      <ion-card *ngIf="viewMode === 'list'" class="events-list-card">
+        <ion-card-content>
+          <div *ngIf="events.length === 0" class="empty-state">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <h3>No Events Yet</h3>
+            <p>Create your first event to get started</p>
+          </div>
+
+          <div *ngIf="events.length > 0" class="events-table-wrapper">
+            <table class="events-table">
+              <thead>
+                <tr>
+                  <th>Event Title</th>
+                  <th>Date</th>
+                  <th>Location</th>
+                  <th>Visibility</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let event of events" class="event-row">
+                  <td class="event-title" (click)="showEventDetails(event)" style="cursor: pointer;">
+                    <div class="title-with-color">
+                      <span class="color-dot" [style.backgroundColor]="event.color"></span>
+                      {{ event.title }}
+                    </div>
+                  </td>
+                  <td class="event-date">{{ formatDate(event.date) }}</td>
+                  <td class="event-location">{{ event.location || '-' }}</td>
+                  <td class="event-visibility">
+                    <ion-badge [color]="event.visibility === 'public' ? 'success' : 'warning'">
+                      {{ event.visibility }}
+                    </ion-badge>
+                  </td>
+                  <td class="event-actions">
+                    <ion-button fill="clear" size="small" color="primary" (click)="editEvent(event)">
+                      <ion-icon name="pencil" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" size="small" color="danger" (click)="deleteEvent(event.id)">
+                      <ion-icon name="trash" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Event Details View -->
+      <ion-card *ngIf="viewMode === 'details' && selectedEvent" class="event-details-card">
+        <ion-card-content class="details-content">
+          <!-- Back Button -->
+          <div class="details-header">
+            <ion-button fill="clear" (click)="viewMode = 'list'">
+              <ion-icon name="arrow-back" slot="start"></ion-icon>
+              Back to Events
+            </ion-button>
+          </div>
+
+          <ion-grid>
+            <ion-row>
+              <!-- Left Column: Event Details -->
+              <ion-col size="12" sizeMd="6">
+                <div class="event-info">
+                  <div class="info-header">
+                    <div class="info-color-dot" [style.backgroundColor]="selectedEvent.color"></div>
+                    <h2>{{ selectedEvent.title }}</h2>
+                  </div>
+
+                  <div class="info-section">
+                    <h3>Event Information</h3>
+                    <div class="info-item">
+                      <span class="label">Date:</span>
+                      <span class="value">{{ formatDate(selectedEvent.date) }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Location:</span>
+                      <span class="value">{{ selectedEvent.location || '-' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Time:</span>
+                      <span class="value">{{ formatTime(selectedEvent.startTime) }} - {{ formatTime(selectedEvent.endTime) }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Visibility:</span>
+                      <ion-badge [color]="selectedEvent.visibility === 'public' ? 'success' : 'warning'">
+                        {{ selectedEvent.visibility }}
+                      </ion-badge>
+                    </div>
+                    <div class="info-item">
+                      <span class="label">Status:</span>
+                      <ion-badge color="primary">{{ selectedEvent.availability }}</ion-badge>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <h3>Description</h3>
+                    <p class="description-text">{{ selectedEvent.description || 'No description provided' }}</p>
+                  </div>
+                </div>
+              </ion-col>
+
+              <!-- Right Column: Attendees List -->
+              <ion-col size="12" sizeMd="6">
+                <div class="attendees-section">
+                  <div class="attendees-header">
+                    <h3>Attendees ({{ eventAttendees.length }})</h3>
+                    <ion-button fill="clear" size="small" (click)="refreshEventAttendees()" [disabled]="loadingAttendees">
+                      <ion-icon name="refresh" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
+
+                  <!-- Loading State -->
+                  <div *ngIf="loadingAttendees" class="loading-state">
+                    <ion-spinner name="crescent"></ion-spinner>
+                    <p>Loading attendees...</p>
+                  </div>
+
+                  <!-- Attendees List -->
+                  <div *ngIf="!loadingAttendees && eventAttendees.length > 0" class="attendees-list">
+                    <ion-item *ngFor="let attendee of eventAttendees" lines="none" class="attendee-item">
+                      <ion-avatar slot="start">
+                        <div class="attendee-avatar">{{ getInitials(attendee.name || attendee.email) }}</div>
+                      </ion-avatar>
+                      <ion-label>
+                        <h3>{{ attendee.name || attendee.email }}</h3>
+                        <p class="attendee-email">{{ attendee.email }}</p>
+                        <p class="attendee-department">{{ attendee.schoolDepartment || 'Department: N/A' }}</p>
+                      </ion-label>
+                    </ion-item>
+                  </div>
+
+                  <!-- No Attendees -->
+                  <div *ngIf="!loadingAttendees && eventAttendees.length === 0" class="no-attendees">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <h4>No Attendees Yet</h4>
+                    <p>No alumni have marked themselves as attending this event</p>
+                  </div>
+
+                  <!-- Guest List (Invitees) -->
+                  <div *ngIf="selectedEvent.guests && selectedEvent.guests.length > 0" class="guests-list-section">
+                    <h4>Invited Guests</h4>
+                    <ion-item *ngFor="let guest of selectedEvent.guests" lines="none" class="guest-item">
+                      <ion-avatar slot="start">
+                        <div class="guest-avatar">{{ getInitials(guest.name || guest.email) }}</div>
+                      </ion-avatar>
+                      <ion-label>
+                        <h3>{{ guest.name || guest.email }}</h3>
+                        <p>{{ guest.email }}</p>
+                      </ion-label>
+                    </ion-item>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+          <!-- Action Buttons -->
+          <div class="details-footer">
+            <ion-button fill="outline" color="primary" (click)="editEvent(selectedEvent)">
+              <ion-icon name="pencil" slot="start"></ion-icon>
+              Edit Event
+            </ion-button>
+            <ion-button fill="outline" color="danger" (click)="confirmDeleteEvent(selectedEvent)">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              Delete Event
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
     </div>
-  </ion-card>
 </ion-content>

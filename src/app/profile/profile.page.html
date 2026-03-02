@@ -1,5 +1,5 @@
-<ion-header [translucent]="true" [class.header-hidden]="!showHeader">
-  <ion-toolbar>
+<ion-header [translucent]="false" [class.header-hidden]="!showHeader">
+  <ion-toolbar class="home-toolbar">
     <ion-buttons slot="start">
       <ion-button (click)="goToProfile()">
         <ion-avatar class="header-avatar" *ngIf="(userProfile$ | async)?.photoDataUrl; else defaultAvatar">
@@ -12,29 +12,63 @@
     </ion-buttons>
 
     <ion-searchbar
-      placeholder="Search..."
+      placeholder="Search alumni by name, course, year..."
       mode="ios"
       class="searchbar"
+      [(ngModel)]="searchQuery"
+      (ionInput)="searchAlumni($event)"
+      debounce="500"
+      animated="true"
     ></ion-searchbar>
 
     <ion-buttons slot="end">
       <ion-button>
-        <ion-icon name="chatbubbles"></ion-icon>
+        <ion-icon name="chatbubbles" class="chat-icon"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" (ionScroll)="onScroll($event)" [scrollEvents]="true">
-  <div class="profile-container" *ngIf="userProfile$ | async as profile">
-    <!-- Facebook-Style Profile Header -->
+  <div class="search-results-container" *ngIf="isSearching && searchResults.length > 0">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Alumni Results ({{ searchResults.length }})</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item button *ngFor="let alumni of searchResults" (click)="goToAlumniProfile(alumni.id)">
+            <ion-avatar slot="start">
+              <img *ngIf="alumni.photoDataUrl || alumni.photoUrl" [src]="alumni.photoDataUrl || alumni.photoUrl" alt="Alumni avatar" />
+              <ion-icon *ngIf="!alumni.photoDataUrl && !alumni.photoUrl" name="person-circle"></ion-icon>
+            </ion-avatar>
+            <ion-label>
+              <h3>{{ alumni.firstName }} {{ alumni.lastName }}</h3>
+              <p>{{ alumni.course || alumni.degreeProgram || 'Alumni' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <div *ngIf="isSearching && searchResults.length === 0 && searchQuery.length > 0" class="empty-search-state">
+    <ion-card>
+      <ion-card-content>
+        <p>No alumni found matching "{{ searchQuery }}"</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <div class="profile-container" *ngIf="!isSearching && (userProfile$ | async) as profile">
+ 
     <div class="profile-header-wrapper">
-      <!-- Cover Photo -->
+     
       <div class="cover-image-container">
         <img src="assets/icon/profileBackground.jpg" alt="Cover photo" class="cover-image" />
       </div>
 
-      <!-- Avatar Container - Overlapping Cover -->
+      
       <div class="avatar-container">
         <div class="avatar-wrapper">
           <ion-avatar class="profile-avatar">
@@ -54,11 +88,33 @@
       </div>
     </div>
 
-    <!-- User Info Card -->
+  
     <div class="user-info-card">
       <div class="user-header">
         <div class="user-info">
-          <h2 class="user-name">{{ profile.firstName }} {{ profile.lastName }}</h2>
+          <ion-button fill="clear" routerLink="/profile-edit" *ngIf="isOwnProfile" class="edit-profile-btn profile-edit-corner">
+            <ion-icon name="pencil" slot="icon-only"></ion-icon>
+          </ion-button>
+          <div class="user-name-row">
+            <h2 class="user-name">{{ profile.firstName }} {{ profile.lastName }}</h2>
+            <div class="profile-actions" *ngIf="!isOwnProfile">
+              <ion-button fill="solid" color="success" size="small" (click)="connectWithAlumni(viewedUserId)" 
+                *ngIf="!isConnectedWithViewed && !isPendingRequest" class="connect-btn">
+                <ion-icon name="person-add" slot="start"></ion-icon>
+                <span>Connect</span>
+              </ion-button>
+              <ion-button fill="solid" color="warning" size="small" disabled
+                *ngIf="isPendingRequest && !isConnectedWithViewed" class="pending-btn">
+                <ion-icon name="time" slot="start"></ion-icon>
+                <span>Request Pending</span>
+              </ion-button>
+              <ion-button fill="solid" color="success" size="small" disabled
+                *ngIf="isConnectedWithViewed" class="connected-btn">
+                <ion-icon name="checkmark" slot="start"></ion-icon>
+                <span>Connected</span>
+              </ion-button>
+            </div>
+          </div>
           <ng-container *ngIf="profile?.isDepartmentHead">
             <ion-chip color="warning" class="dept-head-chip">
               <ion-icon name="ribbon" slot="start"></ion-icon>
@@ -79,15 +135,6 @@
             <ion-icon name="location" class="detail-icon"></ion-icon>
             <span class="detail-label">{{ profile.address }}</span>
           </p>
-        </div>
-        <div class="profile-actions">
-          <ion-button fill="outline" size="small" routerLink="/profile-edit" *ngIf="isOwnProfile" class="edit-profile-btn">
-            <ion-icon name="pencil" slot="icon-only"></ion-icon>
-          </ion-button>
-          <ion-button fill="solid" color="success" size="small" (click)="connectWithAlumni(viewedUserId)" *ngIf="!isOwnProfile" class="connect-btn">
-            <ion-icon name="person-add" slot="start"></ion-icon>
-            <span>Connect</span>
-          </ion-button>
         </div>
       </div>
     </div>
@@ -206,7 +253,7 @@
         <ng-template #noPosts>
           <p class="empty-state">No posts yet. Share your first post!</p>
         </ng-template>
-        <ion-button expand="block" fill="outline" (click)="goToActivity()">
+        <ion-button expand="block" fill="clear" (click)="goToActivity()">
           See All
         </ion-button>
       </ion-card-content>
@@ -253,7 +300,18 @@
 
                 <!-- Role Details -->
                 <div class="role-details">
-                  <h4 class="role-title">{{ role.title }}</h4>
+                  <div class="role-title-row">
+                    <h4 class="role-title">{{ role.title }}</h4>
+                    <ion-button
+                      *ngIf="isOwnProfile"
+                      fill="clear"
+                      size="small"
+                      class="edit-role-btn"
+                      (click)="openExperienceModal(role)"
+                    >
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
                   <p class="role-dates">
                     {{ formatDate(role.startYear, role.startMonth) }} –
                     <span *ngIf="role.currentlyWorking">Present</span>

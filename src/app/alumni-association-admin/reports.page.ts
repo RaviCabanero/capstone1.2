@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { AdminService } from '../services/admin.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-reports',
@@ -19,7 +20,10 @@ export class ReportsPage implements OnInit {
     departmentBreakdown: [] as any[]
   };
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private router: Router
+  ) {}
 
   async ngOnInit() {
     await this.loadReports();
@@ -76,5 +80,33 @@ export class ReportsPage implements OnInit {
     a.download = `alumni-report-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/alumni-admin']);
+  }
+
+  navigateToAnnouncements() {
+    this.router.navigate(['/alumni-admin/announcements']);
+  }
+
+  navigateToEvents() {
+    this.router.navigate(['/alumni-admin/create-events']);
+  }
+
+  navigateToAlumniList() {
+    this.router.navigate(['/alumni-admin/alumni-list']);
+  }
+
+  navigateToReports() {
+    this.router.navigate(['/alumni-admin/reports']);
+  }
+
+  navigateToIdApprovals() {
+    this.router.navigate(['/alumni-admin/alumni-id-approval']);
+  }
+
+  isActiveTab(path: string): boolean {
+    return this.router.url === path;
   }
 }

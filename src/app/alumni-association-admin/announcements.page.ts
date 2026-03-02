@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Firestore, collection, addDoc, getDocs, query, orderBy } from '@angular/fire/firestore';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-announcements',
@@ -23,7 +24,8 @@ export class AnnouncementsPage implements OnInit {
 
   constructor(
     private firestore: Firestore,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private router: Router
   ) {}
 
   async ngOnInit() {
@@ -96,5 +98,33 @@ export class AnnouncementsPage implements OnInit {
       position: 'top'
     });
     await toast.present();
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/alumni-admin']);
+  }
+
+  navigateToAnnouncements() {
+    this.router.navigate(['/alumni-admin/announcements']);
+  }
+
+  navigateToEvents() {
+    this.router.navigate(['/alumni-admin/create-events']);
+  }
+
+  navigateToAlumniList() {
+    this.router.navigate(['/alumni-admin/alumni-list']);
+  }
+
+  navigateToReports() {
+    this.router.navigate(['/alumni-admin/reports']);
+  }
+
+  navigateToIdApprovals() {
+    this.router.navigate(['/alumni-admin/alumni-id-approval']);
+  }
+
+  isActiveTab(path: string): boolean {
+    return this.router.url === path;
   }
 }
