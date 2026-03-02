@@ -8,6 +8,20 @@ ion-content {
   --padding-bottom: 0 !important;
 }
 
+.search-results-container,
+.empty-search-state {
+  padding-top: 8px;
+}
+
+.searchbar {
+  --color: #000000;
+  --placeholder-color: #6b7280;
+}
+
+.chat-icon {
+  color: #16a34a;
+}
+
 // Global Ion Card Styling
 ion-card {
   margin: 16px;
@@ -29,6 +43,13 @@ ion-header {
   &.header-hidden {
     transform: translateY(-100%);
   }
+}
+
+.home-toolbar {
+  --background: #ffffff !important;
+  --color: #000000;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
 }
 
 
@@ -129,6 +150,7 @@ ion-footer {
 
 // User Info Card
 .user-info-card {
+  position: relative;
   padding: 20px 24px;
   background: #ffffff;
   backdrop-filter: blur(10px);
@@ -148,6 +170,13 @@ ion-footer {
   flex: 1;
 }
 
+.user-name-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .profile-actions {
   display: flex;
   gap: 10px;
@@ -158,7 +187,7 @@ ion-footer {
   font-size: 24px;
   font-weight: 700;
   color: #1f2937;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   letter-spacing: -0.5px;
 }
 
@@ -196,21 +225,33 @@ ion-footer {
 }
 
 .edit-profile-btn {
-  --border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  --border-radius: 0;
+  --background: transparent;
+  --background-hover: transparent;
+  --background-focused: transparent;
+  --background-activated: transparent;
   flex-shrink: 0;
   --color: #16a34a;
-  --border-color: #16a34a;
   --padding-start: 0;
   --padding-end: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 0;
+
+  ion-icon {
+    font-size: 20px;
+  }
 }
 
 .edit-profile-btn::part(native) {
   color: #16a34a;
+  border: none;
+  box-shadow: none;
+}
+
+.profile-edit-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
 }
 
 .connect-btn {
@@ -1151,16 +1192,16 @@ ion-item h3 {
     width: 52px;
     height: 52px;
     min-width: 52px;
-    background: linear-gradient(135deg, #16a34a, #15803d);
+    background: #ecfdf3;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);
 
     ion-icon {
       font-size: 26px;
-      color: white;
+      color: #16a34a;
     }
   }
 
@@ -1194,7 +1235,7 @@ ion-item h3 {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(180deg, #16a34a, #15803d);
+    background: #16a34a;
   }
 }
 
@@ -1225,16 +1266,35 @@ ion-item h3 {
   .role-details {
     padding-left: 4px;
 
+    .role-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     .role-title {
       font-size: 15px;
       font-weight: 600;
       margin: 0 0 4px 0;
-      color: var(--ion-color-dark);
+      color: #000000;
+    }
+
+    .edit-role-btn {
+      --padding-start: 0;
+      --padding-end: 0;
+      --color: #16a34a;
+      margin: 0;
+      height: 24px;
+
+      ion-icon {
+        font-size: 16px;
+      }
     }
 
     .role-dates {
       font-size: 13px;
-      color: var(--ion-color-medium);
+      color: #374151;
       margin: 0 0 4px 0;
 
       .role-duration {
@@ -1244,7 +1304,7 @@ ion-item h3 {
 
     .role-location {
       font-size: 12px;
-      color: var(--ion-color-medium);
+      color: #4b5563;
       margin: 4px 0;
       display: flex;
       align-items: center;
@@ -1315,6 +1375,18 @@ ion-item h3 {
 
 // Activity Section
 .activity-section {
+  ion-item {
+    --background: #ffffff;
+    background: #ffffff;
+  }
+
+  ion-label,
+  ion-label p,
+  ion-label h3,
+  .post-date {
+    color: #000000;
+  }
+
   ion-button {
     --color: #16a34a;
     --border-color: #16a34a;
@@ -1507,20 +1579,24 @@ ion-item h3 {
 // Dark mode support
 @media (prefers-color-scheme: dark) {
   .company-header .company-logo {
-    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+    background: #ecfdf3;
+  }
+
+  .company-header .company-logo ion-icon {
+    color: #16a34a;
   }
 
   .timeline::before {
-    background: linear-gradient(180deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+    background: #16a34a;
   }
 
   .role .timeline-dot {
-    border-color: var(--ion-color-primary);
+    border-color: #16a34a;
     box-shadow: 0 0 0 2px var(--ion-color-dark);
   }
 
   .company-name,
   .role-title {
-    color: var(--ion-color-light);
+    color: #000000;
   }
 }

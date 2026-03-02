@@ -1,0 +1,96 @@
+<ion-app>
+  <!-- Header -->
+  <ion-header [translucent]="false" class="admin-header">
+    <div class="header-container">
+      <!-- Left Section: Menu & Title -->
+      <div class="header-left">
+        <ion-button (click)="toggleMenu()" class="menu-button" fill="clear">
+          <ion-icon name="menu-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <div class="header-title-section">
+          <ion-icon name="people-circle-outline" class="header-logo"></ion-icon>
+          <div class="title-text">
+            <h1>Alumni Admin</h1>
+            <p>Association Management</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Section: User Menu -->
+      <div class="header-right">
+        <div class="user-menu">
+          <div class="user-profile">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <p class="user-name">Alumni Admin</p>
+              <p class="user-status">Online</p>
+            </div>
+          </div>
+          <ion-button (click)="logout()" fill="clear" class="logout-btn">
+            <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ion-header>
+
+  <!-- Main Layout -->
+  <div class="layout-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" [class.open]="menuOpen" role="navigation" aria-label="Main navigation">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <h1>Admin Menu</h1>
+        </div>
+        <ion-icon 
+          name="close-outline" 
+          (click)="toggleMenu()" 
+          class="close-icon"
+          aria-label="Close menu"
+        ></ion-icon>
+      </div>
+      
+      <!-- Navigation Items -->
+      <nav class="sidebar-nav">
+        <a 
+          *ngFor="let item of menuItems"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.path === '/alumni-admin' }"
+          (click)="closeMobileMenu()"
+          class="nav-item"
+          [attr.aria-current]="isActive(item.path) ? 'page' : null"
+        >
+          <ion-icon [name]="item.icon" class="nav-icon"></ion-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="admin-info">
+          <div class="admin-avatar">A</div>
+          <div class="admin-details">
+            <p class="admin-name">Alumni Admin</p>
+            <p class="admin-role">Association Manager</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div 
+    class="sidebar-overlay" 
+    *ngIf="menuOpen" 
+    (click)="closeMobileMenu()"
+    aria-hidden="true"
+  ></div>
+</ion-app>

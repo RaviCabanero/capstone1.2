@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -11,6 +11,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
   imports: [IonicModule, CommonModule, ReactiveFormsModule],
 })
 export class ExperienceModalComponent implements OnInit {
+  @Input() existingExperience: any = null;
   experienceForm!: FormGroup;
   submitted = false;
   currentlyWorking = false;
@@ -32,9 +33,14 @@ export class ExperienceModalComponent implements OnInit {
 
   years: number[] = [];
 
+  get isEditMode(): boolean {
+    return !!this.existingExperience;
+  }
+
   constructor(
     private fb: FormBuilder,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private alertCtrl: AlertController
   ) {
     this.generateYears();
   }
@@ -67,6 +73,22 @@ export class ExperienceModalComponent implements OnInit {
       toMonthControl?.updateValueAndValidity();
       toYearControl?.updateValueAndValidity();
     });
+
+    if (this.existingExperience) {
+      this.currentlyWorking = !!this.existingExperience.currentlyWorking;
+      this.experienceForm.patchValue({
+        company: this.existingExperience.company || '',
+        title: this.existingExperience.title || '',
+        location: this.existingExperience.location || '',
+        description: this.existingExperience.description || '',
+        fromMonth: this.existingExperience.startMonth || '',
+        fromYear: this.existingExperience.startYear || '',
+        toMonth: this.existingExperience.endMonth || '',
+        toYear: this.existingExperience.endYear || '',
+        currentlyWorking: !!this.existingExperience.currentlyWorking,
+        shareWithNetwork: this.existingExperience.shareWithNetwork ?? true,
+      });
+    }
   }
 
   generateYears() {
@@ -108,31 +130,70 @@ export class ExperienceModalComponent implements OnInit {
     return this.experienceForm.get('toYear');
   }
 
-  cancel() {
-    this.modalCtrl.dismiss();
+  async cancel() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cancel Changes',
+      message: 'Are you sure you want to cancel? All changes will be lost.',
+      buttons: [
+        {
+          text: 'Continue Editing',
+          role: 'cancel'
+        },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          handler: () => {
+            this.modalCtrl.dismiss();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
-  save() {
+  async save() {
     this.submitted = true;
 
     if (this.experienceForm.invalid) {
       return;
     }
 
-    const formValue = this.experienceForm.value;
-    const experience = {
-      company: formValue.company,
-      title: formValue.title,
-      location: formValue.location,
-      description: formValue.description,
-      startMonth: formValue.fromMonth,
-      startYear: formValue.fromYear,
-      endMonth: formValue.toMonth,
-      endYear: formValue.toYear,
-      currentlyWorking: formValue.currentlyWorking,
-      shareWithNetwork: formValue.shareWithNetwork,
-    };
+    const alert = await this.alertCtrl.create({
+      header: 'Save Experience',
+      message: 'Do you want to save this experience?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save',
+          handler: () => {
+            const formValue = this.experienceForm.value;
+            const experience = {
+              company: formValue.company,
+              title: formValue.title,
+              location: formValue.location,
+              description: formValue.description,
+              startMonth: formValue.fromMonth,
+              startYear: formValue.fromYear,
+              endMonth: formValue.toMonth,
+              endYear: formValue.toYear,
+              currentlyWorking: formValue.currentlyWorking,
+              shareWithNetwork: formValue.shareWithNetwork,
+            };
 
-    this.modalCtrl.dismiss(experience);
+            this.modalCtrl.dismiss({
+              ...experience,
+              id: this.existingExperience?.id,
+              createdAt: this.existingExperience?.createdAt,
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 }

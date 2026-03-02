@@ -53,44 +53,110 @@
       <p>Loading notifications...</p>
     </div>
 
+    <!-- Upcoming Events Section -->
+    <div *ngIf="!loading && upcomingEvents.length > 0" class="events-section">
+      <div class="events-header">
+        <ion-icon name="calendar" class="events-icon"></ion-icon>
+        <h2>Upcoming Events</h2>
+        <span class="event-count">{{ upcomingEvents.length }}</span>
+      </div>
+      <div class="events-list">
+        <div class="event-card" *ngFor="let event of upcomingEvents">
+          <div class="event-date">
+            <div class="event-day">{{ event.eventDate | date:'dd' }}</div>
+            <div class="event-month">{{ event.eventDate | date:'MMM' }}</div>
+          </div>
+          <div class="event-details">
+            <h3>{{ event.eventTitle }}</h3>
+            <p class="event-location">
+              <ion-icon name="location" size="small"></ion-icon>
+              {{ event.location || 'Location TBA' }}
+            </p>
+            <p class="event-time">
+              <ion-icon name="time" size="small"></ion-icon>
+              {{ event.eventDate | date:'h:mm a' }}
+            </p>
+            <p class="event-description">{{ event.description | slice:0:100 }}...</p>
+          </div>
+          <ion-button 
+            fill="clear" 
+            size="small"
+            (click)="navigateToEvent(event)"
+            class="view-btn">
+            View
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
     <!-- Notifications List -->
-    <div *ngIf="!loading && notifications.length > 0" class="notifications-list">
-      <ion-item-sliding *ngFor="let notification of notifications">
-        <ion-item 
-          [class.unread]="!notification.read"
-          (click)="handleNotificationClick(notification)"
-          button>
-          <ion-avatar slot="start">
+    <div *ngIf="!loading && notifications.length > 0" class="notifications-section">
+      <div class="notifications-header">
+        <ion-icon name="notifications" class="notif-icon"></ion-icon>
+        <h2>Notifications</h2>
+        <span class="notif-count">{{ notifications.length }}</span>
+      </div>
+      <div class="notifications-list">
+      <div class="notification-item" *ngFor="let notification of notifications" [class.unread]="!notification.read">
+        <div class="notification-content" (click)="handleNotificationClick(notification)">
+          <div class="notification-icon">
             <ion-icon 
               [name]="getNotificationIcon(notification.type)"
               [color]="getNotificationColor(notification.type)">
             </ion-icon>
-          </ion-avatar>
-          <ion-label>
-            <h2>{{ notification.title }}</h2>
+          </div>
+          <div class="notification-text">
+            <h3>{{ notification.title }}</h3>
             <p>{{ notification.message }}</p>
-            <p class="notification-time">
-              <ion-icon name="time-outline"></ion-icon>
-              {{ notification.timestamp | date:'short' }}
-            </p>
-          </ion-label>
-          <ion-badge 
-            *ngIf="!notification.read" 
-            color="primary" 
-            slot="end">
-            New
-          </ion-badge>
-        </ion-item>
+            <span class="notification-time">{{ notification.timestamp | date:'short' }}</span>
+          </div>
+          <div class="notification-actions">
+            <!-- Connection Request Actions -->
+            <ng-container *ngIf="notification.type === 'connection_request'">
+              <ion-button 
+                fill="solid"
+                size="small"
+                color="success"
+                (click)="acceptConnectionRequest(notification); $event.stopPropagation()"
+                class="action-btn accept-btn">
+                Accept
+              </ion-button>
+              <ion-button 
+                fill="solid"
+                size="small"
+                color="danger"
+                (click)="rejectConnectionRequest(notification); $event.stopPropagation()"
+                class="action-btn reject-btn">
+                Reject
+              </ion-button>
+            </ng-container>
 
-        <ion-item-options side="end">
-          <ion-item-option color="primary" (click)="markAsRead(notification)">
-            <ion-icon slot="icon-only" name="checkmark"></ion-icon>
-          </ion-item-option>
-          <ion-item-option color="danger" (click)="deleteNotification(notification)">
-            <ion-icon slot="icon-only" name="trash"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
+            <!-- Other Notification Actions -->
+            <ng-container *ngIf="notification.type !== 'connection_request'">
+              <ion-badge 
+                *ngIf="!notification.read" 
+                class="new-badge">
+                New
+              </ion-badge>
+              <ion-button 
+                fill="clear" 
+                size="small"
+                (click)="markAsRead(notification); $event.stopPropagation()"
+                class="action-btn">
+                <ion-icon slot="icon-only" name="checkmark"></ion-icon>
+              </ion-button>
+              <ion-button 
+                fill="clear" 
+                size="small"
+                (click)="deleteNotification(notification); $event.stopPropagation()"
+                class="action-btn delete-btn">
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
 
     <!-- Empty State -->

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, authState, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, UserCredential, sendEmailVerification as firebaseSendEmailVerification, User } from '@angular/fire/auth';
+import { Firestore, addDoc, collection } from '@angular/fire/firestore';
 import { map, Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -8,7 +9,7 @@ export class AuthService {
   readonly user$ = authState(this.auth);
   readonly isLoggedIn$: Observable<boolean> = this.user$.pipe(map(user => !!user));
 
-  constructor(private auth: Auth, private router: Router) {}
+  constructor(private auth: Auth, private router: Router, private firestore: Firestore) {}
 
   login(email: string, password: string): Promise<UserCredential> {
     return signInWithEmailAndPassword(this.auth, email, password);
@@ -33,5 +34,23 @@ export class AuthService {
   async logoutAndRedirect(url = '/login'): Promise<void> {
     await this.logout();
     await this.router.navigateByUrl(url, { replaceUrl: true });
+  }
+
+  async logLoginActivity(details: Record<string, any> = {}): Promise<void> {
+    try {
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) return;
+
+      await addDoc(collection(this.firestore, 'logsTracking'), {
+        action: 'user_login',
+        actorUid: currentUser.uid,
+        actorName: currentUser.displayName || currentUser.email || 'Unknown User',
+        targetUserId: currentUser.uid,
+        details,
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Failed to log login activity:', error);
+    }
   }
 }

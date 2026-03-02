@@ -1,0 +1,160 @@
+.page-wrapper {
+  padding: 0 !important;
+  background: #f8fafc;
+  min-height: 100%;
+  color: #111827;
+}
+
+.logs-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  .header-content {
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 260px;
+
+  ion-spinner {
+    --color: #148245;
+  }
+}
+
+.section-card {
+  margin: 0;
+  border-radius: 12px;
+  border: none;
+  --background: #ffffff;
+  --color: #111827;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+ion-button[color='success'][fill='outline'] {
+  --background: #ffffff;
+  --color: #0f6138;
+  --border-color: #148245;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: #ffffff;
+
+  thead {
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+
+    th {
+      text-align: left;
+      padding: 14px;
+      color: #374151;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+
+    &:hover {
+      background: #f9fafb;
+    }
+  }
+
+  td {
+    padding: 14px;
+    background: #ffffff;
+    color: #111827;
+    vertical-align: top;
+  }
+
+  .details-col {
+    color: #4b5563;
+    min-width: 260px;
+    word-break: break-word;
+  }
+}
+
+.action-chip {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #0f6138;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+
+  .empty-icon {
+    font-size: 58px;
+    color: #d1d5db;
+    margin-bottom: 14px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: #374151;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: #9ca3af;
+  }
+}
+
+@media (max-width: 768px) {
+  .logs-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+
+    .header-content h1 {
+      font-size: 24px;
+    }
+  }
+}

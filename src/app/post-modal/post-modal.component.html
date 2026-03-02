@@ -19,7 +19,8 @@
     <!-- User Info Section -->
     <div class="user-info">
       <ion-avatar class="user-avatar">
-        <img [src]="userAvatar || 'https://via.placeholder.com/40'" alt="User avatar" />
+        <img *ngIf="userAvatar" [src]="userAvatar" alt="User avatar" />
+        <ion-icon *ngIf="!userAvatar" name="person-circle"></ion-icon>
       </ion-avatar>
       <div class="user-details">
         <h3 class="user-name">{{ userName }}</h3>

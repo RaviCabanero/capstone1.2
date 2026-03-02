@@ -4,6 +4,7 @@ import { AlertController, ModalController, ToastController } from '@ionic/angula
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, doc, docData, collection, query, where, collectionData } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+import { ConnectionRequestService } from '../services/connection-request.service';
 
 @Component({
   selector: 'app-alumni-network',
@@ -24,6 +25,12 @@ export class AlumniNetworkPage implements OnInit {
   connections: number = 0;
   following: number = 0;
 
+  // Network Lists (for modals)
+  outgoingRequests: any[] = [];
+  acceptedConnections: any[] = [];
+  showInviteListModal: boolean = false;
+  showConnectionListModal: boolean = false;
+
   // Department Filter
   selectedDepartment: string = 'School of Education';
   selectedDepartmentFilter: string = 'my'; // 'my', 'all', or specific department name
@@ -42,11 +49,12 @@ export class AlumniNetworkPage implements OnInit {
     private modalController: ModalController,
     private toastController: ToastController,
     private auth: Auth,
-    private firestore: Firestore
+    private firestore: Firestore,
+    private connectionRequestService: ConnectionRequestService
   ) {}
 
   ngOnInit() {
-    console.log('🚀 Alumni Network Page Initializing...');
+    console.log('Alumni Network Page Initializing...');
     
     // Initialize invite avatars with placeholders
     this.inviteAvatars = [
@@ -67,7 +75,7 @@ export class AlumniNetworkPage implements OnInit {
     // Wait for auth state to be ready
     onAuthStateChanged(this.auth, (user) => {
       if (!user) {
-        console.log('❌ No authenticated user');
+        console.log('No authenticated user');
         return;
       }
 
@@ -80,23 +88,23 @@ export class AlumniNetworkPage implements OnInit {
    * Load all users from Firestore
    */
   private loadAllUsers(currentUserId: string) {
-    console.log('🔄 Loading all users from Firestore...');
+    console.log('Loading all users from Firestore...');
     const alumniQuery = query(collection(this.firestore, 'users'));
 
     collectionData(alumniQuery, { idField: 'id' }).subscribe(
       (users: any[]) => {
-        console.log('📊 Total users in database:', users.length);
+        console.log('Total users in database:', users.length);
         
         if (users.length === 0) {
-          console.warn('⚠️ No users found in database');
+          console.warn('No users found in database');
           this.suggestedAlumni = [];
           return;
         }
         
         // Filter out current user
         const filteredUsers = users.filter(user => user.id !== currentUserId);
-        console.log('📊 Users after filtering (excluding current):', filteredUsers.length);
-        console.log('📊 User details:', filteredUsers);
+        console.log('Users after filtering (excluding current):', filteredUsers.length);
+        console.log('User details:', filteredUsers);
         
         // Update arrays
         this.allAlumni = filteredUsers;
@@ -104,10 +112,10 @@ export class AlumniNetworkPage implements OnInit {
         this.suggestedAlumni = filteredUsers;
         this.populateInviteAvatars(filteredUsers);
         
-        console.log('✅ Alumni loaded and displayed successfully');
+        console.log('Alumni loaded and displayed successfully');
       },
       (error) => {
-        console.error('❌ Error loading alumni from Firestore:', error);
+        console.error('Error loading alumni from Firestore:', error);
       }
     );
   }
@@ -116,15 +124,15 @@ export class AlumniNetworkPage implements OnInit {
    * Load current user profile
    */
   loadUserProfile() {
-    console.log('🔐 Starting profile load with auth state check...');
+    console.log('Starting profile load with auth state check...');
     
     onAuthStateChanged(this.auth, (user) => {
       if (!user) {
-        console.log('❌ No authenticated user in loadUserProfile');
+        console.log('No authenticated user in loadUserProfile');
         return;
       }
 
-      console.log('🔐 Auth state ready, User UID:', user.uid);
+      console.log('Auth state ready, User UID:', user.uid);
       this.loadProfileData(user.uid);
     });
   }
@@ -133,18 +141,18 @@ export class AlumniNetworkPage implements OnInit {
    * Load profile data from Firestore
    */
   private loadProfileData(uid: string) {
-    console.log('📸 Loading profile data for UID:', uid);
+    console.log('Loading profile data for UID:', uid);
     
     docData(doc(this.firestore, `users/${uid}`)).subscribe(
       (profile: any) => {
-        console.log('✅ Profile data received:', profile);
-        console.log('📸 Photo URL:', profile?.photoDataUrl);
+        console.log('Profile data received:', profile);
+        console.log('Photo URL:', profile?.photoDataUrl);
         
         this.userProfile = profile;
         this.userDepartment = profile?.schoolDepartment || profile?.department || 'School of Education';
         
-        console.log('👤 User Department:', this.userDepartment);
-        console.log('📸 Full profile object:', this.userProfile);
+        console.log('User Department:', this.userDepartment);
+        console.log('Full profile object:', this.userProfile);
         
         this.selectedDepartmentFilter = 'all';
         this.selectedDepartment = 'All Departments';
@@ -152,7 +160,7 @@ export class AlumniNetworkPage implements OnInit {
         this.loadAllAlumni();
       },
       (error) => {
-        console.error('❌ Profile load error:', error);
+        console.error(' Profile load error:', error);
       }
     );
   }
@@ -161,21 +169,122 @@ export class AlumniNetworkPage implements OnInit {
    * Load network statistics
    */
   loadNetworkStats() {
-    const uid = this.auth.currentUser?.uid;
-    if (uid) {
+    // Wait for auth state to be ready
+    onAuthStateChanged(this.auth, (user) => {
+      if (!user) {
+        console.log('No authenticated user for stats');
+        return;
+      }
+
+      const uid = user.uid;
+      console.log('Loading network stats for user:', uid);
+
+      // Load outgoing connection requests count
+      this.connectionRequestService.getOutgoingRequests(uid).subscribe({
+        next: (requests: any[]) => {
+          this.inviteSent = requests.length;
+          console.log('✅ Outgoing requests count:', this.inviteSent, 'Requests:', requests);
+        },
+        error: (error) => {
+          console.error('❌ Error loading outgoing requests count:', error);
+          this.inviteSent = 0;
+        }
+      });
+
+      // Load accepted connections count from user profile
       docData(doc(this.firestore, `users/${uid}`)).subscribe((profile: any) => {
-        // Handle both number counts and array-based data
-        this.inviteSent = Array.isArray(profile?.inviteSent) ? profile.inviteSent.length : (profile?.inviteSent || 0);
-        this.connections = Array.isArray(profile?.connections) ? profile.connections.length : (profile?.connections || 0);
-        this.following = Array.isArray(profile?.following) ? profile.following.length : (profile?.following || 0);
+        this.connections = Array.isArray(profile?.connections) ? profile.connections.length : 0;
+        this.following = Array.isArray(profile?.following) ? profile.following.length : 0;
         
-        console.log('📊 Network Stats loaded:', {
+        console.log('✅ Network Stats loaded:', {
           inviteSent: this.inviteSent,
           connections: this.connections,
-          following: this.following
+          following: this.following,
+          profileConnections: profile?.connections
         });
       });
+    });
+  }
+
+  /**
+   * Load outgoing connection requests
+   */
+  loadOutgoingRequests() {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    this.connectionRequestService.getOutgoingRequests(uid).subscribe({
+      next: (requests: any[]) => {
+        // Enrich with user data for display
+        this.outgoingRequests = requests.map((req: any) => {
+          const userData = this.allAlumni.find(a => a.id === req.toUserId);
+          return { ...req, toUser: userData || { id: req.toUserId, firstName: 'Alumni' } };
+        });
+
+        console.log('Outgoing requests loaded:', this.outgoingRequests);
+      },
+      error: (error) => {
+        console.error('Error loading outgoing requests:', error);
+      }
+    });
+  }
+
+  /**
+   * Load accepted connections
+   */
+  loadAcceptedConnections() {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      const connectionIds = this.userProfile?.connections || [];
+      
+      // Fetch user data for each connected user ID
+      this.acceptedConnections = connectionIds.map((userId: string) => {
+        const userData = this.allAlumni.find(a => a.id === userId);
+        return userData || { id: userId, firstName: 'Alumni' };
+      });
+
+      console.log('Accepted connections loaded:', this.acceptedConnections);
+    } catch (error) {
+      console.error('Error loading accepted connections:', error);
     }
+  }
+
+  /**
+   * Show invite sent list
+   */
+  showInviteSentList() {
+    this.loadOutgoingRequests();
+    this.showInviteListModal = true;
+  }
+
+  /**
+   * Show connections list
+   */
+  showConnectionsList() {
+    this.loadAcceptedConnections();
+    this.showConnectionListModal = true;
+  }
+
+  /**
+   * Close modals
+   */
+  closeInviteModal() {
+    this.showInviteListModal = false;
+  }
+
+  closeConnectionModal() {
+    this.showConnectionListModal = false;
+  }
+
+  /**
+   * Navigate to user profile from modal
+   */
+  goToUserProfile(userId: string) {
+    this.router.navigate(['/profile', userId]);
+    this.closeInviteModal();
+    this.closeConnectionModal();
   }
 
   /**
@@ -328,18 +437,38 @@ export class AlumniNetworkPage implements OnInit {
           role: 'cancel',
         },
         {
-          text: 'Connect',
+          text: 'Send Request',
           handler: async () => {
-            // Update connection in database
             const currentUserId = this.auth.currentUser?.uid;
             if (currentUserId) {
-              // Add to connections list (implement based on your DB structure)
-              const toast = await this.toastController.create({
-                message: 'Connection request sent!',
-                duration: 2000,
-                position: 'bottom',
-              });
-              await toast.present();
+              try {
+                // Send connection request using the service
+                await this.connectionRequestService.sendConnectionRequest(alumniId);
+
+                // Show success toast
+                const toast = await this.toastController.create({
+                  message: 'Connection request sent!',
+                  duration: 2000,
+                  position: 'bottom',
+                  color: 'success',
+                });
+                await toast.present();
+
+                // Remove from suggested alumni list
+                const index = this.suggestedAlumni.findIndex(user => user.id === alumniId);
+                if (index > -1) {
+                  this.suggestedAlumni.splice(index, 1);
+                }
+              } catch (error) {
+                console.error('Error sending connection request:', error);
+                const errorToast = await this.toastController.create({
+                  message: 'Failed to send connection request',
+                  duration: 2000,
+                  position: 'bottom',
+                  color: 'danger',
+                });
+                await errorToast.present();
+              }
             }
           },
         },

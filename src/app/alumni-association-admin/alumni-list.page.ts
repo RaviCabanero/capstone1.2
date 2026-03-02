@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { AdminService } from '../services/admin.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-alumni-list',
@@ -22,7 +23,10 @@ export class AlumniListPage implements OnInit {
   selectedDepartment = '';
   selectedAlumniForDept: any = null;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private router: Router
+  ) {}
 
   async ngOnInit() {
     const role = await this.adminService.getUserRole();
@@ -205,5 +209,41 @@ export class AlumniListPage implements OnInit {
       console.error('Failed to assign department head:', error);
       alert(`Error: ${(error as any)?.message || 'Failed to assign'}`);
     }
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/alumni-admin']);
+  }
+
+  navigateToAnnouncements() {
+    this.router.navigate(['/alumni-admin/announcements']);
+  }
+
+  navigateToEvents() {
+    this.router.navigate(['/alumni-admin/create-events']);
+  }
+
+  navigateToAlumniList() {
+    this.router.navigate(['/alumni-admin/alumni-list']);
+  }
+
+  navigateToReports() {
+    this.router.navigate(['/alumni-admin/reports']);
+  }
+
+  navigateToIdApprovals() {
+    this.router.navigate(['/alumni-admin/alumni-id-approval']);
+  }
+
+  isActiveTab(path: string): boolean {
+    return this.router.url === path;
+  }
+
+  openAddUserModal() {
+    // Navigate to create user page or open modal
+    // This can be adjusted based on your routing structure
+    alert('Opening Add Alumni User form...');
+    // Example: this.router.navigate(['/alumni-admin/create-user']);
+    // Or implement a modal here
   }
 }

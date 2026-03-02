@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -17,7 +17,8 @@ export class AccomplishmentModalComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {
@@ -76,26 +77,61 @@ export class AccomplishmentModalComponent implements OnInit {
   /**
    * Save accomplishment
    */
-  save() {
+  async save() {
     this.submitted = true;
 
     if (this.accomplishmentForm.invalid) {
       return;
     }
 
-    const accomplishment = {
-      ...this.accomplishmentForm.value,
-      id: new Date().getTime().toString(),
-      createdAt: new Date().toISOString(),
-    };
+    const alert = await this.alertCtrl.create({
+      header: 'Save Accomplishment',
+      message: 'Do you want to save this accomplishment?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save',
+          handler: () => {
+            const accomplishment = {
+              ...this.accomplishmentForm.value,
+              id: new Date().getTime().toString(),
+              createdAt: new Date().toISOString(),
+            };
 
-    this.modalCtrl.dismiss(accomplishment, 'save');
+            this.modalCtrl.dismiss(accomplishment, 'save');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   /**
    * Cancel and close modal
    */
-  cancel() {
-    this.modalCtrl.dismiss(null, 'cancel');
+  async cancel() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cancel Changes',
+      message: 'Are you sure you want to cancel? All changes will be lost.',
+      buttons: [
+        {
+          text: 'Continue Editing',
+          role: 'cancel'
+        },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          handler: () => {
+            this.modalCtrl.dismiss(null, 'cancel');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 }

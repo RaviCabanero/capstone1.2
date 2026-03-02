@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
-import { Firestore, collection, query, where, orderBy, collectionData, doc, docData, deleteDoc, addDoc, updateDoc, arrayUnion, arrayRemove } from '@angular/fire/firestore';
-import { Observable, of, map } from 'rxjs';
+import { Firestore, collection, query, where, orderBy, collectionData, doc, docData, deleteDoc, addDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from '@angular/fire/firestore';
+import { Observable, of, map, switchMap, forkJoin, from } from 'rxjs';
 import { ModalController, ActionSheetController, AlertController, IonContent } from '@ionic/angular';
 import { PostModalComponent } from '../post-modal/post-modal.component';
+import { EventService } from '../services/event.service';
 
 @Component({
   selector: 'app-home',
@@ -19,23 +20,27 @@ export class HomePage implements OnInit {
   userProfile: any;
   selectedEvent: any = null;
 
-  // Events
+  
   events: any[] = [];
   loadingEvents = true;
 
-  // Search Alumni
+  
   searchQuery: string = '';
   isSearching: boolean = false;
   searchResults: any[] = [];
   allAlumni: any[] = [];
   suggestedAlumni: any[] = [];
+  suggestedAlumniStartIndex = 0;
+  readonly suggestedAlumniPerView = 2;
 
-  // Scroll tracking
+  
   private lastScrollTop = 0;
   showHeader = true;
   showFooter = true;
   currentUserId: string | null = null;
   currentUserConnections: string[] = [];
+  readonly initialCommentsToShow = 1;
+  private expandedComments = new Set<string>();
 
   constructor(
     private router: Router,
@@ -43,7 +48,8 @@ export class HomePage implements OnInit {
     private firestore: Firestore,
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private eventService: EventService
   ) {}
 
   ngOnInit() {
@@ -54,18 +60,21 @@ export class HomePage implements OnInit {
     this.loadAllAlumniForSearch();
     this.loadEvents();
     this.loadSuggestedAlumni();
+
+    // Subscribe to selected event from notification
+    this.eventService.selectedEvent$.subscribe((event: any) => {
+      if (event) {
+        this.selectedEvent = event;
+      }
+    });
   }
 
-  /**
-   * Navigate to Alumni Network page
-   */
+  
   goToAlumniNetwork() {
     this.router.navigate(['/alumni-network']);
   }
 
-  /**
-   * Load all alumni for search functionality
-   */
+  
   loadAllAlumniForSearch() {
     const currentUserId = this.auth.currentUser?.uid;
     const alumniQuery = query(collection(this.firestore, 'users'));
@@ -73,16 +82,15 @@ export class HomePage implements OnInit {
     collectionData(alumniQuery, { idField: 'id' }).subscribe(
       (users: any[]) => {
         this.allAlumni = users.filter(user => user.id !== currentUserId && user.role === 'alumni');
-        console.log('✅ Alumni loaded for search:', this.allAlumni.length);
+        console.log('Alumni loaded for search:', this.allAlumni.length);
       },
       (error) => {
-        console.error('❌ Error loading alumni:', error.message);
+        console.error('Error loading alumni:', error.message);
       }
     );
   }
 
-  /**   * Load suggested alumni to connect (random selection from all alumni)
-   */
+ 
   loadSuggestedAlumni() {
     const currentUserId = this.auth.currentUser?.uid;
     const alumniQuery = query(
@@ -95,7 +103,45 @@ export class HomePage implements OnInit {
       const filtered = alumni.filter(a => a.id !== currentUserId);
       const shuffled = filtered.sort(() => 0.5 - Math.random());
       this.suggestedAlumni = shuffled.slice(0, 6);
+      this.suggestedAlumniStartIndex = 0;
     });
+  }
+
+  get visibleSuggestedAlumni(): any[] {
+    return this.suggestedAlumni.slice(
+      this.suggestedAlumniStartIndex,
+      this.suggestedAlumniStartIndex + this.suggestedAlumniPerView
+    );
+  }
+
+  get canGoToPreviousSuggestions(): boolean {
+    return this.suggestedAlumniStartIndex > 0;
+  }
+
+  get canGoToNextSuggestions(): boolean {
+    return this.suggestedAlumniStartIndex + this.suggestedAlumniPerView < this.suggestedAlumni.length;
+  }
+
+  showPreviousSuggestions() {
+    if (!this.canGoToPreviousSuggestions) {
+      return;
+    }
+
+    this.suggestedAlumniStartIndex = Math.max(
+      this.suggestedAlumniStartIndex - this.suggestedAlumniPerView,
+      0
+    );
+  }
+
+  showNextSuggestions() {
+    if (!this.canGoToNextSuggestions) {
+      return;
+    }
+
+    this.suggestedAlumniStartIndex = Math.min(
+      this.suggestedAlumniStartIndex + this.suggestedAlumniPerView,
+      Math.max(this.suggestedAlumni.length - this.suggestedAlumniPerView, 0)
+    );
   }
 
   /**   * Search alumni by name, course, year, department
@@ -155,18 +201,18 @@ export class HomePage implements OnInit {
    * Load current user profile for avatar
    */
   loadCurrentUserProfile() {
-    console.log('📱 Loading current user profile');
+    console.log('Loading current user profile');
     
     onAuthStateChanged(this.auth, (user) => {
-      console.log('🔐 Auth state changed - User UID:', user?.uid);
+      console.log('Auth state changed - User UID:', user?.uid);
       
       if (!user) {
         const currentUser = this.auth.currentUser;
-        console.log('❌ No user in onAuthStateChanged, trying currentUser:', currentUser?.uid);
+        console.log('No user in onAuthStateChanged, trying currentUser:', currentUser?.uid);
         if (!currentUser) return;
         this.loadProfileData(currentUser.uid);
       } else {
-        console.log('✅ User authenticated:', user.uid);
+        console.log('User authenticated:', user.uid);
         this.loadProfileData(user.uid);
       }
     });
@@ -176,16 +222,16 @@ export class HomePage implements OnInit {
    * Load profile data from Firestore
    */
   private loadProfileData(uid: string) {
-    console.log('🔄 Loading profile data for UID:', uid);
+    console.log('Loading profile data for UID:', uid);
     
     docData(doc(this.firestore, `users/${uid}`)).subscribe(
       (profile: any) => {
-        console.log('✅ Profile loaded:', profile);
-        console.log('📸 Photo URL:', profile?.photoDataUrl);
+        console.log('Profile loaded:', profile);
+        console.log('Photo URL:', profile?.photoDataUrl);
         this.userProfile = profile;
       },
       (error) => {
-        console.error('❌ Error loading profile:', error);
+        console.error('Error loading profile:', error);
       }
     );
   }
@@ -200,27 +246,53 @@ export class HomePage implements OnInit {
     );
     
     this.allPosts$ = collectionData(postsQuery, { idField: 'id' }).pipe(
-      map((posts: any[]) =>
-        posts
-          .map(post => ({
-            ...post,
-            timestamp: this.convertTimestamp(post.timestamp),
-          }))
-          .filter(post => this.canViewPost(post))
-      )
+      switchMap(async (posts: any[]) => {
+        // Process posts and fetch missing user data
+        const postsWithUserData = await Promise.all(
+          posts.map(async (post) => {
+            const processedPost = {
+              ...post,
+              timestamp: this.convertTimestamp(post.timestamp),
+            };
+
+            // If userName or userAvatar is missing, fetch from user document
+            if (!processedPost.userName || !processedPost.userAvatar) {
+              try {
+                const userDocRef = doc(this.firestore, `users/${post.userId}`);
+                const userSnapshot = await getDoc(userDocRef);
+                
+                if (userSnapshot.exists()) {
+                  const userData = userSnapshot.data();
+                  processedPost.userName = processedPost.userName || 
+                    `${userData['firstName'] || ''} ${userData['lastName'] || ''}`.trim() || 
+                    'Unknown User';
+                  processedPost.userAvatar = processedPost.userAvatar || userData['photoDataUrl'] || '';
+                }
+              } catch (error) {
+                console.error('Error fetching user data for post:', error);
+                processedPost.userName = processedPost.userName || 'Unknown User';
+                processedPost.userAvatar = processedPost.userAvatar || '';
+              }
+            }
+
+            return processedPost;
+          })
+        );
+
+        
+        return postsWithUserData.filter(post => this.canViewPost(post));
+      })
     ) as Observable<any[]>;
   }
 
-  /**
-   * Check if current user can view a post based on visibility settings
-   */
+  
   private canViewPost(post: any): boolean {
-    // Own posts are always visible
+   
     if (post.userId === this.currentUserId) {
       return true;
     }
 
-    // Post visibility check
+   
     const postVisibility = post.visibility || 'public';
 
     // Public posts are always visible
@@ -345,6 +417,12 @@ export class HomePage implements OnInit {
   async openPostModal() {
     const modal = await this.modalCtrl.create({
       component: PostModalComponent,
+      componentProps: {
+        userName: this.userProfile?.firstName && this.userProfile?.lastName 
+          ? `${this.userProfile.firstName} ${this.userProfile.lastName}` 
+          : this.auth.currentUser?.displayName || 'User',
+        userAvatar: this.userProfile?.photoDataUrl || ''
+      }
     });
     await modal.present();
     const { data } = await modal.onWillDismiss();
@@ -362,18 +440,10 @@ export class HomePage implements OnInit {
 
     try {
       // Get current user profile to get their avatar
-      const userDoc = await new Promise<any>((resolve, reject) => {
-        const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
-          data => {
-            unsubscribe.unsubscribe();
-            resolve(data);
-          },
-          err => {
-            unsubscribe.unsubscribe();
-            reject(err);
-          }
-        );
-      });
+      const userSnap = await getDoc(doc(this.firestore, `users/${uid}`));
+      const userDoc = userSnap.exists()
+        ? (userSnap.data() as { firstName?: string; lastName?: string; photoDataUrl?: string })
+        : null;
 
       const postToSave = {
         userId: uid,
@@ -608,6 +678,155 @@ export class HomePage implements OnInit {
       console.log('Comment added successfully');
     } catch (error) {
       console.error('Failed to add comment', error);
+    }
+  }
+
+  isCommentsExpanded(post: any): boolean {
+    return this.expandedComments.has(post?.id);
+  }
+
+  toggleComments(post: any) {
+    if (!post?.id) return;
+    if (this.expandedComments.has(post.id)) {
+      this.expandedComments.delete(post.id);
+    } else {
+      this.expandedComments.add(post.id);
+    }
+  }
+
+  getVisibleComments(post: any): any[] {
+    const comments = post?.comments || [];
+    if (this.isCommentsExpanded(post)) {
+      return comments;
+    }
+    return comments.slice(0, this.initialCommentsToShow);
+  }
+
+  canManageComment(comment: any): boolean {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return false;
+    return comment?.userId === uid || this.userProfile?.role === 'super_admin';
+  }
+
+  async openCommentMenu(post: any, comment: any) {
+    if (!this.canManageComment(comment)) return;
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Comment Options',
+      buttons: [
+        {
+          text: 'Edit',
+          icon: 'create-outline',
+          handler: () => this.openEditCommentDialog(post, comment)
+        },
+        {
+          text: 'Delete',
+          icon: 'trash-outline',
+          role: 'destructive',
+          handler: () => this.confirmDeleteComment(post, comment)
+        },
+        {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  private async openEditCommentDialog(post: any, comment: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Edit Comment',
+      inputs: [
+        {
+          name: 'comment',
+          type: 'textarea',
+          value: comment?.text || '',
+          placeholder: 'Update your comment...',
+          attributes: {
+            rows: 4,
+            maxlength: 500,
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save',
+          handler: (data) => {
+            const nextText = (data?.comment || '').trim();
+            if (nextText.length > 0) {
+              this.updateComment(post, comment, nextText);
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async confirmDeleteComment(post: any, comment: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Delete Comment',
+      message: 'Are you sure you want to delete this comment?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => this.deleteComment(post, comment)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async updateComment(post: any, comment: any, nextText: string) {
+    try {
+      const updatedComments = (post.comments || []).map((item: any) => {
+        if (item.id === comment.id) {
+          return {
+            ...item,
+            text: nextText,
+            editedAt: new Date().getTime(),
+          };
+        }
+        return item;
+      });
+
+      await updateDoc(doc(this.firestore, `posts/${post.id}`), {
+        comments: updatedComments,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('Comment updated successfully');
+    } catch (error) {
+      console.error('Failed to update comment', error);
+    }
+  }
+
+  private async deleteComment(post: any, comment: any) {
+    try {
+      const updatedComments = (post.comments || []).filter((item: any) => item.id !== comment.id);
+
+      await updateDoc(doc(this.firestore, `posts/${post.id}`), {
+        comments: updatedComments,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('Comment deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete comment', error);
     }
   }
 

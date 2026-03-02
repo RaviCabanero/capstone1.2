@@ -29,7 +29,7 @@
   </ion-toolbar>
 </ion-header>
 
-<!-- Event Details Modal -->
+
 <ion-modal [isOpen]="selectedEvent !== null" (ionModalDidDismiss)="selectedEvent = null" class="event-details-modal">
   <ng-template>
     <ion-header [translucent]="true" class="event-modal-header">
@@ -43,7 +43,7 @@
     </ion-header>
     <ion-content class="event-modal-content">
       <div *ngIf="selectedEvent" class="event-details-container">
-        <!-- Event Image with Overlay -->
+        
         <div class="event-image-wrapper">
           <img *ngIf="selectedEvent.attachedFile" [src]="selectedEvent.attachedFile" alt="{{ selectedEvent.title }}" class="event-detail-image">
           <div *ngIf="!selectedEvent.attachedFile" class="event-detail-placeholder">
@@ -52,12 +52,12 @@
           <div class="image-overlay"></div>
         </div>
         
-        <!-- Content Card -->
+       
         <div class="event-content-card">
-          <!-- Event Title -->
+          
           <h1 class="event-detail-title">{{ selectedEvent.title }}</h1>
           
-          <!-- Event Meta Grid -->
+       
           <div class="event-meta-grid">
             <div class="meta-card">
               <div class="meta-icon">
@@ -91,16 +91,16 @@
             </div>
           </div>
           
-          <!-- Divider -->
+         
           <div class="section-divider"></div>
           
-          <!-- Description Section -->
+  
           <div *ngIf="selectedEvent.description" class="description-section">
             <h3 class="section-title">About this event</h3>
             <p class="description-text">{{ selectedEvent.description }}</p>
           </div>
           
-          <!-- Guests Section -->
+          
           <div *ngIf="selectedEvent.guests && selectedEvent.guests.length > 0" class="guests-section">
             <h3 class="section-title">Guests Invited</h3>
             <div class="guests-list">
@@ -116,7 +116,7 @@
             </div>
           </div>
           
-          <!-- CTA Button -->
+          
           <div class="button-wrapper">
             <ion-button 
               expand="block" 
@@ -140,28 +140,23 @@
     <div *ngIf="isSearching && searchResults.length > 0" class="search-results-container">
       <div class="search-header">
         <h3>Alumni Results ({{ searchResults.length }})</h3>
-        <ion-button fill="clear" size="small" (click)="clearSearch()">
+        <ion-button fill="clear" size="small" color="success" (click)="clearSearch()">
           <ion-icon name="close"></ion-icon> Clear
         </ion-button>
       </div>
 
       <div class="alumni-list">
         <div class="alumni-card" *ngFor="let alumni of searchResults">
-          <div class="card-avatar">
-            <img [src]="alumni.photoDataUrl || 'assets/icon/favicon.png'" [alt]="alumni.firstName" />
+          <div class="card-avatar" (click)="goToAlumniProfile(alumni.id)">
+            <img *ngIf="alumni.photoDataUrl" [src]="alumni.photoDataUrl" [alt]="alumni.firstName" />
+            <ion-icon *ngIf="!alumni.photoDataUrl" name="person-circle" class="default-avatar-icon"></ion-icon>
           </div>
-          <div class="card-info">
+          <div class="card-info" (click)="goToAlumniProfile(alumni.id)">
             <h4>{{ alumni.firstName }} {{ alumni.lastName }}</h4>
             <p class="course">{{ alumni.course || 'No course' }}</p>
             <p class="department">{{ alumni.schoolDepartment || 'No department' }}</p>
             <p class="year" *ngIf="alumni.yearGraduated">Class of {{ alumni.yearGraduated }}</p>
           </div>
-          <ion-button 
-            fill="outline" 
-            size="small"
-            (click)="goToAlumniProfile(alumni.id)">
-            View
-          </ion-button>
         </div>
       </div>
     </div>
@@ -227,21 +222,43 @@
           <h2>Suggested Alumni to Connect</h2>
         </div>
 
-        <div class="alumni-scroll-container" *ngIf="suggestedAlumni.length > 0">
-          <div class="alumni-suggestion-card" *ngFor="let alumni of suggestedAlumni">
-            <ion-avatar class="alumni-avatar" (click)="goToAlumniProfile(alumni.id)">
-              <img *ngIf="alumni.photoDataUrl" [src]="alumni.photoDataUrl" [alt]="alumni.firstName" />
-              <ion-icon *ngIf="!alumni.photoDataUrl" name="person-circle"></ion-icon>
-            </ion-avatar>
-            <div class="alumni-info">
-              <h4 class="alumni-name" (click)="goToAlumniProfile(alumni.id)">{{ alumni.firstName }} {{ alumni.lastName }}</h4>
-              <p class="alumni-course">{{ alumni.course || 'No course' }}</p>
-              <p class="alumni-department">{{ alumni.schoolDepartment || 'No department' }}</p>
+        <div class="alumni-carousel" *ngIf="suggestedAlumni.length > 0">
+          <ion-button
+            fill="clear"
+            class="carousel-arrow"
+            [disabled]="!canGoToPreviousSuggestions"
+            (click)="showPreviousSuggestions()"
+            aria-label="Previous alumni"
+          >
+            <ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+
+          <div class="alumni-carousel-track">
+            <div class="alumni-suggestion-card" *ngFor="let alumni of visibleSuggestedAlumni">
+              <ion-avatar class="alumni-avatar" (click)="goToAlumniProfile(alumni.id)">
+                <img *ngIf="alumni.photoDataUrl" [src]="alumni.photoDataUrl" [alt]="alumni.firstName" />
+                <ion-icon *ngIf="!alumni.photoDataUrl" name="person-circle"></ion-icon>
+              </ion-avatar>
+              <div class="alumni-info">
+                <h4 class="alumni-name" (click)="goToAlumniProfile(alumni.id)">{{ alumni.firstName }} {{ alumni.lastName }}</h4>
+                <p class="alumni-course">{{ alumni.course || 'No course' }}</p>
+                <p class="alumni-department">{{ alumni.schoolDepartment || 'No department' }}</p>
+              </div>
+              <ion-button fill="solid" color="success" size="small" class="connect-btn">
+                <ion-icon name="person-add-outline" slot="icon-only"></ion-icon>
+              </ion-button>
             </div>
-            <ion-button fill="solid" color="success" size="small" class="connect-btn">
-              <ion-icon name="person-add-outline" slot="icon-only"></ion-icon>
-            </ion-button>
           </div>
+
+          <ion-button
+            fill="clear"
+            class="carousel-arrow"
+            [disabled]="!canGoToNextSuggestions"
+            (click)="showNextSuggestions()"
+            aria-label="Next alumni"
+          >
+            <ion-icon name="chevron-forward-outline" slot="icon-only"></ion-icon>
+          </ion-button>
         </div>
 
         <div *ngIf="suggestedAlumni.length === 0" class="empty-state">
@@ -297,28 +314,48 @@
           <div class="post-actions">
             <ion-button fill="clear" size="small" (click)="likePost(post)" [color]="hasUserLiked(post) ? 'success' : ''">
               <ion-icon name="arrow-redo-outline" slot="start"></ion-icon>
-              <span class="action-text">Forward</span>
+              <span class="action-text">Forward{{ (post.likes > 0) ? ' (' + post.likes + ')' : '' }}</span>
             </ion-button>
             <ion-button fill="clear" size="small" (click)="openCommentDialog(post)">
               <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
-              <span class="action-text">Comment</span>
+              <span class="action-text">Comment{{ (post.comments?.length > 0) ? ' (' + post.comments.length + ')' : '' }}</span>
             </ion-button>
           </div>
 
           <!-- Comments Section -->
           <div class="comments-section" *ngIf="post.comments && post.comments.length > 0">
-            <div class="comment" *ngFor="let comment of post.comments">
+            <div class="comment" *ngFor="let comment of getVisibleComments(post)">
               <ion-avatar class="comment-avatar">
                 <img [src]="comment.userAvatar || 'https://via.placeholder.com/40'" [alt]="comment.userName" />
               </ion-avatar>
               <div class="comment-body">
                 <div class="comment-header">
-                  <h5 class="comment-name">{{ comment.userName }}</h5>
-                  <span class="comment-time">{{ comment.timestamp | date:'short' }}</span>
+                  <div class="comment-meta">
+                    <h5 class="comment-name">{{ comment.userName }}</h5>
+                    <span class="comment-time">{{ comment.timestamp | date:'short' }}</span>
+                  </div>
+                  <ion-button
+                    *ngIf="canManageComment(comment)"
+                    fill="clear"
+                    size="small"
+                    class="comment-menu-btn"
+                    (click)="openCommentMenu(post, comment)"
+                  >
+                    <ion-icon name="ellipsis-vertical"></ion-icon>
+                  </ion-button>
                 </div>
                 <p class="comment-text">{{ comment.text }}</p>
               </div>
             </div>
+            <ion-button
+              *ngIf="post.comments.length > initialCommentsToShow"
+              fill="clear"
+              size="small"
+              class="comments-toggle"
+              (click)="toggleComments(post)"
+            >
+              {{ isCommentsExpanded(post) ? 'Minimize comments' : 'See all comments (' + post.comments.length + ')' }}
+            </ion-button>
           </div>
         </ion-card>
       </ng-container>

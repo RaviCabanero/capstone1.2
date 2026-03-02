@@ -167,9 +167,33 @@ export class AlumniIdApprovalPage implements OnInit {
   }
 
   /**
-   * Go back to dashboard
+   * Sidebar tab navigation
    */
-  goBack() {
+  navigateToDashboard() {
     this.router.navigate(['/alumni-admin']);
+  }
+
+  navigateToAnnouncements() {
+    this.router.navigate(['/alumni-admin/announcements']);
+  }
+
+  navigateToEvents() {
+    this.router.navigate(['/alumni-admin/create-events']);
+  }
+
+  navigateToAlumniList() {
+    this.router.navigate(['/alumni-admin/alumni-list']);
+  }
+
+  navigateToReports() {
+    this.router.navigate(['/alumni-admin/reports']);
+  }
+
+  navigateToIdApprovals() {
+    this.router.navigate(['/alumni-admin/alumni-id-approval']);
+  }
+
+  isActiveTab(path: string): boolean {
+    return this.router.url === path;
   }
 }

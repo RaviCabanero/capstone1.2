@@ -381,7 +381,7 @@ ion-buttons ion-icon[name="person-circle"] {
 }
 
 .chat-icon {
-  color: #2ecc71;
+  color: #16a34a;
   font-size: 24px;
 }
 
@@ -575,38 +575,35 @@ ion-footer {
   padding: 0;
 }
 
-.alumni-scroll-container {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
+.alumni-carousel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
   padding: 4px 0 12px 0;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  
-  &::-webkit-scrollbar {
-    height: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #16a34a;
-    border-radius: 3px;
-    
-    &:hover {
-      background: #15803d;
-    }
+}
+
+.carousel-arrow {
+  --color: #16a34a;
+  --padding-start: 0;
+  --padding-end: 0;
+  margin: 0;
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+
+  ion-icon {
+    font-size: 20px;
   }
 }
 
+.alumni-carousel-track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .alumni-suggestion-card {
-  min-width: 160px;
-  max-width: 160px;
-  flex-shrink: 0;
   background: #ffffff;
   border-radius: 12px;
   padding: 12px;
@@ -616,6 +613,8 @@ ion-footer {
   align-items: center;
   gap: 8px;
   text-align: center;
+  height: 100%;
+  min-height: 200px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   
   &:hover {
@@ -670,8 +669,13 @@ ion-footer {
   color: #16a34a;
   font-weight: 600;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  white-space: normal;
+  word-break: break-word;
+  min-height: 30px;
 }
 
 .alumni-department {
@@ -687,9 +691,25 @@ ion-footer {
   width: 100%;
   height: 28px;
   margin: 0;
+  margin-top: auto;
   font-size: 11px;
   --padding-start: 8px;
   --padding-end: 8px;
+}
+
+@media (max-width: 480px) {
+  .alumni-carousel {
+    gap: 6px;
+  }
+
+  .alumni-carousel-track {
+    gap: 8px;
+  }
+
+  .alumni-suggestion-card {
+    min-height: 192px;
+    padding: 10px;
+  }
 }
 
 // Section Title
@@ -944,8 +964,16 @@ ion-footer {
 .comment-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 4px;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .comment-name {
@@ -960,12 +988,32 @@ ion-footer {
   color: #999999;
 }
 
+.comment-menu-btn {
+  --color: #999999;
+  --padding-start: 4px;
+  --padding-end: 4px;
+  margin: 0;
+
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
 .comment-text {
   margin: 0;
   font-size: 13px;
   color: #333333;
   line-height: 1.4;
   word-wrap: break-word;
+}
+
+.comments-toggle {
+  --color: #4b5563;
+  --padding-start: 0;
+  --padding-end: 0;
+  margin: 4px 0 0 46px;
+  font-size: 12px;
+  text-transform: none;
 }
 
 // ==================== STATES ====================
@@ -1053,6 +1101,15 @@ ion-footer {
 
   .card-avatar {
     flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
 
     img {
       width: 50px;
@@ -1060,16 +1117,27 @@ ion-footer {
       border-radius: 50%;
       object-fit: cover;
     }
+
+    .default-avatar-icon {
+      font-size: 50px;
+      color: var(--ion-color-medium);
+    }
   }
 
   .card-info {
     flex: 1;
+    cursor: pointer;
 
     h4 {
       margin: 0 0 4px 0;
       font-size: 16px;
       font-weight: 600;
       color: var(--ion-color-dark);
+      transition: color 0.2s ease;
+    }
+
+    &:hover h4 {
+      color: var(--ion-color-success);
     }
 
     p {

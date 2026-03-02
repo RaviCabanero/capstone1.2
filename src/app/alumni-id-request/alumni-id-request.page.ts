@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
@@ -41,6 +41,7 @@ export class AlumniIdRequestPage implements OnInit {
     private auth: Auth,
     private firestore: Firestore,
     private toastController: ToastController,
+    private alertController: AlertController,
     private deptService: DepartmentService,
     private courseService: CourseService
   ) {
@@ -182,50 +183,85 @@ export class AlumniIdRequestPage implements OnInit {
       return;
     }
 
-    const uid = this.auth.currentUser?.uid;
-    if (!uid) {
-      console.error('User not authenticated');
-      return;
-    }
+    const alert = await this.alertController.create({
+      header: 'Submit Request',
+      message: 'Do you want to submit your Alumni ID request?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Submit',
+          handler: async () => {
+            const uid = this.auth.currentUser?.uid;
+            if (!uid) {
+              console.error('User not authenticated');
+              return;
+            }
 
-    try {
-      // Get user profile for additional info
-      const userDoc = await getDoc(doc(this.firestore, `users/${uid}`));
-      const userData = userDoc.data();
+            try {
+              // Get user profile for additional info
+              const userDoc = await getDoc(doc(this.firestore, `users/${uid}`));
+              const userData = userDoc.data();
 
-      const alumniData = {
-        ...this.alumniForm.value,
-        userId: uid,
-        requestedAt: new Date().toISOString(),
-        status: 'pending',
-        course: userData?.['course'] || '',
-        department: userData?.['department'] || '',
-      };
+              const alumniData = {
+                ...this.alumniForm.value,
+                userId: uid,
+                requestedAt: new Date().toISOString(),
+                status: 'pending',
+                course: userData?.['course'] || '',
+                department: userData?.['department'] || '',
+              };
 
-      // Save to idRequests collection for admin queries
-      await setDoc(doc(this.firestore, `idRequests/${uid}`), alumniData);
+              // Save to idRequests collection for admin queries
+              await setDoc(doc(this.firestore, `idRequests/${uid}`), alumniData);
 
-      // Save to user profile for easy reference
-      await updateDoc(doc(this.firestore, `users/${uid}`), {
-        alumniIdRequest: alumniData,
-        updatedAt: new Date().toISOString(),
-      });
+              // Save to user profile for easy reference
+              await updateDoc(doc(this.firestore, `users/${uid}`), {
+                alumniIdRequest: alumniData,
+                updatedAt: new Date().toISOString(),
+              });
 
-      console.log('Alumni ID request submitted successfully');
-      
-      // Navigate back to profile with success
-      this.router.navigate(['/profile'], {
-        queryParams: { alumniSuccess: true },
-      });
-    } catch (error) {
-      console.error('Failed to submit alumni ID request', error);
-    }
+              console.log('Alumni ID request submitted successfully');
+              
+              // Navigate back to profile with success
+              this.router.navigate(['/profile'], {
+                queryParams: { alumniSuccess: true },
+              });
+            } catch (error) {
+              console.error('Failed to submit alumni ID request', error);
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   /**
    * Cancel and go back
    */
-  cancel() {
-    this.router.navigate(['/profile']);
+  async cancel() {
+    const alert = await this.alertController.create({
+      header: 'Cancel Request',
+      message: 'Are you sure you want to cancel? All information will be lost.',
+      buttons: [
+        {
+          text: 'Continue',
+          role: 'cancel'
+        },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          handler: () => {
+            this.router.navigate(['/profile']);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 }

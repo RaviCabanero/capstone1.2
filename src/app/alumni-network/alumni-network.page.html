@@ -51,11 +51,11 @@
   <div class="network-overview">
     <h3 class="section-title">Network Overview</h3>
     <div class="stats-grid">
-      <div class="stat-item">
+      <div class="stat-item" (click)="showInviteSentList()">
         <div class="stat-value">{{ inviteSent }}</div>
         <div class="stat-label">Invite Sent</div>
       </div>
-      <div class="stat-item">
+      <div class="stat-item" (click)="showConnectionsList()">
         <div class="stat-value">{{ connections }}</div>
         <div class="stat-label">Connection</div>
       </div>
@@ -131,6 +131,63 @@
       </div>
     </ng-template>
   </div>
+
+  <!-- Invites Sent Modal -->
+  <div class="modal-overlay" *ngIf="showInviteListModal" (click)="closeInviteModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Invites Sent ({{ outgoingRequests.length }})</h2>
+        <ion-button fill="clear" size="small" (click)="closeInviteModal()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="outgoingRequests.length > 0; else noInvites">
+          <div *ngFor="let req of outgoingRequests" class="list-item" (click)="goToUserProfile(req.toUserId)">
+            <img [src]="req.toUser?.photoDataUrl" alt="Avatar" class="avatar">
+            <div class="item-info">
+              <div class="item-name">{{ req.toUser?.firstName }} {{ req.toUser?.lastName }}</div>
+              <div class="item-status">{{ req.toUser?.schoolDepartment || 'Alumni' }}</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noInvites>
+          <div class="empty-state">
+            <p>No invites sent yet</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accepted Connections Modal -->
+  <div class="modal-overlay" *ngIf="showConnectionListModal" (click)="closeConnectionModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Connections ({{ acceptedConnections.length }})</h2>
+        <ion-button fill="clear" size="small" (click)="closeConnectionModal()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="acceptedConnections.length > 0; else noConnections">
+          <div *ngFor="let connection of acceptedConnections" class="list-item" (click)="goToUserProfile(connection.id)">
+            <img [src]="connection?.photoDataUrl" alt="Avatar" class="avatar">
+            <div class="item-info">
+              <div class="item-name">{{ connection?.firstName }} {{ connection?.lastName }}</div>
+              <div class="item-status">{{ connection?.schoolDepartment || 'Alumni' }}</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noConnections>
+          <div class="empty-state">
+            <p>No connections yet</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
 </ion-content>
 
 <!-- Bottom Tab Bar -->

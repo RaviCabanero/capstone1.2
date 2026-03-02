@@ -72,6 +72,12 @@ export class LoginPage implements OnInit {
           return;
         }
 
+        await this.auth.logLoginActivity({
+          role: userDoc?.role || 'unknown',
+          status: userDoc?.status || 'unknown',
+          schoolDepartment: userDoc?.schoolDepartment || userDoc?.department || '',
+        });
+
         await this.showToast('Logged in!');
         
         // Redirect based on role

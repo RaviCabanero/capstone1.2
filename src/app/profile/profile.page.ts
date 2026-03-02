@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ModalController, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController, ToastController, ViewWillEnter } from '@ionic/angular';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, doc, docData, updateDoc, collection, addDoc, query, where, orderBy, collectionData } from '@angular/fire/firestore';
-import { Observable, of, map, catchError } from 'rxjs';
+import { Firestore, doc, docData, updateDoc, collection, addDoc, query, where, orderBy, collectionData, getDoc } from '@angular/fire/firestore';
+import { Observable, of, map, catchError, switchMap } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
+import { ConnectionRequestService } from '../services/connection-request.service';
 import { PostModalComponent } from '../post-modal/post-modal.component';
 import { ExperienceModalComponent } from '../experience-modal/experience-modal.component';
 import { SkillModalComponent } from '../skill-modal/skill-modal.component';
@@ -21,7 +22,7 @@ import { ContactModalComponent } from '../contact-modal/contact-modal.component'
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, RouterModule],
 })
-export class ProfilePage implements OnInit {
+export class ProfilePage implements OnInit, ViewWillEnter {
   user$ = this.authService.user$;
   userProfile$: Observable<any> = of({});
   userPosts$: Observable<any[]> = of([]);
@@ -31,6 +32,12 @@ export class ProfilePage implements OnInit {
   editingSummary = false;
   groupedExperiences: any[] = [];
   profileUrl = '';
+
+  // Search Alumni (same behavior as Home)
+  searchQuery: string = '';
+  isSearching: boolean = false;
+  searchResults: any[] = [];
+  allAlumni: any[] = [];
   
   // Track if viewing own profile or other user's profile
   viewedUserId: string | null = null;
@@ -40,6 +47,7 @@ export class ProfilePage implements OnInit {
   // Track connections
   currentUserConnections: string[] = [];
   isConnectedWithViewed: boolean = false;
+  isPendingRequest: boolean = false;
 
   // Scroll handling
   showHeader: boolean = true;
@@ -60,12 +68,15 @@ export class ProfilePage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private alertController: AlertController,
     private toastController: ToastController,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private connectionRequestService: ConnectionRequestService
   ) {}
 
   ngOnInit() {
     const uid = this.auth.currentUser?.uid;
     this.currentUserId = uid || null;
+
+    this.loadAllAlumniForSearch();
 
     // Load current user's connections
     if (uid) {
@@ -93,6 +104,90 @@ export class ProfilePage implements OnInit {
     });
   }
 
+  /**
+   * Refresh connection state when page comes back into view
+   * This ensures the button updates to "Connected" after accepting a request
+   */
+  ionViewWillEnter() {
+    if (this.viewedUserId && this.currentUserId && !this.isOwnProfile) {
+      // Recheck if we're now connected with this user
+      docData(doc(this.firestore, `users/${this.viewedUserId}`)).pipe(
+        map((profile: any) => {
+          if (profile?.connections && this.currentUserId) {
+            this.isConnectedWithViewed = profile.connections.includes(this.currentUserId);
+          }
+          return profile;
+        })
+      ).subscribe();
+      
+      // Recheck pending request status
+      this.checkPendingRequest(this.currentUserId, this.viewedUserId);
+    }
+  }
+
+  /**
+   * Load all alumni for search functionality
+   */
+  loadAllAlumniForSearch() {
+    const currentUserId = this.auth.currentUser?.uid;
+    const alumniQuery = query(collection(this.firestore, 'users'));
+
+    collectionData(alumniQuery, { idField: 'id' }).subscribe(
+      (users: any[]) => {
+        this.allAlumni = users.filter(user => user.id !== currentUserId && user.role === 'alumni');
+      },
+      (error) => {
+        console.error('Error loading alumni:', error.message);
+      }
+    );
+  }
+
+  /**
+   * Search alumni by name, course, year, department
+   */
+  searchAlumni(event: any) {
+    this.searchQuery = (event.target.value || '').toLowerCase().trim();
+
+    if (this.searchQuery.length > 0) {
+      this.isSearching = true;
+
+      this.searchResults = this.allAlumni.filter(user => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`;
+        const email = user.email?.toLowerCase() || '';
+        const course = user.course?.toLowerCase() || '';
+        const degreeProgram = user.degreeProgram?.toLowerCase() || '';
+        const department = (user.schoolDepartment || user.department || '').toLowerCase();
+        const yearGraduated = user.yearGraduated?.toString().toLowerCase() || '';
+
+        return (
+          fullName.includes(this.searchQuery) ||
+          firstName.includes(this.searchQuery) ||
+          lastName.includes(this.searchQuery) ||
+          email.includes(this.searchQuery) ||
+          course.includes(this.searchQuery) ||
+          degreeProgram.includes(this.searchQuery) ||
+          department.includes(this.searchQuery) ||
+          yearGraduated.includes(this.searchQuery)
+        );
+      });
+    } else {
+      this.clearSearch();
+    }
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.isSearching = false;
+    this.searchResults = [];
+  }
+
+  goToAlumniProfile(alumniId: string) {
+    this.router.navigate(['/profile', alumniId]);
+    this.clearSearch();
+  }
+
   loadProfileData(uid: string) {
     this.profileUrl = `${window.location.origin}/profile/${uid}`;
     this.userProfile$ = docData(doc(this.firestore, `users/${uid}`)).pipe(
@@ -103,6 +198,10 @@ export class ProfilePage implements OnInit {
         // Check if we're connected with this user
         if (profile?.connections && this.currentUserId) {
           this.isConnectedWithViewed = profile.connections.includes(this.currentUserId);
+        }
+        // Check if there's a pending connection request
+        if (!this.isOwnProfile && this.currentUserId) {
+          this.checkPendingRequest(this.currentUserId, uid);
         }
         return profile;
       })
@@ -115,6 +214,19 @@ export class ProfilePage implements OnInit {
     this.loadUserPosts(uid);
   }
 
+  /**
+   * Check if there's a pending connection request to this user
+   */
+  private async checkPendingRequest(fromUserId: string, toUserId: string) {
+    try {
+      const existingRequest = await this.connectionRequestService.getExistingRequest(fromUserId, toUserId);
+      this.isPendingRequest = existingRequest !== null && existingRequest?.status === 'pending';
+    } catch (error) {
+      console.error('Error checking pending request:', error);
+      this.isPendingRequest = false;
+    }
+  }
+
   loadUserPosts(uid: string) {
     const postsQuery = query(
       collection(this.firestore, 'posts'),
@@ -122,14 +234,41 @@ export class ProfilePage implements OnInit {
       orderBy('timestamp', 'desc')
     );
     this.userPosts$ = collectionData(postsQuery, { idField: 'id' }).pipe(
-      map((posts: any[]) => {
+      switchMap(async (posts: any[]) => {
+        // Process posts and fetch missing user data
+        const postsWithUserData = await Promise.all(
+          posts.map(async (post) => {
+            const processedPost = {
+              ...post,
+              timestamp: this.convertTimestamp(post.timestamp),
+            };
+
+            // If userName or userAvatar is missing, fetch from user document
+            if (!processedPost.userName || !processedPost.userAvatar) {
+              try {
+                const userDocRef = doc(this.firestore, `users/${post.userId}`);
+                const userSnapshot = await getDoc(userDocRef);
+                
+                if (userSnapshot.exists()) {
+                  const userData = userSnapshot.data();
+                  processedPost.userName = processedPost.userName || 
+                    `${userData['firstName'] || ''} ${userData['lastName'] || ''}`.trim() || 
+                    'Unknown User';
+                  processedPost.userAvatar = processedPost.userAvatar || userData['photoDataUrl'] || '';
+                }
+              } catch (error) {
+                console.error('Error fetching user data for post:', error);
+                processedPost.userName = processedPost.userName || 'Unknown User';
+                processedPost.userAvatar = processedPost.userAvatar || '';
+              }
+            }
+
+            return processedPost;
+          })
+        );
+
         // Filter posts based on visibility and connection status
-        return posts
-          .map(post => ({
-            ...post,
-            timestamp: this.convertTimestamp(post.timestamp),
-          }))
-          .filter(post => this.canViewPost(post));
+        return postsWithUserData.filter(post => this.canViewPost(post));
       })
     ) as Observable<any[]>;
   }
@@ -224,23 +363,68 @@ export class ProfilePage implements OnInit {
     this.editingSummary = true;
   }
 
-  cancelEditSummary() {
-    this.editingSummary = false;
+  async cancelEditSummary() {
+    const alert = await this.alertController.create({
+      header: 'Cancel Changes',
+      message: 'Are you sure you want to cancel? All changes will be lost.',
+      buttons: [
+        {
+          text: 'Continue Editing',
+          role: 'cancel'
+        },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          handler: () => {
+            this.editingSummary = false;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   async saveSummary() {
-    const uid = this.currentUserId;
-    if (!uid || !this.isOwnProfile) return;
-    await updateDoc(doc(this.firestore, `users/${uid}`), {
-      summary: this.summaryDraft,
-      updatedAt: new Date().toISOString(),
+    const alert = await this.alertController.create({
+      header: 'Save Summary',
+      message: 'Do you want to save your profile summary?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Save',
+          handler: async () => {
+            const uid = this.currentUserId;
+            if (!uid || !this.isOwnProfile) return;
+            await updateDoc(doc(this.firestore, `users/${uid}`), {
+              summary: this.summaryDraft,
+              updatedAt: new Date().toISOString(),
+            });
+            this.editingSummary = false;
+          }
+        }
+      ]
     });
-    this.editingSummary = false;
+
+    await alert.present();
   }
 
   async openPostModal() {
+    const currentProfile = await this.userProfile$.pipe(
+      map(profile => profile)
+    ).toPromise();
+    
     const modal = await this.modalCtrl.create({
       component: PostModalComponent,
+      componentProps: {
+        userName: currentProfile?.firstName && currentProfile?.lastName 
+          ? `${currentProfile.firstName} ${currentProfile.lastName}` 
+          : this.auth.currentUser?.displayName || 'User',
+        userAvatar: currentProfile?.photoDataUrl || ''
+      }
     });
     await modal.present();
     const { data } = await modal.onWillDismiss();
@@ -257,103 +441,53 @@ export class ProfilePage implements OnInit {
    * Send a connection request to another alumni
    */
   async connectWithAlumni(alumniId: string | null) {
-    if (!alumniId || !this.currentUserId) {
-      console.error('Invalid user IDs');
+    // Get current user ID from Firebase Auth (more reliable than property)
+    const currentUserId = this.auth.currentUser?.uid;
+    
+    if (!alumniId || !currentUserId) {
+      console.error('Invalid user IDs:', { alumniId, currentUserId });
+      const toast = await this.toastController.create({
+        message: 'Error: Please log in and try again',
+        duration: 2000,
+        position: 'bottom',
+        color: 'danger'
+      });
+      await toast.present();
       return;
     }
 
     const alert = await this.alertController.create({
       header: 'Send Connection Request',
-      message: 'Would you like to add this alumni to your friends list?',
+      message: 'Would you like to send a connection request to this alumni?',
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
         },
         {
-          text: 'Connect',
+          text: 'Send Request',
           handler: async () => {
             try {
-              // Get the current user's profile information
-              const currentUserProfile = await new Promise<any>((resolve, reject) => {
-                const unsubscribe = docData(doc(this.firestore, `users/${this.currentUserId}`)).subscribe(
-                  (data) => {
-                    unsubscribe.unsubscribe();
-                    resolve(data);
-                  },
-                  (err) => {
-                    unsubscribe.unsubscribe();
-                    reject(err);
-                  }
-                );
-              });
+              // Send connection request using the service
+              await this.connectionRequestService.sendConnectionRequest(alumniId);
 
-              // Get the target user's profile to update their connections
-              const targetUserProfile = await new Promise<any>((resolve, reject) => {
-                const unsubscribe = docData(doc(this.firestore, `users/${alumniId}`)).subscribe(
-                  (data) => {
-                    unsubscribe.unsubscribe();
-                    resolve(data);
-                  },
-                  (err) => {
-                    unsubscribe.unsubscribe();
-                    reject(err);
-                  }
-                );
-              });
-
-              // Update current user's connections
-              const currentUserConnections = currentUserProfile?.connections || [];
-              if (!currentUserConnections.includes(alumniId)) {
-                currentUserConnections.push(alumniId);
-                await updateDoc(doc(this.firestore, `users/${this.currentUserId}`), {
-                  connections: currentUserConnections,
-                  updatedAt: new Date().toISOString(),
-                });
-                // Update local connections array
-                this.currentUserConnections = currentUserConnections;
-              }
-
-              // Update target user's connections
-              const targetUserConnections = targetUserProfile?.connections || [];
-              if (!targetUserConnections.includes(this.currentUserId)) {
-                targetUserConnections.push(this.currentUserId);
-                await updateDoc(doc(this.firestore, `users/${alumniId}`), {
-                  connections: targetUserConnections,
-                  updatedAt: new Date().toISOString(),
-                });
-              }
-
-              // Send a notification to the target alumni
-              await this.notificationService.createNotification({
-                userId: alumniId,
-                type: 'general',
-                title: 'New Connection',
-                message: `${currentUserProfile?.firstName} ${currentUserProfile?.lastName} is now connected with you`,
-                data: {
-                  fromUserId: this.currentUserId,
-                  fromUserName: `${currentUserProfile?.firstName} ${currentUserProfile?.lastName}`,
-                  type: 'connection_established',
-                }
-              });
-
-              // Update the connection status
-              this.isConnectedWithViewed = true;
+              // Update the pending request status
+              this.isPendingRequest = true;
 
               // Show success toast
               const toast = await this.toastController.create({
-                message: 'Connected successfully!',
+                message: 'Connection request sent!',
                 duration: 2000,
                 position: 'bottom',
                 color: 'success'
               });
               await toast.present();
 
-              console.log('✅ Connection established successfully');
+              console.log('Connection request sent successfully');
             } catch (error) {
-              console.error('❌ Error establishing connection:', error);
+              console.error('Error sending connection request:', error);
               const toast = await this.toastController.create({
-                message: 'Failed to establish connection',
+                message: 'Failed to send connection request',
                 duration: 2000,
                 position: 'bottom',
                 color: 'danger'
@@ -368,14 +502,21 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
-  async openExperienceModal() {
+  async openExperienceModal(existingExperience?: any) {
     const modal = await this.modalCtrl.create({
       component: ExperienceModalComponent,
+      componentProps: {
+        existingExperience: existingExperience || null,
+      },
     });
     await modal.present();
     const { data } = await modal.onWillDismiss();
     if (data) {
-      await this.addExperience(data);
+      if (existingExperience) {
+        await this.updateExperience(existingExperience, data);
+      } else {
+        await this.addExperience(data);
+      }
     }
   }
 
@@ -417,6 +558,57 @@ export class ProfilePage implements OnInit {
       console.log('Experience added successfully');
     } catch (error) {
       console.error('Failed to add experience', error);
+    }
+  }
+
+  async updateExperience(originalExperience: any, updatedExperience: any) {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      const userDoc = await new Promise<any>((resolve, reject) => {
+        const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
+          data => {
+            unsubscribe.unsubscribe();
+            resolve(data);
+          },
+          err => {
+            unsubscribe.unsubscribe();
+            reject(err);
+          }
+        );
+      });
+
+      const experiences = userDoc?.experiences || [];
+      const updatedExperiences = experiences.map((exp: any) => {
+        const sameById = !!originalExperience?.id && exp?.id === originalExperience.id;
+        const sameByFields =
+          !originalExperience?.id &&
+          exp?.company === originalExperience?.company &&
+          exp?.title === originalExperience?.title &&
+          exp?.startMonth === originalExperience?.startMonth &&
+          exp?.startYear === originalExperience?.startYear;
+
+        if (sameById || sameByFields) {
+          return {
+            ...exp,
+            ...updatedExperience,
+            id: exp?.id || updatedExperience?.id || new Date().getTime().toString(),
+            createdAt: exp?.createdAt || updatedExperience?.createdAt || new Date().toISOString(),
+          };
+        }
+
+        return exp;
+      });
+
+      await updateDoc(doc(this.firestore, `users/${uid}`), {
+        experiences: updatedExperiences,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('Experience updated successfully');
+    } catch (error) {
+      console.error('Failed to update experience', error);
     }
   }
 
