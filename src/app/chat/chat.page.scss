@@ -1,0 +1,58 @@
+.chat-content {
+  --background: #f7f7f7;
+  padding: 12px;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.message.me {
+  align-items: flex-end;
+}
+
+.bubble {
+  background: white;
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 75%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.message.me .bubble {
+  background: #2ecc71;
+  color: white;
+}
+
+.time {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.composer {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+ion-input {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  flex: 1;
+  background: white;
+  border-radius: 20px;
+}
+
+ion-button {
+  --min-width: 64px;
+}

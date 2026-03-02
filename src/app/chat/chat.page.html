@@ -1,0 +1,26 @@
+<ion-header [translucent]="false">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Chat</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="chat-content">
+  <div class="messages">
+    <div *ngFor="let m of messages" class="message" [ngClass]="{ 'me': m.fromMe }">
+      <div class="bubble">{{ m.text }}</div>
+      <div class="time">{{ m.time }}</div>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div class="composer">
+      <ion-input [(ngModel)]="newMessage" placeholder="Type a message"></ion-input>
+      <ion-button (click)="sendMessage()" color="primary">Send</ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

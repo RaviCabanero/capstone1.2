@@ -81,7 +81,7 @@ export class MenuPage implements OnInit {
    * Navigate to messages
    */
   goToMessages() {
-    this.router.navigate(['/messages']);
+    this.router.navigate(['/chat']);
   }
 
   /**
