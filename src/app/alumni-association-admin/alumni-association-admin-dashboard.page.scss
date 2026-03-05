@@ -1,12 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
 
-$primary-color: #f43f5e;
-$primary-light: #fb7185;
+$primary-color: #2DD55B;
+$primary-light: #2DD55B;
 $main-bg: #f9fafb;
 $card-bg: #ffffff;
 $shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 $radius: 12px;
 $font-main: 'Poppins', 'Inter', Arial, sans-serif;
+
+// override ionic danger color inside dashboard scope
+.page-wrapper {
+  --ion-color-danger: #2DD55B;
+  --ion-color-danger-rgb: 45, 213, 91;
+}
 
 /* Page Wrapper */
 .page-wrapper {
@@ -262,7 +268,7 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   thead {
-    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    background: linear-gradient(135deg, #2DD55B 0%, #33a451 100%);
     color: white;
 
     th {
@@ -296,8 +302,8 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
         font-family: $font-main;
 
         .student-id {
-          background: rgba(244, 63, 94, 0.1);
-          color: #e11d48;
+          background: rgba(173, 178, 43, 0.1);
+          color: #0f7e03;
           padding: 4px 8px;
           border-radius: 4px;
           font-weight: 600;

@@ -195,9 +195,8 @@ export class AlumniListPage implements OnInit {
 
     try {
       const uid = this.selectedAlumniForDept.uid;
-      // Update both role and department
-      await this.adminService.changeUserRole(uid, 'dept_head');
-      await this.adminService.assignDepartment(uid, this.selectedDepartment);
+      // Use Cloud Function to assign department head and department
+      await this.adminService.assignUserAsDeptHead(uid, this.selectedDepartment);
       
       // Update local data
       this.selectedAlumniForDept.role = 'dept_head';

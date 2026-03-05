@@ -104,6 +104,19 @@ export class AdminService {
   }
 
   /**
+   * Assign user as department head (combines role and department assignment)
+   */
+  async assignUserAsDeptHead(uid: string, department: string) {
+    await updateDoc(doc(this.firestore, `users/${uid}`), {
+      role: 'dept_head',
+      isDepartmentHead: true,
+      schoolDepartment: department,
+      updatedAt: new Date().toISOString(),
+    });
+    await this.logAdminAction('assign_dept_head', uid, { role: 'dept_head', schoolDepartment: department });
+  }
+
+  /**
    * Get latest logs for super admin tracking
    */
   async getLogsTracking(maxItems: number = 200) {
