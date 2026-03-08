@@ -1,7 +1,7 @@
 <ion-content class="dashboard-content">
   <!-- Export Button -->
   <div class="floating-create-button">
-    <ion-button (click)="downloadReport()" [disabled]="loading" color="danger" size="large">
+    <ion-button (click)="downloadReport()" [disabled]="loading" color="success" size="large">
       <ion-icon name="download-outline" slot="start"></ion-icon>
       Export
     </ion-button>
@@ -42,7 +42,7 @@
 
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">
-    <ion-spinner name="crescent" color="danger"></ion-spinner>
+    <ion-spinner name="crescent" color="success"></ion-spinner>
     <p>Generating reports...</p>
   </div>
 
@@ -120,7 +120,7 @@
       </ion-card-header>
       <ion-card-content>
         <p>Download a CSV report containing all analytics data, including department statistics and alumni counts.</p>
-        <ion-button expand="block" color="danger" (click)="downloadReport()">
+        <ion-button expand="block" color="success" (click)="downloadReport()">
           <ion-icon slot="start" name="download-outline"></ion-icon>
           Download CSV Report
         </ion-button>

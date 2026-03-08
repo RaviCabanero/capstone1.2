@@ -116,7 +116,7 @@
   margin-bottom: 2rem;
   
   h2 {
-    color: var(--ion-color-danger);
+    color: var(--ion-color-success);
     margin-bottom: 0.5rem;
   }
   
@@ -162,7 +162,7 @@
     .stat-number {
       font-size: 2.5rem;
       font-weight: bold;
-      color: var(--ion-color-danger);
+      color: var(--ion-color-success);
       line-height: 1;
       margin-bottom: 0.3rem;
     }
@@ -183,7 +183,7 @@
       
       ion-icon {
         font-size: 1.5rem;
-        color: var(--ion-color-danger);
+        color: var(--ion-color-success);
       }
     }
   }
@@ -214,7 +214,7 @@
     
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--ion-color-danger), var(--ion-color-danger-shade));
+      background: linear-gradient(90deg, var(--ion-color-success), var(--ion-color-success-shade));
       transition: width 0.3s ease;
     }
   }
@@ -229,7 +229,7 @@ ion-card {
       
       ion-icon {
         font-size: 1.5rem;
-        color: var(--ion-color-danger);
+        color: var(--ion-color-success);
       }
     }
   }

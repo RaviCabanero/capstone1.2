@@ -33,9 +33,9 @@ export class ReportsPage implements OnInit {
     try {
       this.loading = true;
       
-      // Get total alumni
-      const approvedUsers = await this.adminService.getApprovedUsers();
-      this.analytics.totalAlumni = approvedUsers.length;
+      // Get total alumni (all registered users, same as alumni list page)
+      const allUsers = await this.adminService.getAllUsers();
+      this.analytics.totalAlumni = allUsers.length;
       
       // Get pending approvals
       const pendingUsers = await this.adminService.getPendingUsers();
@@ -43,7 +43,7 @@ export class ReportsPage implements OnInit {
       
       // Calculate department breakdown
       const deptMap = new Map<string, number>();
-      approvedUsers.forEach((user: any) => {
+      allUsers.forEach((user: any) => {
         const dept = user.department || 'Not Specified';
         deptMap.set(dept, (deptMap.get(dept) || 0) + 1);
       });
