@@ -1,26 +1,110 @@
 <ion-header [translucent]="false">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-button fill="clear" *ngIf="activeChatId" (click)="closeConversation()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+      <ion-back-button *ngIf="!activeChatId" defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Chat</ion-title>
+
+    <ion-title>
+      <ng-container *ngIf="activeChatId; else chatsTitle">
+        <div class="chat-title">
+          <ion-avatar class="chat-title-avatar">
+            <img *ngIf="activeChatAvatar" [src]="activeChatAvatar" />
+            <div *ngIf="!activeChatAvatar" class="avatar-fallback">
+              {{ activeChatInitials }}
+            </div>
+          </ion-avatar>
+          <span class="chat-title-name">{{ activeChatName }}</span>
+        </div>
+      </ng-container>
+      <ng-template #chatsTitle>Chats</ng-template>
+    </ion-title>
+
+    <ion-buttons slot="end" *ngIf="!activeChatId">
+      <ion-button fill="clear" (click)="onNewChat()">
+        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="chat-content">
-  <div class="messages">
-    <div *ngFor="let m of messages" class="message" [ngClass]="{ 'me': m.fromMe }">
-      <div class="bubble">{{ m.text }}</div>
-      <div class="time">{{ m.time }}</div>
-    </div>
-  </div>
-</ion-content>
+<ng-container *ngIf="!activeChatId; else conversationView">
+  <ion-content class="chat-list-content">
+    <ion-searchbar
+      [(ngModel)]="search"
+      placeholder="Search"
+      showCancelButton="focus"
+    ></ion-searchbar>
 
-<ion-footer>
-  <ion-toolbar>
-    <div class="composer">
-      <ion-input [(ngModel)]="newMessage" placeholder="Type a message"></ion-input>
-      <ion-button (click)="sendMessage()" color="primary">Send</ion-button>
+    <ion-segment [(ngModel)]="segment" class="chat-segment" scrollable>
+      <ion-segment-button value="all">All</ion-segment-button>
+      <ion-segment-button value="unread">Unread</ion-segment-button>
+      <ion-segment-button value="groups">Groups</ion-segment-button>
+    </ion-segment>
+
+    <ion-list lines="none">
+      <ion-item
+        button
+        detail="true"
+        *ngFor="let person of filteredChats"
+        (click)="openConversation(person.id, person.name)"
+        class="chat-item"
+      >
+        <ion-avatar slot="start">
+          <img *ngIf="person.avatar" [src]="person.avatar" />
+          <div *ngIf="!person.avatar" class="avatar-fallback">
+            {{ person.initials }}
+          </div>
+        </ion-avatar>
+        <ion-label class="chat-label">
+          <div class="chat-top">
+            <span class="chat-name">{{ person.name }}</span>
+            <span class="chat-time">{{ person.time || '' }}</span>
+          </div>
+          <div class="chat-bottom">
+            <span class="chat-preview">
+              {{ person.lastMessage || 'Start chatting' }}
+            </span>
+            <ion-badge *ngIf="person.unread" color="primary" class="unread-badge">
+              {{ person.unread }}
+            </ion-badge>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="filteredChats.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      </div>
+      <div class="empty-text">
+        No conversations yet
+      </div>
     </div>
-  </ion-toolbar>
-</ion-footer>
+  </ion-content>
+</ng-container>
+
+<ng-template #conversationView>
+  <ion-content class="chat-content">
+    <div class="messages">
+      <div *ngFor="let m of activeMessages" class="message" [ngClass]="{ 'me': m.fromMe }">
+        <div class="bubble">{{ m.text }}</div>
+        <div class="time">{{ m.time }}</div>
+      </div>
+    </div>
+  </ion-content>
+
+  <ion-footer>
+    <ion-toolbar>
+      <div class="composer">
+        <ion-input [(ngModel)]="newMessage" placeholder="Type a message"></ion-input>
+        <ion-button (click)="sendMessage()" color="primary">Send</ion-button>
+      </div>
+    </ion-toolbar>
+  </ion-footer>
+</ng-template>

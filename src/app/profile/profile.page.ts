@@ -1171,6 +1171,13 @@ export class ProfilePage implements OnInit, ViewWillEnter {
   }
 
   /**
+   * Navigate to the menu page
+   */
+  openMenu() {
+    this.router.navigate(['/menu']);
+  }
+
+  /**
    * Handle scroll event to show/hide header and footer
    */
   onScroll(event: any) {

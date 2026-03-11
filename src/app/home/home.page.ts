@@ -52,6 +52,13 @@ export class HomePage implements OnInit {
     private eventService: EventService
   ) {}
 
+  /**
+   * Navigate to the menu page
+   */
+  openMenu() {
+    this.router.navigate(['/menu']);
+  }
+
   ngOnInit() {
     this.currentUserId = this.auth.currentUser?.uid || null;
     this.loadCurrentUserConnections();
