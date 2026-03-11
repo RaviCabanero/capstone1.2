@@ -51,22 +51,19 @@ export class DepartmentsPage implements OnInit {
     try {
       this.isLoading = true;
       
-      // Get all departments from Firebase (from courses collection)
       const deptNames = await this.adminService.getAllDepartments();
       const users = await this.adminService.getApprovedUsers();
       this.allUsers = users as DepartmentUser[];
       
-      // Transform into Department objects
       this.departments = deptNames.map((name, index) => ({
         id: `dept-${index}`,
         name: name,
-        description: undefined, // You can add this to Firebase if needed
-        head: undefined, // You can fetch this from department heads with matching role
+        description: undefined,
+        head: undefined, 
         email: undefined
       }));
 
-      // Optional: Fetch additional details like department heads
-      // You could call another service method here to get the head of each department
+      
       
       if (this.departments.length === 0) {
         this.showToast('No departments found', 'warning');

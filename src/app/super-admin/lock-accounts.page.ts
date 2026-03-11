@@ -112,8 +112,7 @@ export class LockAccountsPage implements OnInit {
     try {
       user.isLocked = !user.isLocked;
       
-      // Here you would call a service method to update the user's locked status
-      // For now, we'll simulate it
+     
       await this.updateUserLockStatus(user.uid, user.isLocked);
       
       const action = user.isLocked ? 'locked' : 'unlocked';
@@ -123,7 +122,6 @@ export class LockAccountsPage implements OnInit {
     } catch (error) {
       console.error('Error updating account status:', error);
       this.showToast('Error updating account status', 'danger');
-      // Revert the change
       user.isLocked = !user.isLocked;
     }
   }
@@ -135,8 +133,7 @@ export class LockAccountsPage implements OnInit {
   }
 
   private async updateUserLockStatus(uid: string, isLocked: boolean) {
-    // This would be added to AdminService
-    // For now, we'll create a placeholder
+    
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log(`User ${uid} lock status updated to: ${isLocked}`);
