@@ -114,7 +114,6 @@ export class ViewAllDataPage implements OnInit {
         dataStr = JSON.stringify(this.filteredUsers, null, 2);
         filename = 'user_data.json';
       } else {
-        // CSV format
         dataStr = this.convertToCSV(this.filteredUsers);
         filename = 'user_data.csv';
       }

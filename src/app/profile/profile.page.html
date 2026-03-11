@@ -139,7 +139,6 @@
       </div>
     </div>
 
-    <!-- Digital Alumni ID Card -->
     <div class="digital-id-section" *ngIf="idRequest$ | async as idRequest">
       <ion-card class="digital-id-card" *ngIf="idRequest?.status === 'approved'; else idNotAvailable">
         <div class="digital-id-glass">
@@ -194,7 +193,6 @@
       </ng-template>
     </div>
 
-    <!-- About Section -->
     <ion-card class="about-section">
       <ion-card-header class="section-header-compact">
         <ion-card-title class="section-title-compact">About</ion-card-title>
@@ -230,7 +228,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Activity Section -->
     <ion-card class="activity-section">
       <ion-card-header class="section-header-compact">
         <ion-card-title class="section-title-compact">Activity</ion-card-title>

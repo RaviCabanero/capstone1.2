@@ -33,23 +33,19 @@ export class ProfilePage implements OnInit, ViewWillEnter {
   groupedExperiences: any[] = [];
   profileUrl = '';
 
-  // Search Alumni (same behavior as Home)
   searchQuery: string = '';
   isSearching: boolean = false;
   searchResults: any[] = [];
   allAlumni: any[] = [];
   
-  // Track if viewing own profile or other user's profile
   viewedUserId: string | null = null;
   currentUserId: string | null = null;
   isOwnProfile: boolean = true;
   
-  // Track connections
   currentUserConnections: string[] = [];
   isConnectedWithViewed: boolean = false;
   isPendingRequest: boolean = false;
 
-  // Scroll handling
   showHeader: boolean = true;
   showFooter: boolean = true;
   private lastScrollTop: number = 0;
@@ -78,20 +74,16 @@ export class ProfilePage implements OnInit, ViewWillEnter {
 
     this.loadAllAlumniForSearch();
 
-    // Load current user's connections
     if (uid) {
       this.loadCurrentUserConnections(uid);
     }
 
-    // Check if viewing another user's profile from route params
     this.activatedRoute.params.subscribe(params => {
       if (params['id'] && params['id'] !== uid) {
-        // Viewing another user's profile
         this.viewedUserId = params['id'];
         this.isOwnProfile = false;
         this.loadProfileData(params['id']);
       } else {
-        // Viewing own profile
         if (uid) {
           this.viewedUserId = uid;
           this.isOwnProfile = true;
@@ -104,13 +96,9 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     });
   }
 
-  /**
-   * Refresh connection state when page comes back into view
-   * This ensures the button updates to "Connected" after accepting a request
-   */
+  
   ionViewWillEnter() {
     if (this.viewedUserId && this.currentUserId && !this.isOwnProfile) {
-      // Recheck if we're now connected with this user
       docData(doc(this.firestore, `users/${this.viewedUserId}`)).pipe(
         map((profile: any) => {
           if (profile?.connections && this.currentUserId) {
@@ -120,14 +108,11 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         })
       ).subscribe();
       
-      // Recheck pending request status
       this.checkPendingRequest(this.currentUserId, this.viewedUserId);
     }
   }
 
-  /**
-   * Load all alumni for search functionality
-   */
+  
   loadAllAlumniForSearch() {
     const currentUserId = this.auth.currentUser?.uid;
     const alumniQuery = query(collection(this.firestore, 'users'));
@@ -142,9 +127,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     );
   }
 
-  /**
-   * Search alumni by name, course, year, department
-   */
   searchAlumni(event: any) {
     this.searchQuery = (event.target.value || '').toLowerCase().trim();
 
@@ -195,11 +177,9 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         if (profile?.experiences) {
           this.groupedExperiences = this.groupAndSortExperiences(profile.experiences);
         }
-        // Check if we're connected with this user
         if (profile?.connections && this.currentUserId) {
           this.isConnectedWithViewed = profile.connections.includes(this.currentUserId);
         }
-        // Check if there's a pending connection request
         if (!this.isOwnProfile && this.currentUserId) {
           this.checkPendingRequest(this.currentUserId, uid);
         }
@@ -214,9 +194,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     this.loadUserPosts(uid);
   }
 
-  /**
-   * Check if there's a pending connection request to this user
-   */
+  
   private async checkPendingRequest(fromUserId: string, toUserId: string) {
     try {
       const existingRequest = await this.connectionRequestService.getExistingRequest(fromUserId, toUserId);
@@ -235,7 +213,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     );
     this.userPosts$ = collectionData(postsQuery, { idField: 'id' }).pipe(
       switchMap(async (posts: any[]) => {
-        // Process posts and fetch missing user data
         const postsWithUserData = await Promise.all(
           posts.map(async (post) => {
             const processedPost = {
@@ -243,7 +220,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
               timestamp: this.convertTimestamp(post.timestamp),
             };
 
-            // If userName or userAvatar is missing, fetch from user document
             if (!processedPost.userName || !processedPost.userAvatar) {
               try {
                 const userDocRef = doc(this.firestore, `users/${post.userId}`);
@@ -267,35 +243,27 @@ export class ProfilePage implements OnInit, ViewWillEnter {
           })
         );
 
-        // Filter posts based on visibility and connection status
         return postsWithUserData.filter(post => this.canViewPost(post));
       })
     ) as Observable<any[]>;
   }
 
-  /**
-   * Check if current user can view a post based on visibility settings
-   */
+  
   private canViewPost(post: any): boolean {
-    // Own posts are always visible
     if (this.isOwnProfile) {
       return true;
     }
 
-    // Post visibility check
     const postVisibility = post.visibility || 'public';
 
-    // Public posts are always visible
     if (postVisibility === 'public') {
       return true;
     }
 
-    // Friends-only posts are visible if we're connected
     if (postVisibility === 'friends') {
       return this.isConnectedWithViewed;
     }
 
-    // Private posts (only me) are never visible to others
     if (postVisibility === 'onlyme') {
       return false;
     }
@@ -303,9 +271,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     return false;
   }
 
-  /**
-   * Load current user's connections
-   */
+ 
   private loadCurrentUserConnections(uid: string) {
     docData(doc(this.firestore, `users/${uid}`)).subscribe(
       (profile: any) => {
@@ -319,15 +285,12 @@ export class ProfilePage implements OnInit, ViewWillEnter {
   }
 
   private convertTimestamp(timestamp: any): number {
-    // Handle Firestore Timestamp objects
     if (timestamp && typeof timestamp.toMillis === 'function') {
       return timestamp.toMillis();
     }
-    // Handle milliseconds (already a number)
     if (typeof timestamp === 'number') {
       return timestamp;
     }
-    // Fallback to current time
     return new Date().getTime();
   }
 
@@ -336,7 +299,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
   }
 
   goToProfile() {
-    // Navigate to own profile
     if (this.currentUserId) {
       this.router.navigate(['/profile', this.currentUserId]);
     } else {
@@ -354,7 +316,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     };
     reader.readAsDataURL(file);
 
-    // Persist a compressed data URL to Firestore (no Storage needed)
     this.saveAvatarToFirestore(file).catch(err => console.error('Avatar save failed', err));
   }
 
@@ -437,11 +398,8 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     this.router.navigate(['/activity']);
   }
 
-  /**
-   * Send a connection request to another alumni
-   */
+  
   async connectWithAlumni(alumniId: string | null) {
-    // Get current user ID from Firebase Auth (more reliable than property)
     const currentUserId = this.auth.currentUser?.uid;
     
     if (!alumniId || !currentUserId) {
@@ -468,13 +426,10 @@ export class ProfilePage implements OnInit, ViewWillEnter {
           text: 'Send Request',
           handler: async () => {
             try {
-              // Send connection request using the service
               await this.connectionRequestService.sendConnectionRequest(alumniId);
 
-              // Update the pending request status
               this.isPendingRequest = true;
 
-              // Show success toast
               const toast = await this.toastController.create({
                 message: 'Connection request sent!',
                 duration: 2000,
@@ -525,7 +480,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     if (!uid) return;
 
     try {
-      // Get current user profile
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -539,7 +493,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         );
       });
 
-      // Add experience to experiences array
       const experiences = userDoc?.experiences || [];
       const updatedExperiences = [
         ...experiences,
@@ -617,7 +570,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     if (!uid) return;
 
     try {
-      // Get current user profile to get their avatar
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -700,13 +652,10 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     });
   }
 
-  /**
-   * Group experiences by company and sort roles in reverse chronological order
-   */
+  
   private groupAndSortExperiences(experiences: any[]): any[] {
     if (!experiences || experiences.length === 0) return [];
 
-    // Group by company
     const companiesMap = new Map<string, any[]>();
     experiences.forEach(exp => {
       const company = exp.company || 'Unknown Company';
@@ -716,9 +665,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
       companiesMap.get(company)!.push(exp);
     });
 
-    // Process each company's roles and calculate totals
     const grouped = Array.from(companiesMap.entries()).map(([company, roles]) => {
-      // Sort roles by end date in reverse chronological order (newest first)
       const sortedRoles = roles.sort((a, b) => {
         const aEndYear = a.currentlyWorking ? new Date().getFullYear() : a.endYear || 0;
         const aEndMonth = a.currentlyWorking ? new Date().getMonth() + 1 : a.endMonth || 1;
@@ -738,7 +685,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
       };
     });
 
-    // Sort companies by most recent role (company with newest end date first)
     return grouped.sort((a, b) => {
       const aLatestRole = a.roles[0];
       const bLatestRole = b.roles[0];
@@ -755,9 +701,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     });
   }
 
-  /**
-   * Calculate total duration across all roles for a company
-   */
   private calculateCompanyDuration(roles: any[]): string {
     let totalMonths = 0;
 
@@ -786,18 +729,14 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Format date for display (e.g., "May 2025")
-   */
+ 
   formatDate(year: number | null, month: number | null): string {
     if (!year) return 'Date not set';
     if (!month) return year.toString();
     return `${this.monthNames[Math.max(0, Math.min(month - 1, 11))]} ${year}`;
   }
 
-  /**
-   * Calculate duration for a single role (e.g., "9 mos")
-   */
+  
   calculateDuration(role: any): string {
     const startDate = new Date(role.startYear || 0, (role.startMonth || 1) - 1, 1);
     const endDate = role.currentlyWorking
@@ -822,18 +761,13 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Truncate description to 150 characters
-   */
   truncateDescription(description: string): string {
     if (!description) return '';
     if (description.length <= 150) return description;
     return description.substring(0, 150).trim();
   }
 
-  /**
-   * Open skill modal for adding new skill
-   */
+  
   async openSkillModal(skill?: any) {
     const modal = await this.modalCtrl.create({
       component: SkillModalComponent,
@@ -845,24 +779,19 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     const { data } = await modal.onWillDismiss();
     if (data) {
       if (skill) {
-        // Editing existing skill
         await this.updateSkill(skill, data);
       } else {
-        // Adding new skill
         await this.addSkill(data);
       }
     }
   }
 
-  /**
-   * Add skill to user profile
-   */
+  
   async addSkill(skill: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -876,7 +805,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         );
       });
 
-      // Add skill to skills array
       const skills = userDoc?.skills || [];
       const updatedSkills = [
         ...skills,
@@ -897,15 +825,12 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Update existing skill
-   */
+  
   async updateSkill(oldSkill: any, updatedSkill: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -919,7 +844,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         );
       });
 
-      // Find and update the skill
       const skills = userDoc?.skills || [];
       const updatedSkills = skills.map((skill: any) =>
         skill.name === oldSkill.name ? { ...updatedSkill, updatedAt: new Date().toISOString() } : skill
@@ -936,15 +860,11 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Delete skill from user profile
-   */
   async deleteSkill(skillToDelete: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -958,7 +878,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         );
       });
 
-      // Remove skill from skills array
       const skills = userDoc?.skills || [];
       const updatedSkills = skills.filter(
         (s: any) => s.id !== skillToDelete.id || s.name !== skillToDelete.name
@@ -975,9 +894,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Open accomplishment modal for adding new accomplishment
-   */
+
   async openAccomplishmentModal() {
     const modal = await this.modalCtrl.create({
       component: AccomplishmentModalComponent,
@@ -989,15 +906,12 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Add accomplishment to user profile
-   */
+  
   async addAccomplishment(accomplishment: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -1011,7 +925,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         );
       });
 
-      // Add accomplishment to accomplishments array
       const accomplishments = userDoc?.accomplishments || [];
       const updatedAccomplishments = [
         ...accomplishments,
@@ -1032,15 +945,12 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Delete accomplishment from user profile
-   */
+  
   async deleteAccomplishment(accToDelete: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -1054,7 +964,6 @@ export class ProfilePage implements OnInit, ViewWillEnter {
         );
       });
 
-      // Remove accomplishment from accomplishments array
       const accomplishments = userDoc?.accomplishments || [];
       const updatedAccomplishments = accomplishments.filter(
         (a: any) => a.id !== accToDelete.id || a.title !== accToDelete.title
@@ -1071,9 +980,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Open contact modal for editing contact information
-   */
+  
   async openContactModal() {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
@@ -1109,9 +1016,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Update contact information
-   */
+  
   async updateContactInfo(contactInfo: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
@@ -1130,9 +1035,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Copy profile URL to clipboard
-   */
+ 
   async copyProfileUrl() {
     try {
       await navigator.clipboard.writeText(this.profileUrl);
@@ -1142,46 +1045,33 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     }
   }
 
-  /**
-   * Navigate to alumni ID request form
-   */
+  
   openAlumniIdRequest() {
     this.router.navigate(['/alumni-id-request']);
   }
 
-  /**
-   * Navigate to home page
-   */
+  
   goToHome() {
     this.router.navigate(['/home']);
   }
 
-  /**
-   * Navigate to alumni network page
-   */
+  
   goToAlumniNetwork() {
     this.router.navigate(['/alumni-network']);
   }
 
-  /**
-   * Navigate to notifications page
-   */
+  
   goToNotifications() {
     this.router.navigate(['/notifications']);
   }
 
-  /**
-   * Handle scroll event to show/hide header and footer
-   */
   onScroll(event: any) {
     const scrollTop = event.detail.scrollTop;
     
     if (scrollTop > this.lastScrollTop) {
-      // Scrolling down
       this.showHeader = false;
       this.showFooter = false;
     } else {
-      // Scrolling up
       this.showHeader = true;
       this.showFooter = true;
     }

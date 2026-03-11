@@ -78,33 +78,29 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  /**
-   * Get current user ID for debugging
-   */
+ 
   getCurrentUserId(): string {
     return this.auth.currentUser?.uid || 'Not authenticated';
   }
 
-  /**
-   * Debug: Check what's in Firestore
-   */
+  
   private debugCheckFirestore() {
-    // Check notifications collection (all items)
+    
     const allNotificationsQuery = query(collection(this.firestore, 'notifications'));
     collectionData(allNotificationsQuery, { idField: 'id' }).subscribe(
       (data: any[]) => {
-        // Notifications loaded
+        
       },
       (error) => {
         console.error('DEBUG: Error checking notifications:', error);
       }
     );
 
-    // Check events collection
+    
     const allEventsQuery = query(collection(this.firestore, 'events'));
     collectionData(allEventsQuery, { idField: 'id' }).subscribe(
       (data: any[]) => {
-        // Events loaded
+        
       },
       (error) => {
         console.error('DEBUG: Error checking events:', error);
@@ -112,11 +108,9 @@ export class NotificationsPage implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Load current user profile - Using RxJS Observable approach
-   */
+  
   loadUserProfile() {
-    // Create an observable from auth state
+    
     this.userProfile$ = from(
       new Promise<string>((resolve) => {
         onAuthStateChanged(this.auth, (user) => {
@@ -141,7 +135,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
       })
     );
     
-    // Subscribe to the observable
+   
     this.userProfile$?.subscribe(
       (profile: any) => {
         this.userProfile = profile;
@@ -152,24 +146,20 @@ export class NotificationsPage implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Cleanup on component destroy
-   */
+  
   ngOnDestroy() {
-    // Unsubscribe from real-time event listener
+    
     if (this.upcomingEventsUnsubscribe && typeof this.upcomingEventsUnsubscribe.unsubscribe === 'function') {
       this.upcomingEventsUnsubscribe.unsubscribe();
     }
   }
 
-  /**
-   * Load user notifications from Firestore
-   */
+ 
   loadNotifications() {
     const uid = this.auth.currentUser?.uid;
     
     if (!uid) {
-      // Wait for auth to be ready
+     
       const unsubscribe = onAuthStateChanged(this.auth, (user) => {
         if (user) {
           unsubscribe();
@@ -182,35 +172,30 @@ export class NotificationsPage implements OnInit, OnDestroy {
     this.loadNotificationsForUser(uid);
   }
 
-  /**
-   * Load notifications for a specific user
-   */
   private loadNotificationsForUser(uid: string) {
-    // Load all notifications (target: "all" means broadcast to everyone)
+    
     const notificationsQuery = query(
       collection(this.firestore, 'notifications')
     );
 
     collectionData(notificationsQuery, { idField: 'id' }).subscribe(
       (notifications: any[]) => {
-        // Filter notifications that are:
-        // 1. Broadcast to all users (target: "all")
-        // 2. OR specifically for this user (userId field matches)
+        
         const userNotifications = notifications.filter(n => 
           n.target === 'all' || n.userId === uid
         );
         
-        // Check for new notifications
+        
         const previousNotifs = this.notifications || [];
         this.notifications = userNotifications.sort((a, b) => b.timestamp - a.timestamp);
         
-        // If there are new notifications not in the previous list, trigger notification
+        
         const newNotifications = this.notifications.filter(
           notif => !previousNotifs.find(p => p.id === notif.id)
         );
         
         if (newNotifications.length > 0) {
-          // Trigger alert for first new notification
+         
           this.playNotificationAlert(newNotifications[0]);
         }
         
@@ -223,20 +208,16 @@ export class NotificationsPage implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Play notification alert with sound and vibration
-   */
+  
   private async playNotificationAlert(notification: Notification) {
-    // Trigger haptic feedback
+    
     await this.triggerNotificationHaptics();
     
-    // Play notification sound
+   
     await this.playNotificationSound();
   }
 
-  /**
-   * Load upcoming events from Firestore with real-time updates
-   */
+  
   loadUpcomingEvents() {
     const now = new Date().getTime();
     
@@ -246,17 +227,17 @@ export class NotificationsPage implements OnInit, OnDestroy {
       orderBy('eventDate', 'asc')
     );
 
-    // Use subscription for real-time updates
+    
     const subscription = collectionData(eventsQuery, { idField: 'id' }).subscribe(
       (events: any[]) => {
         console.log('Upcoming events loaded:', events.length);
         
-        // Check for new events compared to previously loaded events
+        
         const previousEventIds = new Set(this.upcomingEvents.map(e => e.id));
         
         const newEvents = events.filter(e => !previousEventIds.has(e.id));
         
-        // If there are new events, create notifications for them
+       
         if (newEvents.length > 0) {
           console.log('New events detected:', newEvents.length);
           newEvents.forEach(event => {
@@ -264,7 +245,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
           });
         }
 
-        // Limit to next 5 upcoming events and convert timestamps
+        
         this.upcomingEvents = events.slice(0, 5).map(event => ({
           ...event,
           eventDate: event.eventDate && event.eventDate.toDate 
@@ -272,32 +253,30 @@ export class NotificationsPage implements OnInit, OnDestroy {
             : new Date(event.eventDate)
         }));
         
-        // Set loading to false when events are loaded
+        
         this.loading = false;
         console.log('Upcoming events processed:', this.upcomingEvents.length);
       },
       (error) => {
         console.error('Error loading upcoming events:', error);
         this.upcomingEvents = [];
-        this.loading = false; // Set to false on error too
+        this.loading = false; 
       }
     );
 
-    // Store subscription for cleanup
+    
     if (!this.upcomingEventsUnsubscribe) {
       this.upcomingEventsUnsubscribe = subscription;
     }
   }
 
-  /**
-   * Create a notification for a new event and send to all users
-   */
+  
   async createEventNotification(event: any) {
     try {
       const uid = this.auth.currentUser?.uid;
       if (!uid) return;
 
-      // Create notification for current user
+      
       const currentUserNotification: Notification = {
         userId: uid,
         type: 'event',
@@ -312,13 +291,11 @@ export class NotificationsPage implements OnInit, OnDestroy {
         }
       };
 
-      // Add notification to Firestore for current user
       await this.addNotificationToFirestore(currentUserNotification);
       
-      // Send notifications to all other alumni users
       await this.broadcastEventNotificationToAllUsers(event);
       
-      // Show toast notification with audio and vibration
+      
       this.showNewEventToast(event.eventTitle);
       
       console.log('Event notification created and broadcasted:', event.eventTitle);
@@ -327,18 +304,14 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Broadcast event notification to all alumni users
-   */
   private async broadcastEventNotificationToAllUsers(event: any) {
     try {
-      // Get all users from the users collection
+     
       const usersQuery = query(collection(this.firestore, 'users'));
       
       const usersSnapshot = await collectionData(usersQuery, { idField: 'id' }).toPromise();
       
       if (usersSnapshot && Array.isArray(usersSnapshot)) {
-        // Send notification to each user (except the admin who created it)
         const currentUid = this.auth.currentUser?.uid;
         
         for (const user of usersSnapshot) {
@@ -368,14 +341,10 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Show toast notification for new event with audio and vibration
-   */
+  
   async showNewEventToast(eventTitle: string) {
-    // Trigger haptic feedback
     await this.triggerNotificationHaptics();
     
-    // Play notification sound
     await this.playNotificationSound();
 
     const toast = await this.toastCtrl.create({
@@ -388,7 +357,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
           text: 'View',
           role: 'cancel',
           handler: () => {
-            // Scroll to events section
             const eventsSection = document.querySelector('.events-section');
             eventsSection?.scrollIntoView({ behavior: 'smooth' });
           }
@@ -398,15 +366,11 @@ export class NotificationsPage implements OnInit, OnDestroy {
     await toast.present();
   }
 
-  /**
-   * Trigger haptic feedback for notifications
-   */
+  
   private async triggerNotificationHaptics() {
     try {
-      // Light haptic impact
       await Haptics.impact({ style: ImpactStyle.Light });
       
-      // Add a small delay and another haptic
       setTimeout(async () => {
         await Haptics.impact({ style: ImpactStyle.Light });
       }, 100);
@@ -415,16 +379,11 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Play notification sound using Web Audio API
-   */
+  
   private async playNotificationSound() {
     this.playWebAudioNotification();
   }
 
-  /**
-   * Fallback: Play notification sound using Web Audio API
-   */
   private playWebAudioNotification() {
     try {
       const audioContext = new (window as any).AudioContext() || new (window as any).webkitAudioContext();
@@ -434,7 +393,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Set frequency and duration for notification beep
       oscillator.frequency.value = 800; // Hz
       oscillator.type = 'sine';
 
@@ -448,9 +406,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Add notification to Firestore
-   */
+  
   private async addNotificationToFirestore(notification: Notification) {
     try {
       const uid = this.auth.currentUser?.uid;
@@ -461,7 +417,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
 
       const notificationsCollection = collection(this.firestore, 'notifications');
       
-      // Add notification with user ID
       const docData = {
         ...notification,
         userId: uid,
@@ -475,9 +430,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Get icon based on notification type
-   */
   getNotificationIcon(type: string): string {
     const icons: { [key: string]: string } = {
       event: 'calendar',
@@ -490,9 +442,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
     return icons[type] || 'notifications';
   }
 
-  /**
-   * Get color based on notification type
-   */
+ 
   getNotificationColor(type: string): string {
     const colors: { [key: string]: string } = {
       event: 'primary',
@@ -505,19 +455,16 @@ export class NotificationsPage implements OnInit, OnDestroy {
     return colors[type] || 'medium';
   }
 
-  /**
-   * Handle notification click
-   */
+  
   async handleNotificationClick(notification: Notification) {
-    // Mark as read
+    
     if (!notification.read) {
       await this.markAsRead(notification);
     }
 
-    // Navigate based on notification type
     switch (notification.type) {
       case 'event':
-        // Just navigate to home
+       
         this.router.navigate(['/home']);
         break;
       case 'approval':
@@ -534,9 +481,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Mark notification as read
-   */
   async markAsRead(notification: Notification) {
     if (!notification.id) return;
 
@@ -550,9 +494,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Mark all notifications as read
-   */
+  
   async markAllAsRead() {
     const unreadNotifications = this.notifications.filter(n => !n.read);
     
@@ -571,9 +513,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
     console.log('All notifications marked as read');
   }
 
-  /**
-   * Delete notification
-   */
+  
   async deleteNotification(notification: Notification) {
     if (!notification.id) return;
 
@@ -603,9 +543,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  /**
-   * Accept a connection request
-   */
   async acceptConnectionRequest(notification: Notification) {
     try {
       const requestId = notification.data?.requestId;
@@ -613,15 +550,12 @@ export class NotificationsPage implements OnInit, OnDestroy {
         throw new Error('Request ID not found');
       }
 
-      // Accept the connection request
       await this.connectionRequestService.acceptConnectionRequest(requestId);
 
-      // Mark notification as read
       if (!notification.read) {
         await this.markAsRead(notification);
       }
 
-      // Show success toast
       const toast = await this.toastCtrl.create({
         message: 'Connection accepted!',
         duration: 2000,
@@ -630,7 +564,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
       });
       await toast.present();
 
-      // Delete the notification
       await this.deleteNotificationQuietly(notification.id);
 
     } catch (error) {
@@ -645,9 +578,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Reject a connection request
-   */
   async rejectConnectionRequest(notification: Notification) {
     try {
       const requestId = notification.data?.requestId;
@@ -655,10 +585,8 @@ export class NotificationsPage implements OnInit, OnDestroy {
         throw new Error('Request ID not found');
       }
 
-      // Reject the connection request
       await this.connectionRequestService.rejectConnectionRequest(requestId);
 
-      // Show confirmation toast
       const toast = await this.toastCtrl.create({
         message: 'Connection request declined',
         duration: 2000,
@@ -667,7 +595,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
       });
       await toast.present();
 
-      // Delete the notification
       await this.deleteNotificationQuietly(notification.id);
 
     } catch (error) {
@@ -682,9 +609,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Delete notification without confirmation dialog
-   */
   private async deleteNotificationQuietly(notificationId: string | undefined) {
     if (!notificationId) return;
     try {
@@ -694,70 +618,47 @@ export class NotificationsPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Navigate to event details
-   */
+  
   navigateToEvent(event: any) {
-    // Navigate to home page which displays all events
     this.router.navigate(['/home']);
   }
 
-  /**
-   * Navigate to profile
-   */
+  
   goToProfile() {
     this.router.navigate(['/profile']);
   }
 
-  /**
-   * Navigate to messages
-   */
+  
   goToMessages() {
     this.router.navigate(['/messages']);
   }
 
-  /**
-   * Search alumni
-   */
   searchAlumni(event: any) {
     this.searchQuery = event.target.value.toLowerCase().trim();
-    // Add search logic here if needed
   }
 
-  /**
-   * Handle image loading errors
-   */
+  
   handleImageError(event: any) {
     console.error('❌ Image loading error:', event);
     event.target.style.display = 'none';
   }
 
-  /**
-   * Open notification settings
-   */
+  
   openSettings() {
-    // Navigate to settings or show a settings modal
     console.log('Opening notification settings');
-    // You can add navigation or modal logic here
   }
 
-  /**
-   * Open post modal
-   */
+  
   openPostModal() {
     this.router.navigate(['/create-post']);
   }
 
-  /**
-   * Open menu
-   */
+  
   openMenu() {
     this.router.navigate(['/menu']);
   }
 
-  /**
-   * Check if there are unread notifications
-   */
+  
   hasUnreadNotifications(): boolean {
     return this.notifications.some(n => !n.read);
   }

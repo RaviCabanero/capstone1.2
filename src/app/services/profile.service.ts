@@ -16,7 +16,7 @@ export interface UserProfile {
   phone?: string;
   photoDataUrl?: string;
   summary?: string;
-  role?: 'alumni' | 'dept_head'; // Only alumni and dept_head allowed in app
+  role?: 'alumni' | 'dept_head'; 
   status?: 'pending' | 'approved' | 'rejected';
   createdAt?: string;
   updatedAt?: string;

@@ -27,7 +27,6 @@ export class UserApprovalsPage implements OnInit {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController
   ) {
-    // Initialize observables with proper switchMap pattern
     this.pendingUsers$ = of(null).pipe(
       switchMap(() => from(this.adminService.getPendingUsers())),
       tap(users => this.pendingUsers = users),

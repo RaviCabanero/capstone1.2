@@ -61,7 +61,6 @@ export class HomePage implements OnInit {
     this.loadEvents();
     this.loadSuggestedAlumni();
 
-    // Subscribe to selected event from notification
     this.eventService.selectedEvent$.subscribe((event: any) => {
       if (event) {
         this.selectedEvent = event;
@@ -197,9 +196,7 @@ export class HomePage implements OnInit {
     this.router.navigate(['/profile', alumniId]);
   }
 
-  /**
-   * Load current user profile for avatar
-   */
+ 
   loadCurrentUserProfile() {
     console.log('Loading current user profile');
     
@@ -218,9 +215,7 @@ export class HomePage implements OnInit {
     });
   }
 
-  /**
-   * Load profile data from Firestore
-   */
+  
   private loadProfileData(uid: string) {
     console.log('Loading profile data for UID:', uid);
     
@@ -236,9 +231,6 @@ export class HomePage implements OnInit {
     );
   }
 
-  /**
-   * Load all posts from all users
-   */
   loadAllPosts() {
     const postsQuery = query(
       collection(this.firestore, 'posts'),
@@ -247,7 +239,6 @@ export class HomePage implements OnInit {
     
     this.allPosts$ = collectionData(postsQuery, { idField: 'id' }).pipe(
       switchMap(async (posts: any[]) => {
-        // Process posts and fetch missing user data
         const postsWithUserData = await Promise.all(
           posts.map(async (post) => {
             const processedPost = {
@@ -295,17 +286,14 @@ export class HomePage implements OnInit {
    
     const postVisibility = post.visibility || 'public';
 
-    // Public posts are always visible
     if (postVisibility === 'public') {
       return true;
     }
 
-    // Friends-only posts are visible if we're connected
     if (postVisibility === 'friends') {
       return this.currentUserConnections.includes(post.userId);
     }
 
-    // Private posts (only me) are never visible to others
     if (postVisibility === 'onlyme') {
       return false;
     }
@@ -313,9 +301,7 @@ export class HomePage implements OnInit {
     return false;
   }
 
-  /**
-   * Load current user's connections
-   */
+  
   private loadCurrentUserConnections() {
     if (!this.currentUserId) return;
     
@@ -330,9 +316,6 @@ export class HomePage implements OnInit {
     );
   }
 
-  /**
-   * Load global events for home page
-   */
   loadEvents() {
     this.loadingEvents = true;
     const eventsQuery = query(
@@ -398,9 +381,7 @@ export class HomePage implements OnInit {
     await alert.present();
   }
 
-  /**
-   * Convert Firestore timestamp to milliseconds
-   */
+  
   private convertTimestamp(timestamp: any): number {
     if (timestamp && typeof timestamp.toMillis === 'function') {
       return timestamp.toMillis();
@@ -411,9 +392,7 @@ export class HomePage implements OnInit {
     return new Date().getTime();
   }
 
-  /**
-   * Open post modal
-   */
+  
   async openPostModal() {
     const modal = await this.modalCtrl.create({
       component: PostModalComponent,
@@ -431,15 +410,12 @@ export class HomePage implements OnInit {
     }
   }
 
-  /**
-   * Save post to Firestore
-   */
+ 
   async savePost(postData: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile to get their avatar
       const userSnap = await getDoc(doc(this.firestore, `users/${uid}`));
       const userDoc = userSnap.exists()
         ? (userSnap.data() as { firstName?: string; lastName?: string; photoDataUrl?: string })
@@ -466,9 +442,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  /**
-   * Open post menu (3-dot menu)
-   */
+ 
   async openPostMenu(post: any) {
     const uid = this.auth.currentUser?.uid;
     const isOwner = post.userId === uid;
@@ -483,7 +457,6 @@ export class HomePage implements OnInit {
       }
     ];
 
-    // Only show delete if user owns the post
     if (isOwner) {
       buttons.push({
         text: 'Delete',
@@ -509,9 +482,7 @@ export class HomePage implements OnInit {
     await actionSheet.present();
   }
 
-  /**
-   * Delete post
-   */
+  
   async deletePost(post: any) {
     const uid = this.auth.currentUser?.uid;
     if (post.userId !== uid) {
@@ -527,9 +498,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  /**
-   * Share post
-   */
+  
   async sharePost(post: any) {
     const shareText = `Check out this post: ${post.text || 'Shared post'}`;
     
@@ -543,7 +512,6 @@ export class HomePage implements OnInit {
         console.log('Error sharing', error);
       }
     } else {
-      // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(shareText);
         console.log('Post text copied to clipboard');
@@ -553,15 +521,12 @@ export class HomePage implements OnInit {
     }
   }
 
-  /**
-   * Like/React to a post
-   */
+  
   async likePost(post: any) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Toggle like
       const likes = post.likes || 0;
       const likedBy = post.likedBy || [];
       const userIndex = likedBy.indexOf(uid);
@@ -570,11 +535,9 @@ export class HomePage implements OnInit {
       let updatedLikedBy = likedBy;
 
       if (userIndex > -1) {
-        // Unlike
         updatedLikedBy.splice(userIndex, 1);
         updatedLikes = Math.max(0, likes - 1);
       } else {
-        // Like
         updatedLikedBy.push(uid);
         updatedLikes = likes + 1;
       }
@@ -590,18 +553,14 @@ export class HomePage implements OnInit {
     }
   }
 
-  /**
-   * Check if user has liked a post
-   */
+  
   hasUserLiked(post: any): boolean {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return false;
     return (post.likedBy || []).includes(uid);
   }
 
-  /**
-   * Open comment dialog
-   */
+ 
   async openCommentDialog(post: any) {
     const alert = await this.alertCtrl.create({
       header: 'Add Comment',
@@ -636,15 +595,12 @@ export class HomePage implements OnInit {
     await alert.present();
   }
 
-  /**
-   * Add comment to post
-   */
+ 
   async addComment(post: any, commentText: string) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return;
 
     try {
-      // Get current user profile for comment display
       const userDoc = await new Promise<any>((resolve, reject) => {
         const unsubscribe = docData(doc(this.firestore, `users/${uid}`)).subscribe(
           data => {
@@ -834,38 +790,29 @@ export class HomePage implements OnInit {
     this.router.navigateByUrl('/profile');
   }
 
-  /**
-   * Navigate to Notifications page
-   */
+  
   goToNotifications() {
     this.router.navigate(['/notifications']);
   }
 
-  /**
-   * Navigate to Messages/Activity page
-   */
+ 
   goToMessages() {
     this.router.navigate(['/activity']);
   }
 
-  /**
-   * Handle scroll events to show/hide header and footer
-   */
+ 
   async onScroll(event: any) {
     const scrollElement = await this.content.getScrollElement();
     const scrollTop = scrollElement.scrollTop;
-    const scrollThreshold = 50; // Minimum scroll distance to trigger hide/show
-
+    const scrollThreshold = 50; 
     if (Math.abs(scrollTop - this.lastScrollTop) < scrollThreshold) {
-      return; // Don't trigger for small scrolls
+      return; 
     }
 
     if (scrollTop > this.lastScrollTop && scrollTop > 100) {
-      // Scrolling down - hide header and footer
       this.showHeader = false;
       this.showFooter = false;
     } else if (scrollTop < this.lastScrollTop) {
-      // Scrolling up - show header and footer
       this.showHeader = true;
       this.showFooter = true;
     }
