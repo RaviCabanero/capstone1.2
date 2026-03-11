@@ -38,7 +38,14 @@
     </div>
     <div class="invite-avatars">
       <div class="invite-avatar" *ngFor="let user of inviteAvatars">
-        <img [src]="user.photoDataUrl || 'assets/icon/favicon.png'" [alt]="user.firstName" />
+        <ng-container *ngIf="user.photoDataUrl; else invitePlaceholder">
+          <img [src]="user.photoDataUrl" [alt]="user.firstName" />
+        </ng-container>
+        <ng-template #invitePlaceholder>
+          <div class="profile-placeholder">
+            <ion-icon name="person-circle"></ion-icon>
+          </div>
+        </ng-template>
       </div>
     </div>
     <ion-button expand="block" color="light" class="search-btn" (click)="searchAlumniToInvite()">
@@ -101,7 +108,14 @@
         </div>
 
         <div class="card-avatar">
-          <img [src]="alumnus.photoDataUrl || 'assets/icon/favicon.png'" [alt]="alumnus.firstName" />
+          <ng-container *ngIf="alumnus.photoDataUrl; else cardPlaceholder">
+            <img [src]="alumnus.photoDataUrl" [alt]="alumnus.firstName" />
+          </ng-container>
+          <ng-template #cardPlaceholder>
+            <div class="profile-placeholder">
+              <ion-icon name="person-circle"></ion-icon>
+            </div>
+          </ng-template>
         </div>
 
         <div class="card-info">

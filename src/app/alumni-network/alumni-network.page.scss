@@ -50,8 +50,9 @@ ion-toolbar {
   border-radius: 50%;
 
   ion-icon {
-    font-size: 32px;
-    color: #000000;
+    font-size: 200px;
+    color: #16a34a;
+    line-height: 1;
   }
 }
 
@@ -71,7 +72,7 @@ ion-toolbar {
 .header-avatar + ng-template ion-icon,
 .header-avatar ion-icon,
 ion-buttons ion-icon[name="person-circle"] {
-  color: #000000;
+  color: #16a34a;
 }
 
 .chat-icon {

@@ -58,9 +58,9 @@ export class AlumniNetworkPage implements OnInit {
     
     // Initialize invite avatars with placeholders
     this.inviteAvatars = [
-      { firstName: 'User', lastName: '1', photoDataUrl: 'assets/icon/favicon.png' },
-      { firstName: 'User', lastName: '2', photoDataUrl: 'assets/icon/favicon.png' },
-      { firstName: 'User', lastName: '3', photoDataUrl: 'assets/icon/favicon.png' },
+      { firstName: 'User', lastName: '1', photoDataUrl: null },
+      { firstName: 'User', lastName: '2', photoDataUrl: null },
+      { firstName: 'User', lastName: '3', photoDataUrl: null },
     ];
     
     this.loadUserProfile();
@@ -103,14 +103,21 @@ export class AlumniNetworkPage implements OnInit {
         
         // Filter out current user
         const filteredUsers = users.filter(user => user.id !== currentUserId);
-        console.log('Users after filtering (excluding current):', filteredUsers.length);
-        console.log('User details:', filteredUsers);
+
+        // Normalize photo URLs so that placeholder assets don't show as “real” avatars
+        const normalizedUsers = filteredUsers.map((user) => ({
+          ...user,
+          photoDataUrl: user.photoDataUrl && !user.photoDataUrl.includes('assets/icon') ? user.photoDataUrl : null,
+        }));
+
+        console.log('Users after filtering (excluding current):', normalizedUsers.length);
+        console.log('User details:', normalizedUsers);
         
         // Update arrays
-        this.allAlumni = filteredUsers;
-        this.allSearchAlumni = filteredUsers;
-        this.suggestedAlumni = filteredUsers;
-        this.populateInviteAvatars(filteredUsers);
+        this.allAlumni = normalizedUsers;
+        this.allSearchAlumni = normalizedUsers;
+        this.suggestedAlumni = normalizedUsers;
+        this.populateInviteAvatars(normalizedUsers);
         
         console.log('Alumni loaded and displayed successfully');
       },
