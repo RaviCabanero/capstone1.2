@@ -22,6 +22,7 @@ export class AlumniListPage implements OnInit {
   showDepartmentModal = false;
   selectedDepartment = '';
   selectedAlumniForDept: any = null;
+  selectedFilterDepartment = ''; // For filtering alumni by department
 
   constructor(
     private adminService: AdminService,
@@ -71,16 +72,32 @@ export class AlumniListPage implements OnInit {
 }
 
   searchAlumni() {
+    this.applyFilters();
+  }
+
+  filterByDepartment() {
+    this.applyFilters();
+  }
+
+  applyFilters() {
     const term = this.searchTerm.toLowerCase().trim();
-    
-    if (!term) {
-      this.filteredAlumni = [...this.allAlumni];
-      return;
-    }
+    const filterDept = this.selectedFilterDepartment.toLowerCase().trim();
 
     this.filteredAlumni = this.allAlumni.filter(alumni => {
       const dept = (alumni as any)['department'] as string | undefined;
       const schoolDept = (alumni as any)['schoolDepartment'] as string | undefined;
+      const userDept = (dept || schoolDept || '').toLowerCase();
+
+      // Apply department filter
+      if (filterDept && !userDept.includes(filterDept)) {
+        return false;
+      }
+
+      // Apply search term filter
+      if (!term) {
+        return true;
+      }
+
       return (
         (alumni.firstName as string | undefined)?.toLowerCase().includes(term) ||
         (alumni.lastName as string | undefined)?.toLowerCase().includes(term) ||
@@ -98,6 +115,12 @@ export class AlumniListPage implements OnInit {
         String((alumni.yearGraduated as string | number | undefined) || '').toLowerCase().includes(term)
       );
     });
+  }
+
+  resetFilters() {
+    this.searchTerm = '';
+    this.selectedFilterDepartment = '';
+    this.applyFilters();
   }
 
   getDepartment(user: any): string {
