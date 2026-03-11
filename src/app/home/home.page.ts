@@ -797,7 +797,7 @@ export class HomePage implements OnInit {
 
  
   goToMessages() {
-    this.router.navigate(['/activity']);
+    this.router.navigate(['/chat']);
   }
 
  

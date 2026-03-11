@@ -407,7 +407,7 @@ export class AlumniNetworkPage implements OnInit {
    * Navigate to messages
    */
   goToMessages() {
-    this.router.navigate(['/messages']);
+    this.router.navigate(['/chat']);
   }
 
   /**

@@ -48,9 +48,10 @@ export class AlumniAssociationAdminDashboardPage implements OnInit {
 
   async loadStats() {
     try {
-      // Total Alumni
-      const alumni = await this.adminService.getApprovedUsers();
-      this.stats.totalAlumni = alumni.length;
+      // Total Alumni (use full user count to match the alumni list)
+      // previously we only counted approved users; the list page shows all
+      const total = await this.adminService.getTotalUserCount();
+      this.stats.totalAlumni = total;
 
       // Active Events
       if (typeof this.adminService.getActiveEvents === 'function') {

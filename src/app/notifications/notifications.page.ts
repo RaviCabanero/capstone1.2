@@ -630,7 +630,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
 
   
   goToMessages() {
-    this.router.navigate(['/messages']);
+    this.router.navigate(['/chat']);
   }
 
   searchAlumni(event: any) {

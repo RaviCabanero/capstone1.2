@@ -33,18 +33,41 @@
         <ion-searchbar 
           [(ngModel)]="searchTerm" 
           (ionInput)="searchAlumni()"
-          placeholder="Search by name, role, status, department, address, or email"
-          animated="true">
+          placeholder="Search by name, email, department..."
+          animated="true"
+          debounce="300">
         </ion-searchbar>
-        <ion-button 
-          (click)="openAddUserModal()" 
-          color="success" 
-          class="add-user-btn"
-          fill="solid"
-          shape="round">
-          <ion-icon name="add-circle" slot="start"></ion-icon>
-          Add Alumni
-        </ion-button>
+        <div class="filter-controls">
+          <ion-select 
+            [(ngModel)]="selectedFilterDepartment"
+            (ionChange)="filterByDepartment()"
+            placeholder="All Departments"
+            interface="popover"
+            class="department-filter">
+            <ion-select-option value="">All Departments</ion-select-option>
+            <ion-select-option *ngFor="let dept of departments" [value]="dept">
+              {{ dept }}
+            </ion-select-option>
+          </ion-select>
+          <ion-button 
+            (click)="resetFilters()" 
+            fill="outline"
+            color="medium"
+            class="reset-filters-btn"
+            *ngIf="searchTerm || selectedFilterDepartment">
+            <ion-icon name="close" slot="start"></ion-icon>
+            Clear
+          </ion-button>
+          <ion-button 
+            (click)="openAddUserModal()" 
+            color="success" 
+            class="add-user-btn"
+            fill="solid"
+            shape="round">
+            <ion-icon name="add-circle" slot="start"></ion-icon>
+            Add Alumni
+          </ion-button>
+        </div>
       </div>
 
       <div class="page-header">

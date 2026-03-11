@@ -1,12 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
 
-$primary-color: #f43f5e;
-$primary-light: #fb7185;
-$main-bg: #f9fafb;
+$primary-color: #22c55e;
+$primary-light: #22c55e;
+$main-bg: #f9faf6;
 $card-bg: #ffffff;
 $shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 $radius: 12px;
 $font-main: 'Poppins', 'Inter', Arial, sans-serif;
+
+// override ionic danger color inside dashboard scope
+.page-wrapper {
+  --ion-color-danger: #2DD55B;
+  --ion-color-danger-rgb: 45, 213, 91;
+}
 
 /* Page Wrapper */
 .page-wrapper {
@@ -37,10 +43,15 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
 /* Page Header */
 .page-header {
   margin-bottom: 32px;
+  padding: 24px;
+  background: #fef3c7;
+  border-radius: 12px;
+  border-left: 6px solid #22c55e;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.08);
 
   h1 {
     font-size: 28px;
-    font-weight: 700;
+    font-weight: 600;
     color: #1f2937;
     margin: 0 0 8px 0;
     font-family: $font-main;
@@ -48,13 +59,15 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
 
   p {
     font-size: 14px;
-    color: #6b7280;
+    color: #5b6b6c;
     margin: 0;
     font-family: $font-main;
+    font-weight: 500;
   }
 
   @media (max-width: 768px) {
     margin-bottom: 24px;
+    padding: 18px;
 
     h1 {
       font-size: 24px;
@@ -76,9 +89,9 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
 
 /* Stat Card */
 .stat-card {
-  --background: $card-bg;
+  --background: #ebd511;
   --box-shadow: $shadow;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #dac613;
   border-radius: $radius;
   transition: all 0.2s ease;
   width: 100%;
@@ -108,26 +121,26 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
     }
 
     &.total-users {
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      background: linear-gradient(#22c55e);
     }
 
     &.events {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      background: linear-gradient(#22c55e);
     }
 
     &.announcements {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(#22c55e);
     }
 
     &.departments {
-      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+      background: linear-gradient(#22c55e);
     }
   }
 
   h3 {
     font-size: 13px;
     font-weight: 600;
-    color: #6b7280;
+    color: #92400e;
     margin: 0 0 6px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -136,13 +149,13 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
   .stat-value {
     font-size: 28px;
     font-weight: 700;
-    color: #1f2937;
+    color: #78350f;
     margin: 0 0 2px 0;
   }
 
   .stat-label {
     font-size: 12px;
-    color: #9ca3af;
+    color: #92400e;
     margin: 0;
   }
 }
@@ -262,7 +275,7 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   thead {
-    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    background: linear-gradient(135deg, #2DD55B 0%, #33a451 100%);
     color: white;
 
     th {
@@ -296,8 +309,8 @@ $font-main: 'Poppins', 'Inter', Arial, sans-serif;
         font-family: $font-main;
 
         .student-id {
-          background: rgba(244, 63, 94, 0.1);
-          color: #e11d48;
+          background: rgba(173, 178, 43, 0.1);
+          color: #0f7e03;
           padding: 4px 8px;
           border-radius: 4px;
           font-weight: 600;

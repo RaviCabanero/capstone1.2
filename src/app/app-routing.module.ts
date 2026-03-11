@@ -62,6 +62,20 @@ const routes: Routes = [
     loadChildren: () => import('./alumni-network/alumni-network.module').then(m => m.AlumniNetworkPageModule)
   },
   {
+    path: 'chat',
+    loadChildren: () => import('./chat/chat.module').then(m => m.ChatPageModule)
+  },
+  {
+    path: 'messages/:id',
+    redirectTo: 'chat',
+    pathMatch: 'full'
+  },
+  {
+    path: 'messages',
+    redirectTo: 'chat',
+    pathMatch: 'full'
+  },
+  {
     path: 'activity',
     component: ActivityPage
   },

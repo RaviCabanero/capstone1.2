@@ -2,7 +2,7 @@
   <div class="page-wrapper ion-padding">
     <!-- Create Button -->
     <div class="floating-create-button">
-      <ion-button (click)="toggleForm()" color="danger" size="large">
+      <ion-button (click)="toggleForm()" color="success" size="large">
         <ion-icon [name]="showForm ? 'close' : 'add'" slot="start"></ion-icon>
         {{ showForm ? 'Cancel' : 'New Announcement' }}
       </ion-button>
@@ -40,7 +40,7 @@
 
           <ion-button 
             expand="block" 
-            color="danger" 
+            color="success" 
             (click)="createAnnouncement()"
             [disabled]="!newAnnouncement.title.trim() || !newAnnouncement.content.trim()">
             <ion-icon slot="start" name="megaphone-outline"></ion-icon>
@@ -51,7 +51,7 @@
 
       <!-- Loading State -->
       <div *ngIf="loading" class="loading-container">
-        <ion-spinner name="crescent" color="danger"></ion-spinner>
+        <ion-spinner name="crescent" color="success"></ion-spinner>
         <p>Loading announcements...</p>
       </div>
 

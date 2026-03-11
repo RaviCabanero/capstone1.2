@@ -28,13 +28,14 @@ service cloud.firestore {
       
       // Alumni association admin can update digitalIdStatus fields
       allow update: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['alumni_association_admin', 'super_admin'] &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['alumni_association_admin', 'alumni_admin', 'super_admin'] &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['digitalIdStatus', 'digitalIdApprovedAt', 'digitalIdRejectedAt', 'updatedAt']);
       
       // Alumni association admin or super admin can modify other users' roles (only to alumni or dept_head)
       allow update: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['alumni_association_admin', 'super_admin'] &&
-        (request.resource.data.role == 'alumni' || request.resource.data.role == 'dept_head');
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['alumni_association_admin', 'alumni_admin', 'super_admin'] &&
+        (request.resource.data.role == 'alumni' || request.resource.data.role == 'dept_head') &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'isDepartmentHead', 'schoolDepartment', 'updatedAt']);
       
       // Only super admin can delete users
       allow delete: if request.auth != null &&
