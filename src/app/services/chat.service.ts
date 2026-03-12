@@ -74,6 +74,30 @@ export class ChatService {
       createdAt: serverTimestamp(),
       participants,
     });
+
+    // Also create a notification so the recipient sees the new message in their notifications.
+    await this.createMessageNotification(recipientId, senderId, text);
+  }
+
+  private async createMessageNotification(recipientId: string, senderId: string, text: string) {
+    try {
+      const senderName = this.auth.currentUser?.displayName || senderId;
+      const notification = {
+        userId: recipientId,
+        type: 'message' as const,
+        title: `New message from ${senderName}`,
+        message: text.length > 100 ? `${text.slice(0, 97)}...` : text,
+        timestamp: new Date().getTime(),
+        read: false,
+        data: {
+          fromUserId: senderId,
+        },
+      };
+      const notificationsCol = collection(this.firestore, 'notifications');
+      await addDoc(notificationsCol, notification);
+    } catch (error) {
+      console.error('Failed to create message notification:', error);
+    }
   }
 
   watchMessages(chatId: string): Observable<ChatMessageRecord[]> {

@@ -23,12 +23,12 @@ import { ConnectionRequestService } from '../services/connection-request.service
 export interface Notification {
   id?: string;
   userId: string;
-  type: 'event' | 'announcement' | 'approval' | 'reminder' | 'general' | 'connection_request';
+  type: 'event' | 'announcement' | 'approval' | 'reminder' | 'general' | 'connection_request' | 'message';
   title: string;
   message: string;
   timestamp: number;
   read: boolean;
-  data?: any; // Additional data like eventId, postId, requestId, etc.
+  data?: any; // Additional data like eventId, postId, requestId, conversationId, etc.
 }
 
 @Component({
@@ -41,6 +41,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
   notifications: Notification[] = [];
   upcomingEvents: any[] = [];
   loading = true;
+  notificationSoundEnabled = false; // Disable notification sound by default (user request)
   userProfile: any = {}; // Initialize with empty object
   userProfile$: Observable<any> | undefined;
   searchQuery: string = '';
@@ -210,11 +211,13 @@ export class NotificationsPage implements OnInit, OnDestroy {
 
   
   private async playNotificationAlert(notification: Notification) {
-    
+    // Provide haptic feedback for new notifications.
     await this.triggerNotificationHaptics();
-    
-   
-    await this.playNotificationSound();
+
+    // Only play an audible sound when enabled (default is off).
+    if (this.notificationSoundEnabled) {
+      await this.playNotificationSound();
+    }
   }
 
   
@@ -344,8 +347,6 @@ export class NotificationsPage implements OnInit, OnDestroy {
   
   async showNewEventToast(eventTitle: string) {
     await this.triggerNotificationHaptics();
-    
-    await this.playNotificationSound();
 
     const toast = await this.toastCtrl.create({
       message: `📅 New event: ${eventTitle}`,
@@ -409,8 +410,8 @@ export class NotificationsPage implements OnInit, OnDestroy {
   
   private async addNotificationToFirestore(notification: Notification) {
     try {
-      const uid = this.auth.currentUser?.uid;
-      if (!uid) {
+      const currentUid = this.auth.currentUser?.uid;
+      if (!currentUid) {
         console.warn('No user ID available for notification');
         return;
       }
@@ -419,7 +420,8 @@ export class NotificationsPage implements OnInit, OnDestroy {
       
       const docData = {
         ...notification,
-        userId: uid,
+        // Allow the caller to specify a different userId (e.g. recipient for message notifications).
+        userId: notification.userId || currentUid,
         createdAt: new Date().getTime()
       };
 
@@ -437,7 +439,8 @@ export class NotificationsPage implements OnInit, OnDestroy {
       approval: 'checkmark-circle',
       reminder: 'alarm',
       general: 'notifications',
-      connection_request: 'person-add'
+      connection_request: 'person-add',
+      message: 'chatbubbles'
     };
     return icons[type] || 'notifications';
   }
@@ -450,21 +453,42 @@ export class NotificationsPage implements OnInit, OnDestroy {
       approval: 'success',
       reminder: 'tertiary',
       general: 'medium',
-      connection_request: 'success'
+      connection_request: 'success',
+      message: 'secondary'
     };
     return colors[type] || 'medium';
   }
 
   
   async handleNotificationClick(notification: Notification) {
-    
     if (!notification.read) {
       await this.markAsRead(notification);
     }
 
+    if (notification.type === 'connection_request') {
+      // Keep the notification until the user accepts/rejects it.
+      // Navigate the user to the sender's profile so they can decide.
+      const fromUserId = notification.data?.fromUserId;
+      if (fromUserId) {
+        this.router.navigate([`/profile/${fromUserId}`]);
+      } else {
+        this.router.navigate(['/profile']);
+      }
+      return;
+    }
+
     switch (notification.type) {
+      case 'message':
+        // If this notification is for a new message, open the chat view
+        // and try to open a conversation with the sender if we have their UID.
+        const otherUserId = notification.data?.fromUserId;
+        if (otherUserId) {
+          this.router.navigate(['/chat'], { queryParams: { openChatWith: otherUserId } });
+        } else {
+          this.router.navigate(['/chat']);
+        }
+        break;
       case 'event':
-       
         this.router.navigate(['/home']);
         break;
       case 'approval':
@@ -478,6 +502,10 @@ export class NotificationsPage implements OnInit, OnDestroy {
       default:
         this.router.navigate(['/home']);
         break;
+    }
+
+    if (notification.id) {
+      await this.deleteNotificationQuietly(notification.id);
     }
   }
 

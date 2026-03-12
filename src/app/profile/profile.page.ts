@@ -43,6 +43,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
   isOwnProfile: boolean = true;
   
   currentUserConnections: string[] = [];
+  viewedUserConnections: string[] = [];
   isConnectedWithViewed: boolean = false;
   isPendingRequest: boolean = false;
 
@@ -178,8 +179,9 @@ export class ProfilePage implements OnInit, ViewWillEnter {
           this.groupedExperiences = this.groupAndSortExperiences(profile.experiences);
         }
         if (profile?.connections && this.currentUserId) {
-          this.isConnectedWithViewed = profile.connections.includes(this.currentUserId);
+          this.viewedUserConnections = profile.connections || [];
         }
+        this.updateConnectionStatus();
         if (!this.isOwnProfile && this.currentUserId) {
           this.checkPendingRequest(this.currentUserId, uid);
         }
@@ -276,12 +278,27 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     docData(doc(this.firestore, `users/${uid}`)).subscribe(
       (profile: any) => {
         this.currentUserConnections = profile?.connections || [];
+        this.updateConnectionStatus();
       },
       (error) => {
         console.error('Error loading connections:', error);
         this.currentUserConnections = [];
+        this.updateConnectionStatus();
       }
     );
+  }
+
+  private updateConnectionStatus() {
+    if (!this.currentUserId || !this.viewedUserId) {
+      this.isConnectedWithViewed = false;
+      return;
+    }
+
+    const connectedFromCurrent = this.currentUserConnections.includes(this.viewedUserId);
+    const connectedFromViewed = this.viewedUserConnections.includes(this.currentUserId);
+
+    // Ensure that either direction counts as connected.
+    this.isConnectedWithViewed = connectedFromCurrent || connectedFromViewed;
   }
 
   private convertTimestamp(timestamp: any): number {

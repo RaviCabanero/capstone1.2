@@ -376,6 +376,19 @@ ion-content {
             }
           }
         }
+
+        .connection-request-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          width: 120px;
+
+          ion-button {
+            height: 36px;
+            font-size: 12px;
+            --border-radius: 10px;
+          }
+        }
       }
     }
   }

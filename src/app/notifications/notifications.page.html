@@ -113,22 +113,24 @@
           <div class="notification-actions">
             <!-- Connection Request Actions -->
             <ng-container *ngIf="notification.type === 'connection_request'">
-              <ion-button 
-                fill="solid"
-                size="small"
-                color="success"
-                (click)="acceptConnectionRequest(notification); $event.stopPropagation()"
-                class="action-btn accept-btn">
-                Accept
-              </ion-button>
-              <ion-button 
-                fill="solid"
-                size="small"
-                color="danger"
-                (click)="rejectConnectionRequest(notification); $event.stopPropagation()"
-                class="action-btn reject-btn">
-                Reject
-              </ion-button>
+              <div class="connection-request-actions">
+                <ion-button 
+                  fill="solid"
+                  size="small"
+                  color="success"
+                  (click)="acceptConnectionRequest(notification); $event.stopPropagation()"
+                  class="accept-btn">
+                  Accept
+                </ion-button>
+                <ion-button 
+                  fill="outline"
+                  size="small"
+                  color="danger"
+                  (click)="rejectConnectionRequest(notification); $event.stopPropagation()"
+                  class="reject-btn">
+                  Reject
+                </ion-button>
+              </div>
             </ng-container>
 
             <!-- Other Notification Actions -->
@@ -138,20 +140,6 @@
                 class="new-badge">
                 New
               </ion-badge>
-              <ion-button 
-                fill="clear" 
-                size="small"
-                (click)="markAsRead(notification); $event.stopPropagation()"
-                class="action-btn">
-                <ion-icon slot="icon-only" name="checkmark"></ion-icon>
-              </ion-button>
-              <ion-button 
-                fill="clear" 
-                size="small"
-                (click)="deleteNotification(notification); $event.stopPropagation()"
-                class="action-btn delete-btn">
-                <ion-icon slot="icon-only" name="trash"></ion-icon>
-              </ion-button>
             </ng-container>
           </div>
         </div>

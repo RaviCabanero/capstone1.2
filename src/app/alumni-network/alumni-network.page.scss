@@ -279,6 +279,9 @@ ion-buttons ion-icon[name="person-circle"] {
     gap: 15px;
 
     .alumni-card-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       background: white;
       border-radius: 10px;
       overflow: hidden;
@@ -359,6 +362,7 @@ ion-buttons ion-icon[name="person-circle"] {
         height: 36px;
         font-weight: 600;
         text-transform: capitalize;
+        margin-top: 12px;
       }
     }
   }

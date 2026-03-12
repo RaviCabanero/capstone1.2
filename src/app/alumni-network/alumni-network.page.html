@@ -124,8 +124,16 @@
           <p class="alumni-department">{{ alumnus.schoolDepartment || alumnus.department || 'No department' }}</p>
         </div>
 
-        <ion-button expand="block" color="success" size="small" (click)="$event.stopPropagation(); connectWithAlumnus(alumnus.id)">
-          Connect
+        <ion-button
+          expand="block"
+          [color]="alumnus.isConnected ? 'medium' : 'success'"
+          [fill]="alumnus.isConnected ? 'outline' : 'solid'"
+          size="small"
+          [disabled]="alumnus.isConnected || alumnus.isPending"
+          (click)="$event.stopPropagation(); connectWithAlumnus(alumnus.id)">
+          <ng-container *ngIf="alumnus.isConnected">Connected</ng-container>
+          <ng-container *ngIf="!alumnus.isConnected && alumnus.isPending">Pending</ng-container>
+          <ng-container *ngIf="!alumnus.isConnected && !alumnus.isPending">Connect</ng-container>
         </ion-button>
       </div>
     </div>
@@ -225,7 +233,6 @@
     <ion-tab-button tab="notification" routerLink="/notifications">
       <ion-icon name="notifications"></ion-icon>
       <ion-label>Notification</ion-label>
-      <ion-badge *ngIf="notificationCount > 0">{{ notificationCount }}</ion-badge>
     </ion-tab-button>
     
     <ion-tab-button tab="menu" (click)="openMenu()">

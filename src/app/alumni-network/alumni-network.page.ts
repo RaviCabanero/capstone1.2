@@ -13,25 +13,22 @@ import { ConnectionRequestService } from '../services/connection-request.service
   standalone: false,
 })
 export class AlumniNetworkPage implements OnInit {
-  // User Profile
   userProfile: any;
   userDepartment: string = '';
 
-  // Invite Section
   inviteAvatars: any[] = [];
-
-  // Network Overview Stats
   inviteSent: number = 0;
   connections: number = 0;
   following: number = 0;
 
-  // Network Lists (for modals)
+  currentUserConnections: string[] = [];
+  pendingRequestIds: string[] = [];
+
   outgoingRequests: any[] = [];
   acceptedConnections: any[] = [];
   showInviteListModal: boolean = false;
   showConnectionListModal: boolean = false;
 
-  // Department Filter
   selectedDepartment: string = 'School of Education';
   selectedDepartmentFilter: string = 'my'; // 'my', 'all', or specific department name
 
@@ -118,6 +115,9 @@ export class AlumniNetworkPage implements OnInit {
         this.allSearchAlumni = normalizedUsers;
         this.suggestedAlumni = normalizedUsers;
         this.populateInviteAvatars(normalizedUsers);
+
+        // Apply connection / pending status to each alumni card
+        this.applyConnectionStatusToAlumni();
         
         console.log('Alumni loaded and displayed successfully');
       },
@@ -156,6 +156,7 @@ export class AlumniNetworkPage implements OnInit {
         console.log('Photo URL:', profile?.photoDataUrl);
         
         this.userProfile = profile;
+        this.currentUserConnections = Array.isArray(profile?.connections) ? profile.connections : [];
         this.userDepartment = profile?.schoolDepartment || profile?.department || 'School of Education';
         
         console.log('User Department:', this.userDepartment);
@@ -165,6 +166,8 @@ export class AlumniNetworkPage implements OnInit {
         this.selectedDepartment = 'All Departments';
         this.loadSuggestedAlumni();
         this.loadAllAlumni();
+        this.applyConnectionStatusToAlumni();
+        this.loadOutgoingRequests();
       },
       (error) => {
         console.error(' Profile load error:', error);
@@ -222,11 +225,16 @@ export class AlumniNetworkPage implements OnInit {
 
     this.connectionRequestService.getOutgoingRequests(uid).subscribe({
       next: (requests: any[]) => {
+        // Track request IDs so we can mark pending status on cards.
+        this.pendingRequestIds = requests.map(req => req.toUserId);
+
         // Enrich with user data for display
         this.outgoingRequests = requests.map((req: any) => {
           const userData = this.allAlumni.find(a => a.id === req.toUserId);
           return { ...req, toUser: userData || { id: req.toUserId, firstName: 'Alumni' } };
         });
+
+        this.applyConnectionStatusToAlumni();
 
         console.log('Outgoing requests loaded:', this.outgoingRequests);
       },
@@ -327,6 +335,9 @@ export class AlumniNetworkPage implements OnInit {
 
         // Populate invite avatars with random users
         this.populateInviteAvatars(filteredUsers);
+
+        // Apply connected/pending status to the updated list
+        this.applyConnectionStatusToAlumni();
       },
       (error) => {
         console.error(' Error loading users:', error);
@@ -361,6 +372,9 @@ export class AlumniNetworkPage implements OnInit {
 
             // Populate invite avatars with 3 random users
             this.populateInviteAvatars(filteredUsers);
+
+            // Apply connection / pending status across the search cache too
+            this.applyConnectionStatusToAlumni();
       },
       (error) => {
         console.error(' Search cache error:', error);
@@ -435,6 +449,43 @@ export class AlumniNetworkPage implements OnInit {
    * Connect with alumnus
    */
   async connectWithAlumnus(alumniId: string) {
+    const currentUserId = this.auth.currentUser?.uid;
+    if (!alumniId || !currentUserId) {
+      const toast = await this.toastController.create({
+        message: 'Error: Please log in and try again',
+        duration: 2000,
+        position: 'bottom',
+        color: 'danger',
+      });
+      await toast.present();
+      return;
+    }
+
+    const alreadyConnected = this.currentUserConnections.includes(alumniId);
+    const alreadyPending = this.pendingRequestIds.includes(alumniId);
+
+    if (alreadyConnected) {
+      const toast = await this.toastController.create({
+        message: 'You are already connected with this alumni.',
+        duration: 2000,
+        position: 'bottom',
+        color: 'medium',
+      });
+      await toast.present();
+      return;
+    }
+
+    if (alreadyPending) {
+      const toast = await this.toastController.create({
+        message: 'Connection request already pending.',
+        duration: 2000,
+        position: 'bottom',
+        color: 'medium',
+      });
+      await toast.present();
+      return;
+    }
+
     const alert = await this.alertController.create({
       header: 'Send Connection Request',
       message: 'Send a connection request to this alumnus?',
@@ -446,36 +497,29 @@ export class AlumniNetworkPage implements OnInit {
         {
           text: 'Send Request',
           handler: async () => {
-            const currentUserId = this.auth.currentUser?.uid;
-            if (currentUserId) {
-              try {
-                // Send connection request using the service
-                await this.connectionRequestService.sendConnectionRequest(alumniId);
+            try {
+              await this.connectionRequestService.sendConnectionRequest(alumniId);
 
-                // Show success toast
-                const toast = await this.toastController.create({
-                  message: 'Connection request sent!',
-                  duration: 2000,
-                  position: 'bottom',
-                  color: 'success',
-                });
-                await toast.present();
+              // Mark as pending locally so the UI updates immediately
+              this.pendingRequestIds.push(alumniId);
+              this.applyConnectionStatusToAlumni();
 
-                // Remove from suggested alumni list
-                const index = this.suggestedAlumni.findIndex(user => user.id === alumniId);
-                if (index > -1) {
-                  this.suggestedAlumni.splice(index, 1);
-                }
-              } catch (error) {
-                console.error('Error sending connection request:', error);
-                const errorToast = await this.toastController.create({
-                  message: 'Failed to send connection request',
-                  duration: 2000,
-                  position: 'bottom',
-                  color: 'danger',
-                });
-                await errorToast.present();
-              }
+              const toast = await this.toastController.create({
+                message: 'Connection request sent!',
+                duration: 2000,
+                position: 'bottom',
+                color: 'success',
+              });
+              await toast.present();
+            } catch (error) {
+              console.error('Error sending connection request:', error);
+              const errorToast = await this.toastController.create({
+                message: 'Failed to send connection request',
+                duration: 2000,
+                position: 'bottom',
+                color: 'danger',
+              });
+              await errorToast.present();
             }
           },
         },
@@ -557,6 +601,32 @@ export class AlumniNetworkPage implements OnInit {
     } else {
       return this.selectedDepartmentFilter;
     }
+  }
+
+  /**
+   * Apply connection + pending status to the visible alumni lists.
+   */
+  private applyConnectionStatusToAlumni() {
+    const currentUserId = this.auth.currentUser?.uid;
+    const connectedSet = new Set(this.currentUserConnections || []);
+    const pendingSet = new Set(this.pendingRequestIds || []);
+
+    const updateList = (list: any[]) =>
+      list.map((user) => {
+        const isConnected =
+          connectedSet.has(user.id) ||
+          (currentUserId && Array.isArray(user.connections) && user.connections.includes(currentUserId));
+
+        return {
+          ...user,
+          isConnected,
+          isPending: pendingSet.has(user.id),
+        };
+      });
+
+    this.allAlumni = updateList(this.allAlumni);
+    this.allSearchAlumni = updateList(this.allSearchAlumni);
+    this.suggestedAlumni = updateList(this.suggestedAlumni);
   }
 
   /**

@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
 import { ToastController } from '@ionic/angular';
@@ -35,6 +36,7 @@ export class ChatPage implements OnInit, OnDestroy {
   private chatService = inject(ChatService);
   private auth = inject(Auth);
   private toastController = inject(ToastController);
+  private route = inject(ActivatedRoute);
 
   segment: 'all' | 'unread' | 'groups' | 'communities' = 'all';
   search: string = '';
@@ -51,6 +53,7 @@ export class ChatPage implements OnInit, OnDestroy {
   private authSub?: Subscription;
   private chatSub?: Subscription;
   private messageSub?: Subscription;
+  private queryParamSub?: Subscription;
 
   get activeChatName() {
     if (!this.activeChatId) return '';
@@ -81,6 +84,13 @@ export class ChatPage implements OnInit, OnDestroy {
       this.currentUid = user?.uid;
       this.loadAlumni();
       this.subscribeToChats(this.currentUid);
+    });
+
+    this.queryParamSub = this.route.queryParams.subscribe((params) => {
+      const openChatWith = params['openChatWith'];
+      if (openChatWith) {
+        this.openConversation(openChatWith);
+      }
     });
   }
 
@@ -335,5 +345,6 @@ export class ChatPage implements OnInit, OnDestroy {
     this.authSub?.unsubscribe();
     this.chatSub?.unsubscribe();
     this.messageSub?.unsubscribe();
+    this.queryParamSub?.unsubscribe();
   }
 }
