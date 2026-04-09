@@ -44,17 +44,63 @@ async function createAlumniAdmin() {
     
     console.log('✓ User created successfully with UID:', userRecord.uid);
     
+    // Parse displayName into firstName and lastName
+    const nameParts = displayName.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
     // Create/update user document in Firestore with alumni_association_admin role
     await admin.firestore().collection('users').doc(userRecord.uid).set({
       uid: userRecord.uid,
       email: email,
       displayName: displayName,
+      firstName: firstName,
+      lastName: lastName,
       role: 'alumni_association_admin',
       status: 'approved',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     
+    // Create required subcollections with a non-reserved init document id
+    const subcollections = ['Chats', 'ConnectionRequest', 'IdRequest', 'Notifications', 'Post'];
+    const initDoc = {
+      initialized: true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      userId: userRecord.uid
+    };
+    for (const name of subcollections) {
+      await admin.firestore().collection('users').doc(userRecord.uid).collection(name).doc('init').set(initDoc, { merge: true });
+    }
+
+    // Create alias document keyed by lastName for easier admin viewing
+    if (lastName) {
+      const aliasRef = admin.firestore().collection('users').doc(lastName);
+      const aliasSnap = await aliasRef.get();
+      let aliasId = lastName;
+      if (aliasSnap.exists && aliasSnap.data().uid !== userRecord.uid) {
+        // collision - append short uid
+        aliasId = `${lastName}_${userRecord.uid.toString().slice(0,6)}`;
+      }
+      const finalAliasRef = admin.firestore().collection('users').doc(aliasId);
+      await finalAliasRef.set({
+        uid: userRecord.uid,
+        email,
+        displayName,
+        firstName,
+        lastName,
+        role: 'alumni_association_admin',
+        status: 'approved',
+        aliasOf: userRecord.uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      // create subcollection init docs for alias
+      for (const name of subcollections) {
+        await finalAliasRef.collection(name).doc('init').set(initDoc, { merge: true });
+      }
+    }
     console.log('✓ User document created in Firestore with alumni_association_admin role');
     console.log('\n=== Setup Complete! ===');
     console.log(`\nYou can now login with:`);

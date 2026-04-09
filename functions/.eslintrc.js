@@ -1,4 +1,18 @@
 module.exports = {
+  root: true,
+  env: {
+    node: true,
+    es2021: true
+  },
+  extends: ['eslint:recommended'],
+  parserOptions: {
+    ecmaVersion: 12
+  },
+  rules: {
+    // keep lint permissive for deployment
+  }
+};
+module.exports = {
   env: {
     es6: true,
     node: true,

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, authState, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, UserCredential, sendEmailVerification as firebaseSendEmailVerification, User } from '@angular/fire/auth';
 import { Firestore, addDoc, collection } from '@angular/fire/firestore';
@@ -9,7 +9,7 @@ export class AuthService {
   readonly user$ = authState(this.auth);
   readonly isLoggedIn$: Observable<boolean> = this.user$.pipe(map(user => !!user));
 
-  constructor(private auth: Auth, private router: Router, private firestore: Firestore) {}
+  constructor(private auth: Auth, private router: Router, private firestore: Firestore, private ngZone: NgZone) {}
 
   login(email: string, password: string): Promise<UserCredential> {
     return signInWithEmailAndPassword(this.auth, email, password);
@@ -18,7 +18,7 @@ export class AuthService {
   async register(email: string, password: string, displayName: string): Promise<UserCredential> {
     const credential = await createUserWithEmailAndPassword(this.auth, email, password);
     if (credential.user && displayName) {
-      await updateProfile(credential.user, { displayName });
+      await this.ngZone.run(() => updateProfile(credential.user!, { displayName }));
     }
     return credential;
   }

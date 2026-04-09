@@ -14,6 +14,28 @@ export class AdminService {
   ) {}
 
   /**
+   * Normalize user data to ensure firstName and lastName are populated
+   * Falls back to splitting displayName if firstName/lastName are missing
+   */
+  private normalizeUserData(user: any): any {
+    let firstName = user.firstName || '';
+    let lastName = user.lastName || '';
+
+    // If either is missing, try to extract from displayName
+    if ((!firstName || !lastName) && user.displayName) {
+      const parts = user.displayName.trim().split(/\s+/);
+      if (!firstName) firstName = parts[0] || '';
+      if (!lastName) lastName = parts.slice(1).join(' ') || '';
+    }
+
+    return {
+      ...user,
+      firstName,
+      lastName
+    };
+  }
+
+  /**
    * Get all pending user approvals
    */
   async getPendingUsers() {
@@ -22,7 +44,7 @@ export class AdminService {
       where('status', '==', 'pending')
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map(doc => this.normalizeUserData({
       uid: doc.id,
       ...doc.data()
     }));
@@ -37,7 +59,7 @@ export class AdminService {
       where('status', '==', 'approved')
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map(doc => this.normalizeUserData({
       uid: doc.id,
       ...doc.data()
     }));
@@ -52,7 +74,7 @@ export class AdminService {
       where('role', '==', 'dept_head')
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map(doc => this.normalizeUserData({
       uid: doc.id,
       ...doc.data()
     }));
@@ -187,7 +209,7 @@ export class AdminService {
   async getAllUsers() {
     const q = query(collection(this.firestore, 'users'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map(doc => this.normalizeUserData({
       uid: doc.id,
       ...doc.data()
     }));
@@ -226,7 +248,7 @@ export class AdminService {
       where('schoolDepartment', '==', department)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    return snapshot.docs.map(doc => this.normalizeUserData({
       uid: doc.id,
       ...doc.data()
     }));
@@ -320,7 +342,7 @@ export class AdminService {
     if (!user) return null;
     
     const userDoc = await getDoc(doc(this.firestore, 'users', user.uid));
-    return userDoc.exists() ? userDoc.data() : null;
+    return userDoc.exists() ? this.normalizeUserData(userDoc.data()) : null;
   }
 
   /**
@@ -335,7 +357,7 @@ export class AdminService {
         where('department', '==', department)
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      return snapshot.docs.map(doc => this.normalizeUserData({
         uid: doc.id,
         ...doc.data()
       }));

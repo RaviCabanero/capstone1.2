@@ -140,4 +140,11 @@ export class LoginPage implements OnInit {
     await alert.present();
   }
 
+  ionViewWillLeave() {
+    // Blur the active element to prevent focus retention on hidden pages
+    if (document.activeElement) {
+      (document.activeElement as HTMLElement).blur();
+    }
+  }
+
 }

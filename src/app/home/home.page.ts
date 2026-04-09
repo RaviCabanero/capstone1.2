@@ -430,7 +430,7 @@ export class HomePage implements OnInit {
 
       const postToSave = {
         userId: uid,
-        userName: this.auth.currentUser?.displayName || userDoc?.firstName + ' ' + userDoc?.lastName || 'User',
+        userName: (userDoc ? `${userDoc.firstName || ''} ${userDoc.lastName || ''}`.trim() : '') || this.auth.currentUser?.displayName || 'User',
         userAvatar: userDoc?.photoDataUrl || '',
         text: postData.text,
         image: postData.image || '',
@@ -624,7 +624,7 @@ export class HomePage implements OnInit {
       const newComment = {
         id: new Date().getTime().toString(),
         userId: uid,
-        userName: this.auth.currentUser?.displayName || userDoc?.firstName + ' ' + userDoc?.lastName || 'Anonymous',
+        userName: (userDoc ? `${userDoc.firstName || ''} ${userDoc.lastName || ''}`.trim() : '') || this.auth.currentUser?.displayName || 'Anonymous',
         userAvatar: userDoc?.photoDataUrl || '',
         text: commentText,
         timestamp: new Date().getTime(),

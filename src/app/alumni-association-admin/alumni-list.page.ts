@@ -132,11 +132,11 @@ export class AlumniListPage implements OnInit {
   }
 
   getDisplayName(user: any): string {
-    if (user?.displayName) return user.displayName;
     const first = user?.firstName || user?.firstname || '';
     const last = user?.lastName || user?.lastname || '';
     const combined = `${first} ${last}`.trim();
     if (combined) return combined;
+    if (user?.displayName) return user.displayName;
     if (user?.email) return user.email.split('@')[0];
     return 'No Name';
   }

@@ -10,4 +10,11 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule],
 })
-export class RegisterSuccessPage {}
+export class RegisterSuccessPage {
+  ionViewWillLeave() {
+    // Blur the active element to prevent focus retention on hidden pages
+    if (document.activeElement) {
+      (document.activeElement as HTMLElement).blur();
+    }
+  }
+}

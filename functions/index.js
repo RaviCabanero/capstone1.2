@@ -9,9 +9,10 @@
 
 const {setGlobalOptions} = require("firebase-functions");
 const {onCall} = require("firebase-functions/v2/https");
-const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+const {onDocumentWritten, onDocumentCreated} = require("firebase-functions/v2/firestore");
+const {onUserCreated: onAuthUserCreated} = require("firebase-functions/v2/auth");
 const {initializeApp} = require("firebase-admin/app");
-const {getFirestore} = require("firebase-admin/firestore");
+const {getFirestore, doc, setDoc, updateDoc, getDoc} = require("firebase-admin/firestore");
 const {getAuth} = require("firebase-admin/auth");
 const nodemailer = require("nodemailer");
 const logger = require("firebase-functions/logger");
@@ -40,6 +41,58 @@ const transporter = nodemailer.createTransport({
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
+
+// Helper: create an alias document keyed by lastName (if available).
+// If the plain lastName id is taken by another user, append a short uid suffix.
+async function ensureAliasByLastName(db, uid, { firstName = '', lastName = '', email = '', displayName = '', role = 'alumni', status = 'pending' } = {}) {
+  const base = (lastName || '').toString().trim();
+  if (!base) return null;
+
+  let aliasId = base;
+  let aliasRef = doc(db, 'users', aliasId);
+  let snap = await getDoc(aliasRef);
+
+  if (snap.exists) {
+    const data = snap.data() || {};
+    if (data.uid === uid) {
+      // alias already points to this uid
+      return aliasId;
+    }
+    // collision: create a unique alias using a short uid suffix
+    const short = uid ? uid.toString().slice(0, 6) : Date.now().toString().slice(-6);
+    aliasId = `${base}_${short}`;
+    aliasRef = doc(db, 'users', aliasId);
+    snap = await getDoc(aliasRef);
+  }
+
+  const aliasData = {
+    uid,
+    email,
+    displayName,
+    firstName,
+    lastName,
+    role,
+    status,
+    aliasOf: uid,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  await setDoc(aliasRef, aliasData, { merge: true });
+
+  // create subcollection init docs under alias
+  const subcollections = ['Chats', 'ConnectionRequest', 'IdRequest', 'Notifications', 'Post'];
+  await Promise.all(subcollections.map((name) =>
+    setDoc(doc(db, 'users', aliasId, name, 'init'), {
+      initialized: true,
+      createdAt: new Date().toISOString(),
+      userId: uid,
+      collection: name
+    }, { merge: true })
+  ));
+
+  return aliasId;
+}
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -125,8 +178,126 @@ exports.sendRejectionEmail = onCall(async (request) => {
   }
 });
 
+/** * Trigger when a new user document is created in Firestore
+ */
+exports.onUserCreated = onDocumentCreated("users/{uid}", async (event) => {
+  const uid = event.params.uid;
+
+  const userData = event.data.after.data() || {};
+  const displayName = (userData.displayName || '').toString().trim();
+  const firstName = userData.firstName || displayName.split(/\s+/)[0] || '';
+  const lastName = userData.lastName || displayName.split(/\s+/).slice(1).join(' ') || '';
+
+  const db = getFirestore();
+  const userDocRef = doc(db, 'users', uid);
+  const updates = {};
+  if (!userData.firstName && firstName) updates.firstName = firstName;
+  if (!userData.lastName && lastName) updates.lastName = lastName;
+  if (Object.keys(updates).length) {
+    updates.updatedAt = new Date().toISOString();
+    await updateDoc(userDocRef, updates);
+  }
+
+  const subcollections = [
+    'Chats',
+    'ConnectionRequest',
+    'IdRequest',
+    'Notifications',
+    'Post'
+  ];
+
+  // Use a safe, non-reserved init document id
+  await Promise.all(subcollections.map((name) => {
+    return setDoc(doc(db, 'users', uid, name, 'init'), {
+      initialized: true,
+      createdAt: new Date().toISOString(),
+      userId: uid,
+      collection: name
+    }, { merge: true });
+  }));
+
+  // Also create an alias document keyed by lastName for easier admin viewing
+  try {
+    await ensureAliasByLastName(db, uid, {
+      firstName,
+      lastName,
+      email: userData.email || '',
+      displayName: userData.displayName || '',
+      role: userData.role || 'alumni',
+      status: userData.status || 'pending'
+    });
+  } catch (err) {
+    logger.warn(`Failed to create alias by lastName for user ${uid}: ${err?.message || err}`);
+  }
+
+  return null;
+});
+
 /**
- * Trigger when user status is updated in Firestore
+ * Auth trigger: ensure a Firestore user document and required subcollections
+ * are created as soon as an Auth user is created.
+ */
+exports.onAuthUserCreated = onAuthUserCreated(async (event) => {
+  const authUser = event.data || {};
+  const uid = authUser.uid;
+  if (!uid) return null;
+
+  const db = getFirestore();
+  const userRef = doc(db, 'users', uid);
+  const existing = await getDoc(userRef);
+
+  // If the user document already has fields, don't overwrite
+  if (existing.exists && Object.keys(existing.data() || {}).length > 0) {
+    return null;
+  }
+
+  const displayName = (authUser.displayName || '').toString().trim();
+  const firstName = displayName.split(/\s+/)[0] || '';
+  const lastName = displayName.split(/\s+/).slice(1).join(' ') || '';
+  const email = authUser.email || '';
+
+  const userData = {
+    uid,
+    email,
+    displayName: displayName || (email ? email.split('@')[0] : ''),
+    firstName,
+    lastName,
+    role: 'alumni',
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  await setDoc(userRef, userData, { merge: true });
+
+  const subcollections = ['Chats', 'ConnectionRequest', 'IdRequest', 'Notifications', 'Post'];
+  await Promise.all(subcollections.map((name) =>
+    setDoc(doc(db, 'users', uid, name, 'init'), {
+      initialized: true,
+      createdAt: new Date().toISOString(),
+      userId: uid,
+      collection: name
+    }, { merge: true })
+  ));
+
+  // create alias doc keyed by lastName for admin readability
+  try {
+    await ensureAliasByLastName(db, uid, {
+      firstName,
+      lastName,
+      email,
+      displayName: userData.displayName || '',
+      role: userData.role || 'alumni',
+      status: userData.status || 'pending'
+    });
+  } catch (err) {
+    logger.warn(`Failed to create alias by lastName for auth user ${uid}: ${err?.message || err}`);
+  }
+
+  return null;
+});
+
+/** * Trigger when user status is updated in Firestore
  */
 exports.onUserStatusChanged = onDocumentWritten("users/{uid}", async (event) => {
   const uid = event.params.uid;

@@ -12,9 +12,10 @@ import {
   getDocs,
   WriteBatch,
   writeBatch,
-  arrayUnion
+  arrayUnion,
+  setDoc
 } from '@angular/fire/firestore';
-import { getDoc } from 'firebase/firestore';
+import { getDoc, collectionGroup, documentId } from 'firebase/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { NotificationService } from './notification.service';
@@ -59,10 +60,10 @@ export class ConnectionRequestService {
       const senderName = currentUser.email || 'An Alumni';
 
       // Create connection request document
-      const requestRef = collection(this.firestore, 'connectionRequests');
-      console.log('✏️ Creating connection request...');
-      
-      const requestDocRef = await addDoc(requestRef, {
+      // Create connection request document under sender's subcollection
+      const fromCollection = collection(this.firestore, 'users', fromUserId, 'ConnectionRequest');
+      console.log('✏️ Creating connection request under sender...');
+      const requestDocRef = await addDoc(fromCollection, {
         fromUserId: fromUserId,
         toUserId: toUserId,
         status: 'pending',
@@ -70,7 +71,21 @@ export class ConnectionRequestService {
         createdAt: new Date().toISOString()
       });
 
-      console.log('✅ Connection request created:', requestDocRef.id);
+      console.log('✅ Connection request created with id:', requestDocRef.id);
+
+      // Mirror the request under receiver's subcollection with same id
+      try {
+        await setDoc(doc(this.firestore, 'users', toUserId, 'ConnectionRequest', requestDocRef.id), {
+          fromUserId: fromUserId,
+          toUserId: toUserId,
+          status: 'pending',
+          timestamp: Date.now(),
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+        console.log('✅ Mirrored connection request under receiver');
+      } catch (mirrorErr) {
+        console.warn('⚠️ Failed to mirror connection request under receiver:', mirrorErr);
+      }
 
       // Create notification for the receiver (non-critical, don't fail if this fails)
       try {
@@ -116,13 +131,27 @@ export class ConnectionRequestService {
 
       const { fromUserId, toUserId } = requestDoc;
 
-      // Update request status first (this is critical)
-      const requestRef = doc(this.firestore, `connectionRequests/${requestId}`);
-      console.log('✏️ Updating request status to accepted...');
-      await updateDoc(requestRef, {
-        status: 'accepted'
-      });
-      console.log('✅ Request status updated');
+      // Update request status in both sender and receiver subcollections
+      console.log('✏️ Updating request status to accepted in user subcollections...');
+      try {
+        const fromRef = doc(this.firestore, `users/${fromUserId}/ConnectionRequest/${requestId}`);
+        const toRef = doc(this.firestore, `users/${toUserId}/ConnectionRequest/${requestId}`);
+        await updateDoc(fromRef, { status: 'accepted' });
+        await updateDoc(toRef, { status: 'accepted' });
+        console.log('✅ Request status updated in both subcollections');
+      } catch (err) {
+        console.warn('⚠️ Failed updating one or both subcollection docs, attempting collectionGroup fallback', err);
+        // Fallback: try to update any matching connection request document by id across collection group
+        try {
+          const q = query(collectionGroup(this.firestore, 'ConnectionRequest'), where(documentId(), '==', requestId));
+          const snaps = await getDocs(q);
+          for (const s of snaps.docs) {
+            await updateDoc(doc(this.firestore, s.ref.path), { status: 'accepted' } as any);
+          }
+        } catch (cgErr) {
+          console.warn('⚠️ collectionGroup fallback failed:', cgErr);
+        }
+      }
 
       // Update user profiles (non-critical, don't fail if this fails)
       try {
@@ -180,12 +209,18 @@ export class ConnectionRequestService {
    */
   async rejectConnectionRequest(requestId: string): Promise<void> {
     try {
-      const requestRef = doc(this.firestore, `connectionRequests/${requestId}`);
-      await updateDoc(requestRef, {
-        status: 'rejected'
-      });
-      
-      console.log('Connection request rejected');
+      // Update status to rejected in both user subcollections if present
+      // We don't know the users here, so attempt collectionGroup update first
+      const q = query(collectionGroup(this.firestore, 'ConnectionRequest'), where(documentId(), '==', requestId));
+      const snaps = await getDocs(q);
+      if (!snaps.empty) {
+        for (const s of snaps.docs) {
+          await updateDoc(doc(this.firestore, s.ref.path), { status: 'rejected' } as any);
+        }
+        console.log('Connection request rejected in subcollections');
+      } else {
+        console.warn('Connection request not found in subcollections for id', requestId);
+      }
     } catch (error) {
       console.error('Error rejecting connection request:', error);
       throw error;
@@ -197,7 +232,7 @@ export class ConnectionRequestService {
    */
   getIncomingRequests(userId: string): Observable<ConnectionRequest[]> {
     const q = query(
-      collection(this.firestore, 'connectionRequests'),
+      collection(this.firestore, 'users', userId, 'ConnectionRequest'),
       where('toUserId', '==', userId),
       where('status', '==', 'pending')
     );
@@ -209,7 +244,7 @@ export class ConnectionRequestService {
    */
   getOutgoingRequests(userId: string): Observable<ConnectionRequest[]> {
     const q = query(
-      collection(this.firestore, 'connectionRequests'),
+      collection(this.firestore, 'users', userId, 'ConnectionRequest'),
       where('fromUserId', '==', userId),
       where('status', '==', 'pending')
     );
@@ -222,7 +257,7 @@ export class ConnectionRequestService {
   async getExistingRequest(fromUserId: string, toUserId: string): Promise<ConnectionRequest | null> {
     try {
       const q = query(
-        collection(this.firestore, 'connectionRequests'),
+        collection(this.firestore, 'users', fromUserId, 'ConnectionRequest'),
         where('fromUserId', '==', fromUserId),
         where('toUserId', '==', toUserId),
         where('status', '==', 'pending')
@@ -247,16 +282,12 @@ export class ConnectionRequestService {
    */
   private async getConnectionRequestById(requestId: string): Promise<ConnectionRequest | null> {
     try {
-      const docRef = doc(this.firestore, `connectionRequests/${requestId}`);
-      const snapshot = await this.ngZone.run(async () => {
-        return await getDoc(docRef);
-      });
-      
-      if (!snapshot.exists()) {
-        return null;
-      }
-      
-      return { id: requestId, ...snapshot.data() } as ConnectionRequest;
+      // Try to find the request document anywhere under users/*/ConnectionRequest
+      const q = query(collectionGroup(this.firestore, 'ConnectionRequest'), where(documentId(), '==', requestId));
+      const snaps = await getDocs(q);
+      if (snaps.empty) return null;
+      const d = snaps.docs[0];
+      return { id: d.id, ...(d.data() as any) } as ConnectionRequest;
     } catch (error) {
       console.error('Error fetching connection request:', error);
       return null;

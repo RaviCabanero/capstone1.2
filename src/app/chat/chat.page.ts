@@ -80,9 +80,10 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.authSub = authState(this.auth).subscribe((user) => {
+    this.authSub = authState(this.auth).subscribe(async (user) => {
       this.currentUid = user?.uid;
-      this.loadAlumni();
+      // Ensure alumni list is loaded before subscribing to chats so names are available for search
+      await this.loadAlumni();
       this.subscribeToChats(this.currentUid);
     });
 
@@ -137,9 +138,10 @@ export class ChatPage implements OnInit, OnDestroy {
       const users: any[] = await this.adminService.getAllUsers();
       this.alumni = users.map((user) => ({
         uid: user.uid,
+        // Prefer explicit firstName/lastName from Firestore over auth/displayName
         name:
-          user.displayName ||
           `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+          user.displayName ||
           user.email ||
           'Unknown',
         email: user.email,
@@ -159,7 +161,7 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   private getInitials(user: any) {
-    const first = (user.firstName || user.displayName || '').toString().trim();
+    const first = (user.firstName || '').toString().trim();
     const last = (user.lastName || '').toString().trim();
     if (first && last) return `${first[0]}${last[0]}`.toUpperCase();
     if (first) return first.substring(0, 2).toUpperCase();

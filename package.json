@@ -9,7 +9,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "migrate-users": "node scripts/migrate_users_create_subcollections.js"
   },
   "private": true,
   "dependencies": {
@@ -33,6 +34,7 @@
     "@capacitor/status-bar": "8.0.0",
     "@ionic/angular": "^8.0.0",
     "firebase": "^11.10.0",
+    "firebase-admin": "^13.6.0",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

@@ -602,7 +602,9 @@ export class ProfilePage implements OnInit, ViewWillEnter {
 
       const postToSave = {
         userId: uid,
-        userName: this.auth.currentUser?.displayName || 'User',
+        userName: ((userDoc?.firstName || userDoc?.lastName)
+          ? `${userDoc?.firstName || ''} ${userDoc?.lastName || ''}`.trim()
+          : this.auth.currentUser?.displayName) || 'User',
         userAvatar: userDoc?.photoDataUrl || '',
         text: postData.text,
         image: postData.image || '',
